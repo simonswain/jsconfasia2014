@@ -1,0 +1,8 @@
+** Building an Internet of Things service, from silicon to cloud **
+
+One of my gigs at the moment is at an IoT startup. We're building
+everything from hardware to the cloud system the devices talk to. I'd
+give a rundown on what the devices are, how they talk to the cloud,
+and what you can do with them. The cloud app is top to bottom
+Javascript. There are lots of interesting problems getting this
+working for real. 
