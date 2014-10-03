@@ -27,3 +27,12 @@ function random0to (max) {
 function random1to (max) {
   return 1 + Math.floor( Math.random() * max );
 }
+
+function dec2hex(d, padding) {
+  var hex = Number(d).toString(16);
+  padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
+  while (hex.length < padding) {
+    hex = "0" + hex;
+  }
+  return hex;
+}
