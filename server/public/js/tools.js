@@ -36,3 +36,16 @@ function dec2hex(d, padding) {
   }
   return hex;
 }
+
+
+var random = {
+  from0upto: function (max) {
+    return Math.floor( Math.random() * (max));
+  },
+  from0to: function (max) {
+    return Math.floor( Math.random() * (max + 1));
+  },
+  from1to: function (max) {
+    return 1 + Math.floor( Math.random() * max );
+  }
+};
