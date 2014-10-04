@@ -49,7 +49,7 @@ App.Views.testpattern = Backbone.View.extend({
     }
 
     ctx.beginPath();
-    ctx.fillStyle = '#cc0';
+    ctx.fillStyle = '#0ff';
     ctx.rect(this.sprite.x * xw, this.sprite.y * xh, xw, xh);
     ctx.fill();
     ctx.closePath();     
@@ -58,7 +58,9 @@ App.Views.testpattern = Backbone.View.extend({
 
     ctx.fillStyle = '#aaa';
     ctx.font = '12pt arial';
-    ctx.fillText(xw + ' ' + xh + ' ' + this.sprite.x + ' ' + this.sprite.y, 24, 24);
+    ctx.textAlign = 'right';
+    ctx.fillText(this.sprite.x, 16, 16);
+    ctx.fillText(this.sprite.y, 16, 32);
 
     if(!this.running){
       return;
@@ -84,7 +86,7 @@ App.Views.testpattern = Backbone.View.extend({
     this.tickTimer = setTimeout(this.tick.bind(this), this.period);
   },
   init: function(){
-    this.period = 100;
+    this.period = 25;
     this.sprite = {
       x: 0,
       y: 0
