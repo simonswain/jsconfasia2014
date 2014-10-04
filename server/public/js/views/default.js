@@ -26,7 +26,8 @@ App.Views.Default = Backbone.View.extend({
       ['testpattern', 'Test Pattern'],
       ['emergence', 'Emergence'],
       
-      ['life', 'Game of Life'],
+      ['life', 'Life'],
+      ['life_hd', 'Life HD'],
       ['rules_of_life', 'Rules of Life'],
       ['species_of_life', 'Species of Life'],
 
@@ -41,7 +42,7 @@ App.Views.Default = Backbone.View.extend({
       ['gravity', 'Gravity'], // like click to add a ship from codepen
       ['gravity_physics', 'The Physics of Gravity'], // explain physics of gravity (diagram, vectors)
       ['orbiting_planets', 'Orbiting Planets'], // we fake gravity for the planets
-      ['orbiting_planets_with_ship', 'Orbiting With Ships'], // but the ships respect gravity
+      ['orbiting_planets_with_ships', 'Orbiting With Ships'], // but the ships respect gravity
 
       ['ship', 'What can we do with a ship?'], // Show single ship. JS object illustrate params
       ['ship_behaviour', 'Make the ship behave'], // Chase, run, laser, missile
@@ -58,7 +59,7 @@ App.Views.Default = Backbone.View.extend({
 
 
 
-      ['foxes_rabbits', 'Foxes and Rabbits'], // haha fooled you. not going to show you the planet just yet
+      ['foxes_and_rabbits', 'Foxes and Rabbits'], // haha fooled you. not going to show you the planet just yet
       ['foxes_rabbits_grass', 'Foxes, Rabbits and Grass'], // http://www.shodor.org/interactivate/activities/RabbitsAndWolves/
       // the world simulation thing
 
@@ -85,7 +86,6 @@ App.Views.Default = Backbone.View.extend({
     data.pages = _.map(pages, function(x){
       x[2] = ''
       if(x[0] !== '' && App.Views.hasOwnProperty(x[0])){
-        console.log(x[0]);
         x[2] = 'available';
       }
       return x;
