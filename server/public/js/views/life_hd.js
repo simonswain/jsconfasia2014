@@ -3,7 +3,7 @@
 /*jshint browser:true */
 /*jshint strict:false */
 
-App.Views.life = Backbone.View.extend({
+App.Views.life_hd = Backbone.View.extend({
   template: _.template('<div class="canvas"></div><div class="fx"></div>'),
   initialize : function(opts) {
     _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick', 'spawn');
@@ -41,6 +41,7 @@ App.Views.life = Backbone.View.extend({
 
     var xw = this.w/this.gridxy;
     var xh = this.h/this.gridxy;
+    console.log
     // draw here
 
     var grid = this.grid;
@@ -128,7 +129,7 @@ App.Views.life = Backbone.View.extend({
   init: function(){
     var self = this;
 
-    this.gridxy = 32;
+    this.gridxy = 128;
     var density = 50;
     // which grid we are coming from
     this.q = 0;
@@ -142,7 +143,7 @@ App.Views.life = Backbone.View.extend({
         this.grid[x][y] = (random0to(100) < density);
       } 
     }
-    this.period = 100;
+    this.period = 50;
 
   },
   spawn: function(){
