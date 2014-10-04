@@ -84,7 +84,6 @@ App.Views.gravity = Backbone.View.extend({
       return;
     }
 
-    // planet
     var tick_ships = function(){
 
       var ships = self.ships;
