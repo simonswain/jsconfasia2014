@@ -110,6 +110,7 @@ App.Views.fighting_ships = Backbone.View.extend({
         ctx.beginPath();
         ctx.moveTo(0, - z);
         ctx.lineTo(z, z);
+        ctx.lineTo(0, 0);
         ctx.lineTo(-z, z);
         ctx.lineTo(0, -z);
         ctx.closePath();     
@@ -414,8 +415,8 @@ App.Views.fighting_ships = Backbone.View.extend({
     }();
 
     var init_ships = function(){
-      var init_ships = random1to(30) + 5;
-      for (var i=0; i<init_ships; i++){
+      var limit = random1to(30) + 5;
+      for (var i=0; i<limit; i++){
         self.ships.push(self.makeShip());
       }
     }();
