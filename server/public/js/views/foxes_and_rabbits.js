@@ -26,7 +26,7 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
     var ctxfx = this.fxview.getContext('2d');
 
     // snapshot bottom half for sliding chart
-    var slideframe = ctx.getImageData(0,this.ch/2,this.cw,this.ch/2);
+    //var slideframe = ctx.getImageData(0,this.ch/2,this.cw,this.ch/2);
 
     ctx.save();
     ctxfx.save();
@@ -73,20 +73,52 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
 
     // chart
 
-    ctx.putImageData(slideframe, -xw/4, this.ch/2);
+    var renderChart = function(){
+      var dd = (self.h/1000) / 2;
+      var yo = self.h / 2;
+      var i,ii; 
+      ctx.beginPath();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#f00';
+      //ctx.moveTo(self.w, yo + (self.numFox * dd));
+      for(i=0, ii=self.foxhist.length; i<ii; i++){
+        x = self.w - ii*4 + i*4;
+        if(x<0){
+          continue;
+        }
+        ctx.lineTo(x, self.h - (self.foxhist[i] * dd));
+      }
+      ctx.stroke();
 
-    var dd = (this.h/1000) / 2;
-    var chart_r = xw/3;
-    ctx.fillStyle = '#f00';
-    ctx.beginPath();
-    ctx.arc(this.w-2, this.h - (this.numFox * dd), chart_r, 0, 2 * Math.PI, true);
-    ctx.fill();
-    //ctx.fillRect(this.w-2, this.h - (this.numFox * dd), xw/2, xw/2);
+      ctx.beginPath();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#cc0';
+      //ctx.moveTo(self.w, yo + (self.numRabbit * dd));
+      for(i=0, ii=self.rabbithist.length; i<ii; i++){
+        x = self.w - ii*4 + i*4;
+        if(x<0){
+          continue;
+        }
+        ctx.lineTo(x, self.h - (self.rabbithist[i] * dd));
+      }
+      ctx.stroke();
+    }();
+    
+    // ctx.putImageData(slideframe, -xw/4, this.ch/2);
 
-    ctx.fillStyle = '#cc0';
-    ctx.beginPath();
-    ctx.arc(this.w-2, this.h - (this.numRabbit * dd), chart_r, 0, 2 * Math.PI, true);
-    ctx.fill();
+    // var dd = (this.h/1000) / 2;
+    // var chart_r = xw/3;
+    // ctx.fillStyle = '#f00';
+    // ctx.beginPath();
+    // ctx.arc(this.w-2, this.h - (this.numFox * dd), chart_r, 0, 2 * Math.PI, true);
+    // ctx.fill();
+    // //ctx.fillRect(this.w-2, this.h - (this.numFox * dd), xw/2, xw/2);
+
+    // ctx.fillStyle = '#cc0';
+    // ctx.beginPath();
+    // ctx.arc(this.w-2, this.h - (this.numRabbit * dd), chart_r, 0, 2 * Math.PI, true);
+    // ctx.fill();
+
     //ctx.fillRect(this.w-2, this.h - (this.numRabbit * dd), xw/2, xw/2);
 
     //
@@ -94,11 +126,11 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
     ctx.restore();
     ctxfx.restore();
 
-    ctx.fillStyle = '#aaa';
-    ctx.font = '12pt arial';
-    ctx.textAlign = 'right';
-    ctx.fillText(this.numFox, 32, 16);
-    ctx.fillText(this.numRabbit, 32, 32);
+    // ctx.fillStyle = '#aaa';
+    // ctx.font = '12pt arial';
+    // ctx.textAlign = 'right';
+    // ctx.fillText(this.numFox, 32, 16);
+    // ctx.fillText(this.numRabbit, 32, 32);
 
     this.requestId = window.requestAnimationFrame(this.draw);
 
@@ -208,6 +240,15 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
 
 
     //
+    this.foxhist.push(this.numFox);
+    while(this.foxhist.length > this.w){
+      this.foxhist.shift();
+    }
+
+    this.rabbithist.push(this.numRabbit);
+    while(this.rabbithist.length > this.w){
+      this.rabbithist.shift();
+    }
 
     if(this.tickTimer){
       clearTimeout(this.tickTimer);
@@ -224,6 +265,9 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
     this.foxdeath = 0.04;
     this.foxbirth = 0.8;
     this.rabbitbirth = 0.07;
+
+    this.foxhist = [];
+    this.rabbithist = [];
 
     this.numFox = 0;
     this.numRabbit = 0;
