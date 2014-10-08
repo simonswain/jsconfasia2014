@@ -8,7 +8,7 @@ var G = {
     var x = Math.abs(x1-x2);
     var y = Math.abs(y1-y2);
     return Math.sqrt( (x*x) + (y*y) );
-  },
+  }
 };
 
 function ra_de(r) {
