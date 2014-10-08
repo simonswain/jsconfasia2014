@@ -26,9 +26,9 @@ App.Views.Default = Backbone.View.extend({
       ['testpattern', 'Test Pattern'],
       ['emergence', 'Emergence'],
       
+      ['rules_of_life', 'Rules of Life'],
       ['life', 'Life'],
       ['life_hd', 'Life HD'],
-      ['rules_of_life', 'Rules of Life'],
       ['species_of_life', 'Species of Life'],
 
       ['game_loop', 'Game Loop'], // tick, render, how to make life
@@ -51,7 +51,7 @@ App.Views.Default = Backbone.View.extend({
       // two quick asides -- nerdy hobbies of the 80's
       ['adnd', 'AD&D'], // complex, messy, different rules for everything
       ['traveller', 'Traveller'], // clean, orthogonal, systematic, nicely designed
-      ['starmaps', 'Sectors, Sectors, Systems, Planets'], // forms and images from traveller books
+      ['starmaps', 'Sectors, Subsectors, Systems, Planets'], // forms and images from traveller books
 
       // Lets make some space
       ['make_stars', 'Lets make some stars'], // random starfield. Auto zoom, pan (pick system at random, easing), different density on randomisation; explain spacing algorithm. 'next' key zooms in to a star as lead in to next slide
