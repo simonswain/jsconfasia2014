@@ -5,8 +5,7 @@
 
 App.Views.App = Backbone.View.extend({
   el: '#app',
-  template: _.template('<header class="nav"></header>\
-<div class="view"></div>'),
+  template: _.template('<div class="view"></div>'),
   initialize : function(opts) {
     _.bindAll(this, 'render');
     this.controller = opts.controller;
