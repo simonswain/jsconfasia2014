@@ -5,14 +5,75 @@
 
 App.Views.App = Backbone.View.extend({
   el: '#app',
-  template: _.template('<div class="view"></div>'),
+  template: _.template('<div class="nav"></div><div class="view"></div>'),
   initialize : function(opts) {
-    _.bindAll(this, 'render');
+    _.bindAll(this, 'render','onClose','onKey');
     this.controller = opts.controller;
-    this.listenTo(this.controller, 'change:view', this.render);
+    this.listenTo(this.controller, 'change:view change:view_id', this.render);
+    $(window).on('keydown', this.onKey);
     this.render();
   },
+  onClose: function(){
+    $(window).off('keydown', this.onKey);
+  },
+  onKey: function(e){
+    var current = this.controller.get('view_id');
+    var index = App.index;
+    var prev = null;
+    var next = null;
+    var ix = 0;
+    //console.log(e.which);
+    if(e.which === 27){
+      this.controller.set({view_id: 'default'});
+      App.router.navigate('', {trigger: true});
+    }
+
+    if(e.which === 37){
+      // prev
+      prev = index[0];      
+      while(index[ix][0] !== current && ix < index.length){
+        prev = index[ix];
+        ix ++;
+      }
+      this.controller.set({view_id: prev[0]});
+      App.router.navigate(prev[0], {trigger: true});
+    }
+
+    if(e.which === 39){
+      if(!current){
+        this.controller.set({view_id: index[0][0]});
+        App.router.navigate(index[0][0], {trigger: true});
+        return;
+      }
+      // next
+      prev = index[0];      
+      while(index[ix][0] !== current && ix < index.length){
+        ix ++;
+      }
+      ix ++;
+      next = index[ix];
+      this.controller.set({view_id: next[0]});
+      App.router.navigate(next[0], {trigger: true});
+    }
+ 
+    if(e.which === 32){
+      // space - restart
+      if(this.views.main.init){
+        this.views.main.init();
+      }
+    }
+
+    if(e.which === 9){
+      e.preventDefault();
+      // space - restart
+      if(this.views.main.toggle){
+        this.views.main.toggle();
+      }
+    }
+
+  },
   render : function() {
+   
 
     _.each(this.views, function(x){
       x.close();

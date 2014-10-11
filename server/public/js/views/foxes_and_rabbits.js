@@ -61,7 +61,7 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
         }
         // rabbit
         if(grid[x][y] === 3){
-          ctx.fillStyle = '#cc0';
+          ctx.fillStyle = '#0bb';
         }
         ctx.rect(x * xw, y * xh, xw, xh);
         ctx.fill();
@@ -92,7 +92,7 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
 
       ctx.beginPath();
       ctx.lineWidth = 4;
-      ctx.strokeStyle = '#cc0';
+      ctx.strokeStyle = '#0bb';
       //ctx.moveTo(self.w, yo + (self.numRabbit * dd));
       for(i=0, ii=self.rabbithist.length; i<ii; i++){
         x = self.w - ii*4 + i*4;

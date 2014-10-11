@@ -6,7 +6,7 @@
 App.Views.life = Backbone.View.extend({
   template: _.template('<div class="canvas"></div><div class="fx"></div>'),
   initialize : function(opts) {
-    _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick', 'spawn');
+    _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick');
     this.render();
     $(window).on('resize', this.render);
   },
@@ -144,8 +144,6 @@ App.Views.life = Backbone.View.extend({
     }
     this.period = 100;
 
-  },
-  spawn: function(){
   },
   start: function () {
     this.init();

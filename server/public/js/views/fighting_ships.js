@@ -72,7 +72,7 @@ App.Views.fighting_ships = Backbone.View.extend({
 
     var draw_ships = function(){
       // ships
-      var z = xw / 16;
+      var z = xw / 8;
       for ( var i in self.ships ) {
         var ship = self.ships[i]
         //console.log(ship);
@@ -108,11 +108,11 @@ App.Views.fighting_ships = Backbone.View.extend({
         ctx.fillStyle = ship.color;
         ctx.strokeStyle = ship.color;
         ctx.beginPath();
-        ctx.moveTo(0, - z);
+        ctx.moveTo(0, -1.5*z);
         ctx.lineTo(z, z);
         ctx.lineTo(0, 0);
         ctx.lineTo(-z, z);
-        ctx.lineTo(0, -z);
+        ctx.lineTo(0, -1.5*z);
         ctx.closePath();     
         ctx.stroke();
         ctx.fill();
@@ -158,6 +158,9 @@ App.Views.fighting_ships = Backbone.View.extend({
       return;
     }
 
+    var xw = this.w/16;
+    var xh = this.h/16;
+
     var tick_missiles = function(){
       for ( var i in self.missiles ) {
         var missile = self.missiles[i];
@@ -185,7 +188,7 @@ App.Views.fighting_ships = Backbone.View.extend({
         // home in on target
         var other = self.ships[missile.target];
         var a = G.angle ( other.x, other.y, missile.x, missile.y );
-        var t = missile.v;
+        var t = missile.v/2;
         missile.x = missile.x + t * Math.cos(a);
         missile.y = missile.y + t * Math.sin(a);
 
@@ -305,8 +308,6 @@ App.Views.fighting_ships = Backbone.View.extend({
 	  ship.vy = - ship.vy * 0.5;
         }
 
-        ship.y = ship.y + ship.vy;
-
         // angle ship is facing
         ship.a = ra_de ( G.angle ( 0, 0, ship.vx, ship.vy ) ) - 90;
 
@@ -323,24 +324,26 @@ App.Views.fighting_ships = Backbone.View.extend({
         var a = 0, t = 0, c = 0;
         for (var ii in self.ships) {
           var other = self.ships[ii];
-          var theta = G.angle ( star.x, star.y, ship.x, ship.y );
-          var range = G.distance ( ship.x, ship.y, star.x, star.y );
-
-          c ++;
-          // run away from bigger, chase smaller
-          if ( other.power > ship.power ) {
-            a = a + de_ra ( ra_de (theta) + 180 );
-          } else {
-            a = a + de_ra ( ra_de (theta) );
+          var theta = G.angle ( other.x, other.y, ship.x, ship.y );
+          var range = G.distance ( ship.x, ship.y, other.x, other.y );
+          if(range < 8 * xw){
+            c ++;
+            // run away from bigger, chase smaller
+            if ( other.power > ship.power ) {
+              a = a + de_ra ( ra_de (theta) + 180 );
+            } else {
+              a = a + de_ra ( ra_de (theta) );
+            }
+            t = t + 0.1;
           }
-          t = t + 0.1;
         }
-
-        a = a / c;
-        a = a % 360;
-        t = ship.impulse / 10;
-	ship.vx = ship.vx + t * Math.cos(a);
-	ship.vy = ship.vy + t * Math.sin(a);
+        if(c>0){
+          a = a / c;
+          a = a % 360;
+          t = ship.impulse / 20;
+	  ship.vx = ship.vx + t * Math.cos(a);
+	  ship.vy = ship.vy + t * Math.sin(a);
+        }
 
         // combat mode?
         if ( ship.energy > 20 ) {
@@ -395,7 +398,7 @@ App.Views.fighting_ships = Backbone.View.extend({
     this.trails = true;
     this.init_ships = 16;
 
-    this.period = 35;
+    this.period = 16;
 
     this.stars = [];
     this.ships = [];
@@ -428,11 +431,11 @@ App.Views.fighting_ships = Backbone.View.extend({
     return {
       x: opts.x || 0,
       y: opts.y || 0,
-      v: opts.v || 10 + random1to(10)/20,
+      v: opts.v || 20 + random1to(20)/100,
       target: opts.target || false,
       color: opts.color || '#fff',
       theta: opts.theta || random1to (360)-1,
-      ttl: 25 + random1to(15)
+      ttl: 50 + random1to(50)
     }
   },
   makeShip: function (opts) {
@@ -440,11 +443,11 @@ App.Views.fighting_ships = Backbone.View.extend({
     var x = ( this.w / 2 ) + ( this.w / 4 ) - random1to(this.w / 2 );
     var y = ( this.h / 2 ) + ( this.h / 4 ) - random1to(this.h / 2 );
 
-    var vx = ( 4 - random1to(8) ) * 0.5
+    var vx = ( 4 - random1to(8) ) * 0.5;
     var vy = ( 4 - random1to(8) ) * 0.5;
 
     var a = random1to(360);
-    var v = random1to(10);
+    var v = 5 + random1to(5);
 
     var hue = random1to(4) - 1
 
@@ -470,7 +473,7 @@ App.Views.fighting_ships = Backbone.View.extend({
     }
 
     var energy_max = 20 + random1to(10);
-    var impulse = random1to(10);
+    var impulse = random1to(5);
     var ship = {
       x: x,
       y: y,

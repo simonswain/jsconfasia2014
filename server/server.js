@@ -105,11 +105,26 @@ module.exports = function(config){
     '/vendor/jquery/dist/jquery.js',
     '/vendor/underscore/underscore.js',
     '/vendor/backbone/backbone.js',
+    '/vendor/node-uuid/uuid.js',
+
 
     // app corre
     '/js/app.js',
     '/js/tools.js',
-    '/js/socket.js'
+    '/js/socket.js',
+
+    '/js/models/star.js',
+    '/js/models/system.js',
+    '/js/models/planet.js',
+    '/js/models/empire.js',
+    '/js/models/universe.js',
+
+    '/js/collections/empires.js',
+    '/js/collections/stars.js',
+    '/js/collections/systems.js',
+    '/js/collections/planets.js',
+    '/js/collections/ships.js',
+
   ];
   
   // models, collections, views

@@ -62,7 +62,7 @@ App.Views.orbiting_planets = Backbone.View.extend({
         ctx.strokeStyle = '#0ff';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(planet.x, planet.y, planet.size * xw/64, 0, 2 * Math.PI, true);
+        ctx.arc(planet.x, planet.y, planet.size * xw/48, 0, 2 * Math.PI, true);
         ctx.fill();
         ctx.stroke();
 
@@ -70,7 +70,7 @@ App.Views.orbiting_planets = Backbone.View.extend({
         ctxfx.strokeStyle = '#0ff';
         ctxfx.lineWidth = 2;
         ctxfx.beginPath();
-        ctxfx.arc(planet.x, planet.y, planet.size * xw/64, 0, 2 * Math.PI, true);
+        ctxfx.arc(planet.x, planet.y, planet.size * xw/128, 0, 2 * Math.PI, true);
         ctxfx.fill();
         ctxfx.stroke();
 
@@ -115,12 +115,12 @@ App.Views.orbiting_planets = Backbone.View.extend({
   },
   init: function(){
     var self = this;
-    this.period = 100;
+    this.period = 25;
 
     this.planets = [];
     
     var init_planets = function(){
-      for(var i=0, ii = random1to(3) + 1; i<ii; i++){
+      for(var i=0, ii = random1to(3) + 2; i<ii; i++){
         self.planets.push (self.makePlanet());
       }
     }();
@@ -131,7 +131,7 @@ App.Views.orbiting_planets = Backbone.View.extend({
       size: random.from0to(Math.min(this.w,this.h) * 0.01),
       r: Math.min(this.w,this.h) * 0.1 + random.from0to(Math.min(this.w,this.h) * 0.4),
       d: random.from0to(360),
-      v: 0.001 * (random.from0to(100)),
+      v: 0.00001 * (random.from0to(2000)),
       x: 0,
       y: 0
     };
@@ -140,8 +140,8 @@ App.Views.orbiting_planets = Backbone.View.extend({
   start: function () {
     this.init();
     this.running = true;
-    this.draw();
     this.tick();
+    this.draw();
     setInterval(this.init.bind(this), 20000);
 
     // restart every 20s

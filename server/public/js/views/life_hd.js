@@ -6,7 +6,7 @@
 App.Views.life_hd = Backbone.View.extend({
   template: _.template('<div class="canvas"></div><div class="fx"></div>'),
   initialize : function(opts) {
-    _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick', 'spawn');
+    _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick');
     this.render();
     $(window).on('resize', this.render);
   },
@@ -126,10 +126,11 @@ App.Views.life_hd = Backbone.View.extend({
     }
     this.tickTimer = setTimeout(this.tick.bind(this), this.period);
   },
+  
   init: function(){
     var self = this;
 
-    this.gridxy = 128;
+    this.gridxy = 192;
     var density = 50;
     // which grid we are coming from
     this.q = 0;
@@ -145,8 +146,6 @@ App.Views.life_hd = Backbone.View.extend({
     }
     this.period = 50;
 
-  },
-  spawn: function(){
   },
   start: function () {
     this.init();

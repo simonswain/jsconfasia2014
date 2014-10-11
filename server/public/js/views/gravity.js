@@ -47,7 +47,7 @@ App.Views.gravity = Backbone.View.extend({
       ctx.strokeStyle = '#69c';	
       ctx.lineWidth = 2;			
       ctx.beginPath();
-      ctx.arc(planet.x, planet.y, xw, 0, 2 * Math.PI, true);
+      ctx.arc(planet.x, planet.y, xw, 0, 2 * Math.PI, true);            
       ctx.fill();
       ctx.stroke();   
     }();
@@ -64,6 +64,7 @@ App.Views.gravity = Backbone.View.extend({
         ctx.beginPath();
         //ctx.rect(ship.x, ship.y, 12, 12);
         ctx.arc(ship.x - xw/16, ship.y-xh/16, xw/8, xh/8, 2 * Math.PI, true);
+        ctx.closePath()
         ctx.fill();
         ctx.stroke();   
         
@@ -98,12 +99,13 @@ App.Views.gravity = Backbone.View.extend({
           vx: 0,
           vy: 0,
           age: 0,
+          maxage: 250 + random0to(250),
           thrust: 1
         });
       }
 
       ships = _.filter(ships, function(x){
-        return (x.age < 250);
+        return (x.age < x.maxage);
       });
 
       for(var i=0, ii=ships.length; i<ii; i++){
@@ -166,15 +168,13 @@ App.Views.gravity = Backbone.View.extend({
   },
   init: function(){
     this.trails = true;
-    this.period = 10;
+    this.period = 16;
     this.planet = {
       x: this.w/2,
       y: this.h/2
     };
     this.ships = [];
   },
-
-
 
   start: function () {
     this.init();
