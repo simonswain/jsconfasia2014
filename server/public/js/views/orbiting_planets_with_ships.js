@@ -58,11 +58,28 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
         star = self.stars[i];
         ctx.fillStyle = '#900';	
         ctx.strokeStyle = '#c00';	
-        ctx.lineWidth = 2;			
+
+        var p = 12;
+        var r = xw/3;
+        var m = 0.7;
+        ctx.save();
         ctx.beginPath();
-        ctx.arc(star.x, star.y, xw/3, 0, 2 * Math.PI, true);
+        ctx.translate(star.x, star.y);
+        ctx.moveTo(0,0-r);
+        for (var i = 0; i < p; i++) {
+          ctx.rotate(Math.PI / p);
+          ctx.lineTo(0, 0 - (r*m));
+          ctx.rotate(Math.PI / p);
+          ctx.lineTo(0, 0 - r);
+        }
         ctx.fill();
-        ctx.stroke();
+        ctx.restore();
+
+        // ctx.lineWidth = 2;			
+        // ctx.beginPath();
+        // ctx.arc(star.x, star.y, xw/3, 0, 2 * Math.PI, true);
+        // ctx.fill();
+        // ctx.stroke();
 
       }
     }();

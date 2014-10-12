@@ -35,8 +35,9 @@ App.Views.App = Backbone.View.extend({
         prev = index[ix];
         ix ++;
       }
-      this.controller.set({view_id: prev[0]});
-      App.router.navigate(prev[0], {trigger: true});
+      window.location.href='/' + prev[0];
+      //this.controller.set({view_id: prev[0]});
+      //App.router.navigate(prev[0], {trigger: true});
     }
 
     if(e.which === 39){
@@ -52,8 +53,9 @@ App.Views.App = Backbone.View.extend({
       }
       ix ++;
       next = index[ix];
-      this.controller.set({view_id: next[0]});
-      App.router.navigate(next[0], {trigger: true});
+      window.location.href='/' + next[0];
+      //this.controller.set({view_id: next[0]});
+      //App.router.navigate(next[0], {trigger: true});
     }
  
     if(e.which === 32){

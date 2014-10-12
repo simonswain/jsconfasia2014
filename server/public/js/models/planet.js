@@ -2,41 +2,45 @@ App.Models.Planet = Backbone.Model.extend({
   defaults: {
     'name':'Unknown Planet',
     'age': 0,
-    'interval': 25,
+    'interval': 100,
     'x': 0,
     'y': 0,
     'r': 0, // orbit radius
     'a': 0, // orbit angle
     'v': 0.0001, //orbital velocity in degrees
-    land: 1000,
-    size: 1,
+    size: 1, // size for drawing
 
-    // non-renewable raw materials
-    raw: 0,
-    // abount of reource consumee
-    consumed: 0,
-
-    agriculture: 0,
-    population: 0,
+    land: 1000, // available area
+    agr: 0,
+    pop: 0,
     birthrate: 0.002,
     deathrate: 0.001,
 
     //
-    pollution: 0,
-    industry: 0,
+    pol: 0,
+    ind: 0,
+    cr: 0,
 
-    tech: 1,
-    credit: 0
+    // deltas from last tick
+    d_pop: 0,
+    d_agr: 0,
+    d_ind: 0,
+    d_pol:0,
+    d_cr:0,
+
+    out_agr: 0,
+    out_ind: 0
   },
   initialize: function(opts) {
 
     opts = opts || {};
 
-    _.bindAll(this, 'run','stop', 'physics');
+    _.bindAll(this, 'run', 'stop', 'physics');
 
     var r, a, v, rr;
-    
-    r = a = v = 0;
+    r = 0;
+    a = 0;
+    v = 0;
 
     if(opts.system){    
       rr = opts.system.get('radius');
@@ -45,16 +49,20 @@ App.Models.Planet = Backbone.Model.extend({
       v = 0.0001 + (random.from0to(100)/10000);
     }
 
+    var land = 10000 * random.from1to(10);
+
     this.set({
       id: uuid.v4(),
       r: r,
       a: a,
       v: v,
-      population: 1000 * random.from1to(10),
+      pop: (15 + random.from1to(25)) * land/100,
+      agr: (15 + random.from1to(25)) * land/100,
+      ind: (5 + random.from1to(5)) * land/100,
+      pol: 0,
       size: 1 * random.from1to(9),
-      land: 10000 * random.from1to(10),
-      credit: 0,
-      raw: 1000000 * random.from1to(10)
+      land: land,
+      cr: 0,
     });
 
 
@@ -70,23 +78,67 @@ App.Models.Planet = Backbone.Model.extend({
     
     this.physics();
 
-    // population growth
+    // 'POP + IND + AGR cannot exceed Size of Planet',
+    // 'POP has birthrate and deathrate',
+    // 'IND increases POL',
+    // 'POL increases deathrate',
+    // 'IND output is ~ POP',
+    // 'IND increases AGR',
+    // 'POP is limited by AGR',
+    // 'IND creates credit to make Ships',
+    // 'Suplus POP will leave via ship',
+    // 'IND & AGR can be traded'
+
     
     var data = this.toJSON();
-    var births = data.population * (data.birthrate/100 * (50 + random.from1to(50)));
-    var deaths = data.population * (data.deathrate/100 * (50 + random.from1to(50)));
-    data.population += births;
-    data.population += deaths;
 
-    // population death
+    // pollution recovery
+    data.pol = data.pol * 0.98;
 
-    // population consumes ag
+    data.pol += ((data.ind + data.pop) / data.land)  * 0.2;
+    if (data.pol >= 100){
+      data.pol = 100;
+    }
 
-    // industry consumes raw
+    var births = data.pop * (data.birthrate/100 * (50 + random.from1to(50)));
+    var deaths = data.pop * (data.deathrate/100 * (50 + random.from1to(50)));
 
-    // industry produces goods
+    births = 0;
+    deaths = 0;
+   
+    deaths += 0.5 * data.pop * (data.pol/100);
 
-    // ships take population and colonizes
+    // use tech to increase efficiency
+
+    // pollution reduces ag output
+    data.out_agr = data.agr * (1 - (data.pol/100));
+
+    data.pop += births;
+    data.pop -= deaths;
+
+    if(data.pop > data.out_agr){
+      deaths -= data.pop - data.out_agr;
+      data.pop = data.out_agr;
+    }
+
+
+    data.d_pop = births + deaths;
+
+    // pop and ind creates pol, expressed as a percentage of total
+    // environmental destruction
+
+    // output is reduced by this percentage
+
+    // pollution recovery
+
+
+    // pop consumes ag
+
+    // ind consumes raw
+
+    // ind produces goods
+
+    // ships take pop and colonizes
 
     // ships take ag, raw, goods and sell. profit goes to this planet
     // (ship home planet)
@@ -94,13 +146,16 @@ App.Models.Planet = Backbone.Model.extend({
     // planet wants to buy ag, raw, goods depending on stats ('need' factor)
 
     // Calculate earnings from planet
-    var earnings = random.from0to(5);
+    var earnings = ((data.ind / 1000) * (data.pop / 1000)) * ((50 + random0to(50))/100);
 
-    this.set({
-      population: data.population,
-      age: this.get('age') + 1,
-      credit: this.get('credit') + earnings
-    });
+    data.d_cr = earnings;
+    data.cr += earnings;
+    data.age ++;
+
+
+    // enough credit spawns ships to carray away pop
+
+    this.set(data);
 
     if(this.system){
       // wrap in check for system so planet can be simmed in isolation
@@ -109,7 +164,7 @@ App.Models.Planet = Backbone.Model.extend({
         this.spawnShip();
       }
 
-      if(this.system.empire && this.get('credit') > this.shipcost){
+      if(this.system.empire && this.get('cr') > this.shipcost){
         this.spawnShip();
       }
 
@@ -158,7 +213,7 @@ App.Models.Planet = Backbone.Model.extend({
     var shipcost = this.shipcost;
 
     this.set({
-      credit: this.get('credit') - shipcost
+      cr: this.get('cr') - shipcost
     });
 
     console.log(' @ Spawn ' + this.system.get('name') + ':' + this.get('name') + ':' + this.system.empire.get('name'));

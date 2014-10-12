@@ -1,20 +1,20 @@
 App.Models.Universe = Backbone.Model.extend({
   defaults: {
     id: null,
+    systemLimit: 5,
     name: 'The Universe',
     radius: 1024,
     w: 1024,
     h: 1024,
   },
-  initialize: function() {
+  initialize: function(opts) {
     _.bindAll(this, 'addSystem','initSystems');
-    this.systemLimit = 8;
     this.systems = new App.Collections.Systems();
     this.initSystems();
   },
 
   initSystems: function(){
-    while(this.systems.length < this.systemLimit){
+    while(this.systems.length < this.get('systemLimit')){
       this.addSystem();
     }
   },
@@ -25,7 +25,7 @@ App.Models.Universe = Backbone.Model.extend({
     
     var x, y;
     var d;
-    var spacing = this.get('radius') * 0.15;
+    var spacing = this.get('radius') * 0.2;
 
     var gen = function(max){
       return (max * 0.1) + random.from0upto(max * 0.55);

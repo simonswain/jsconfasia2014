@@ -38,12 +38,115 @@ App.Views.make_universe = Backbone.View.extend({
 
     ctxfx.translate(this.x, this.y);
     ctxfx.scale(this.scale, this.scale);
-
-    var xw = this.w/16;
-    var xh = this.h/16;
-
+    
+    var xw = this.w/8;
+    var xh = this.h/8;
+    var xx = Math.min(this.w, this.h)/24;
     // draw here
 
+    // scale for drawing elements within a system
+    var scale = xx / Math.min(this.w, this.h)
+
+    this.universe.systems.each(function(system){
+
+      var data = system.toJSON();
+
+      // center of system
+      var cx = data.x;
+      var cy = data.y;
+
+      // top left of system
+      var lx = data.x - xx;
+      var ly = data.y - xx;
+
+      ctx.fillStyle = 'rgba(127,127,127,0.1)';
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(data.x, data.y, xx, 0, 2 * Math.PI, true);
+      ctx.fill();
+      ctx.stroke();
+
+      // ctx.rect(data.x - xx, data.y - xx, xx * 2, xx * 2);
+      // ctx.stroke();
+
+      ctx.fillStyle = '#666';
+      ctx.font = '10pt arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(data.name, data.x,data.y + xx*1.5);
+
+      ctx.save();
+      ctx.translate(lx, ly);
+      ctx.scale(scale*1.5, scale*1.5);
+      
+      ctx.strokeStyle = '#fff';
+
+
+      system.stars.each(function(star){
+        var data = star.toJSON();
+        ctx.fillStyle = data.color;
+        ctx.strokeStyle = data.color;
+        var p = 12;
+        var r = data.size * xw/24;
+        var m = 0.7;
+        ctx.save();
+        ctx.beginPath();
+        ctx.translate(data.x, data.y);
+        ctx.moveTo(0,0-r);
+        for (var i = 0; i < p; i++) {
+          ctx.rotate(Math.PI / p);
+          ctx.lineTo(0, 0 - (r*m));
+          ctx.rotate(Math.PI / p);
+          ctx.lineTo(0, 0 - r);
+        }
+        ctx.fill();
+        ctx.restore();
+      });
+
+      system.planets.each(function(planet){
+        var data = planet.toJSON();
+        data.x = Number(data.x);
+        data.y = Number(data.y);
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(data.x, data.y, xw/24 * data.size*2, 0, 2 * Math.PI, true);
+        ctx.fill();
+        ctx.stroke();
+      });
+
+
+      system.ships.each(function(ship){
+        var data = ship.toJSON();
+        var z = xw/4;
+        ctx.fillStyle = '#c00';
+        ctx.strokeStyle = '#c00';
+
+        ctx.save();
+        ctx.translate(data.x, data.y);        
+        // rotate 45 degrees clockwise
+        ctx.rotate(de_ra(data.a));
+
+        ctx.lineWidth = z/2;
+        ctx.fillStyle = data.color;
+        ctx.strokeStyle = data.color;
+        ctx.beginPath();
+        ctx.moveTo(0, -1.5*z);
+        ctx.lineTo(z, z);
+        ctx.lineTo(0, 0);
+        ctx.lineTo(-z, z);
+        ctx.lineTo(0, -1.5*z);
+        ctx.closePath();     
+        ctx.stroke();
+        ctx.fill();
+        ctx.restore();
+      });
+
+
+      ctx.restore();
+
+    });
 
     //
 
@@ -75,6 +178,10 @@ App.Views.make_universe = Backbone.View.extend({
   init: function(){
     var self = this;
 
+    this.universe = new App.Models.Universe({
+      systemLimit: 6
+    });
+
     this.period = 100;
 
   },
@@ -83,7 +190,6 @@ App.Views.make_universe = Backbone.View.extend({
     this.running = true;
     this.draw();
     setTimeout(this.tick.bind(this), this.period);
-    setInterval(this.init.bind(this), 20000);
 
     // restart every 20s
   },

@@ -3,7 +3,7 @@
 /*jshint browser:true */
 /*jshint strict:false */
 
-App.Views.orbiting_planets = Backbone.View.extend({
+App.Views.glider = Backbone.View.extend({
   template: _.template('<div class="canvas"></div><div class="fx"></div>'),
   initialize : function(opts) {
     _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick');
@@ -28,7 +28,7 @@ App.Views.orbiting_planets = Backbone.View.extend({
     ctx.save();
     ctxfx.save();
 
-    ctxfx.fillStyle = 'rgba(1,1,1,.05)';
+    ctxfx.fillStyle = 'rgba(1,1,1,.18)';
     ctxfx.fillRect(0,0, this.cw,this.ch);
 
     ctx.clearRect(0,0,this.cw,this.ch);
@@ -39,61 +39,34 @@ App.Views.orbiting_planets = Backbone.View.extend({
     ctxfx.translate(this.x, this.y);
     ctxfx.scale(this.scale, this.scale);
 
-    var xw = this.w/16;
-    var xh = this.h/16;
-
+    var xw = this.w/this.gridxy;
+    var xh = this.h/this.gridxy;
     // draw here
 
-    // fake star
-    ctx.fillStyle = '#ff0';	
-    ctx.strokeStyle = '#ff0';	
+    var grid = this.grid;
+    var x, xx, y, yy;
+    for(x = 0, xx = grid.length; x<xx; x ++){
+      for(y = 0, yy = grid[x].length; y<yy; y ++){
+        if(!grid[x][y]){
+          continue;
+        }
+        // don't draw border cells
+        if(x === 0 || y === 0 || x === xx-1 || y === yy-1){
+          continue;
+        }
 
-    var p = 12;
-    var r = xw/2;
-    var m = 0.7;
-    ctx.save();
-    ctx.beginPath();
-    ctx.translate(this.w/2, this.h/2);
-    ctx.moveTo(0,0-r);
-    for (var i = 0; i < p; i++) {
-      ctx.rotate(Math.PI / p);
-      ctx.lineTo(0, 0 - (r*m));
-      ctx.rotate(Math.PI / p);
-      ctx.lineTo(0, 0 - r);
-    }
-    ctx.fill();
-    ctx.restore();
-
-    // ctx.lineWidth = 2;			
-    // ctx.beginPath();
-    // ctx.arc(this.w/2, this.h/2, xw/2, 0, 2 * Math.PI, true);
-    // ctx.fill();
-    // ctx.stroke();   
-
-    // planets
-    var draw_planets = function(){
-      var planet;
-      for (var i in self.planets) {
-        planet = self.planets[i];
-        ctx.fillStyle = '#0cc';
-        ctx.strokeStyle = '#0ff';
-        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(planet.x, planet.y, planet.size * xw/48, 0, 2 * Math.PI, true);
+        ctx.fillStyle = '#0ff';
+        ctx.lineStyle = '#000';
+        ctx.lineWidth = xw/10;
+        ctx.rect(x * xw, y * xh, xw, xh);
         ctx.fill();
         ctx.stroke();
+        ctx.closePath();     
+      } 
+    }
 
-        ctxfx.fillStyle = '#0cc';
-        ctxfx.strokeStyle = '#0ff';
-        ctxfx.lineWidth = 2;
-        ctxfx.beginPath();
-        ctxfx.arc(planet.x, planet.y, planet.size * xw/128, 0, 2 * Math.PI, true);
-        ctxfx.fill();
-        ctxfx.stroke();
-
-      }
-    }();
-
+    //
 
     ctx.restore();
     ctxfx.restore();
@@ -111,17 +84,59 @@ App.Views.orbiting_planets = Backbone.View.extend({
 
     // tick here
 
-    var tick_planets = function(){
-      var planet;
-      for (var i in self.planets) {
-        planet = self.planets[i];
-        planet.d += planet.v;
-        planet.d = planet.d % 360;
-        planet.x = (self.w/2) + planet.r * Math.cos(planet.d);
-        planet.y = (self.h/2) + planet.r * Math.sin(planet.d);
-      }
-    }();
+    var next = [];
+    var grid = this.grid;
 
+    var x, xx, y, yy, xxx, yyy;
+    var i, ii, c, list; // count of neighbours
+    for(x = 0, xx = grid.length; x<xx; x ++){
+      next[x] = [];
+      for(y = 0, yy = grid[x].length; y<yy; y ++){
+
+        next[x][y] = grid[x][y];
+
+        list = [
+          [x-1, y-1], [x,y-1], [x+1,y-1],
+          [x-1, y], [x+1,y],
+          [x-1, y+1], [x,y+1], [x+1,y+1]
+        ];
+        c = 0;
+
+        //console.log(x,y, grid[x][y]);
+        for(i=0, ii = list.length; i<ii; i++){         
+          xxx = list[i][0];
+          if(xxx < 0){
+            xxx = xx - 1;
+          }
+          if(xxx >= xx){
+            xxx = 0;
+          }
+          if(typeof grid[xxx] === 'undefined'){
+            continue;
+          }
+          yyy = list[i][1];
+          if(yyy < 0){
+            yyy = yy - 1;
+          }
+          if(yyy >= yy){
+            yyy = 0;
+          }
+          if(grid[xxx][yyy]){
+            c ++;
+          }
+        }
+
+        if(grid[x][y] && c === 2){
+          next[x][y] = true;
+        } else if(c === 3){
+          next[x][y] = true;
+        } else {
+          next[x][y] = false;
+        }
+      }
+    }
+    //console.log(next);
+    this.grid = next;
 
     //
 
@@ -132,34 +147,38 @@ App.Views.orbiting_planets = Backbone.View.extend({
   },
   init: function(){
     var self = this;
-    this.period = 25;
 
-    this.planets = [];
+    this.gridxy = 12;
+
+
+    // which grid we are coming from
+    this.q = 0;
+    this.grid = [];
     
-    var init_planets = function(){
-      for(var i=0, ii = random1to(3) + 2; i<ii; i++){
-        self.planets.push (self.makePlanet());
-      }
-    }();
+    var i, x, y;
+    this.grid = [];
+    for(x = 0; x<this.gridxy; x ++){
+      this.grid[x] = [];
+      for(y = 0; y<this.gridxy; y ++){
+        this.grid[x][y] = 0;
+      } 
+    }
 
-  },
-  makePlanet: function() {
-    var planet = {
-      size: random.from0to(Math.min(this.w,this.h) * 0.01),
-      r: Math.min(this.w,this.h) * 0.1 + random.from0to(Math.min(this.w,this.h) * 0.4),
-      d: random.from0to(360),
-      v: 0.00001 * (random.from0to(2000)),
-      x: 0,
-      y: 0
-    };
-    return planet;
+    this.grid[1][0] = 1;
+    this.grid[2][1] = 1;
+    this.grid[0][2] = 1;
+    this.grid[1][2] = 1;
+    this.grid[2][2] = 1;
+
+    this.period =  250;
+
   },
   start: function () {
     this.init();
     this.running = true;
-    this.tick();
     this.draw();
-    setInterval(this.init.bind(this), 20000);
+    setTimeout(this.tick.bind(this), this.period);
+    //setInterval(this.init.bind(this), 15000);
 
     // restart every 20s
   },

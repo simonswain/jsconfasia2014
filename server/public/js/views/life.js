@@ -53,6 +53,7 @@ App.Views.life = Backbone.View.extend({
         ctx.beginPath();
         ctx.fillStyle = '#0ff';
         ctx.lineStyle = '#000';
+        ctx.lineWidth = xw/10;
         ctx.rect(x * xw, y * xh, xw, xh);
         ctx.fill();
         ctx.stroke();
@@ -81,7 +82,7 @@ App.Views.life = Backbone.View.extend({
     var next = [];
     var grid = this.grid;
 
-    var x, xx, y, yy;
+    var x, xx, y, yy, xxx, yyy;
     var i, ii, c, list; // count of neighbours
     for(x = 0, xx = grid.length; x<xx; x ++){
       next[x] = [];
@@ -97,11 +98,25 @@ App.Views.life = Backbone.View.extend({
         c = 0;
 
         //console.log(x,y, grid[x][y]);
-        for(i=0, ii = list.length; i<ii; i++){
-          if(typeof grid[list[i][0]] === 'undefined'){
+        for(i=0, ii = list.length; i<ii; i++){         
+          xxx = list[i][0];
+          if(xxx < 0){
+            xxx = xx - 1;
+          }
+          if(xxx >= xx){
+            xxx = 0;
+          }
+          if(typeof grid[xxx] === 'undefined'){
             continue;
           }
-          if(grid[list[i][0]][list[i][1]]){
+          yyy = list[i][1];
+          if(yyy < 0){
+            yyy = yy - 1;
+          }
+          if(yyy >= yy){
+            yyy = 0;
+          }
+          if(grid[xxx][yyy]){
             c ++;
           }
         }

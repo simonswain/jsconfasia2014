@@ -55,10 +55,10 @@ App.Views.make_planet = Backbone.View.extend({
     ctx.fill();
 
     var segments = {
-      population: '#900',
-      pollution: '#444',
-      agriculture: '#090',
-      industry: '#0cc'
+      pop: '#fff',
+      pol: '#c00',
+      agr: '#090',
+      ind: '#0cc'
     };
     
     var oldAngle = 0;    
@@ -75,36 +75,86 @@ App.Views.make_planet = Backbone.View.extend({
       oldAngle += wedge;
     });
 
-
+    var segments = {
+      pop: '#fff',
+      pol: '#c00',
+      agr: '#090',
+      ind: '#0cc',
+      cr: '#cc0'
+    };
     var vals = [
       'land',
-      'age',
-      'raw',
-      'consumed',
-      'population',
+      'pop',
       // 'birthrate',
       // 'deathrate', 
-      'agriculture',
-      'pollution',
-      'industry',
-      'credit'
+      'agr',
+      'pol',
+      'ind',
+      'cr'
     ];
-    var xl = this.w/2 + xw/4;
+    var xl = this.w/2 - xw*5;
+    var xd = this.w/2 + xw*3;
     var xr = this.w/2 - xw/4;
+    var xo = this.w/2 + xw*6;
     var yy = 5.5*xh;
-    ctx.fillStyle = '#fff';
+
     ctx.font = '32pt arial';
 
+    ctx.fillStyle = '#aaa';
     ctx.textAlign = 'center';
     ctx.fillText(data.name, this.w/2, 4*xh);
 
     vals.forEach(function(k){
+      
+      if(segments[k]){
+        ctx.fillStyle = segments[k];
+      }
 
       ctx.textAlign = 'left';
       ctx.fillText(k, xl, yy);
+      var s;
+      // deltas
+      s = data['d_' + k]
+      if(!s){
+        s = 0;
+      } else {
+        s = s.toFixed(2);
+      }
+      if(data['d_' + k] === 0){
+        s = '-';
+      } else if(data['d_' + k] < 0){
+        s = '-' + s;
+      } else {
+        s = '+' + s;
+      }
+
+     if(data.hasOwnProperty('d_' + k)){
+        ctx.textAlign = 'right';
+        ctx.fillText(s, xd, yy);
+      }
+
+      // outputs
+      s = data['out_' + k]
+      if(!s){
+        s = 0;
+      } else {
+        s = s.toFixed(0);
+      }
+      if(data['out_' + k] === 0){
+        s = '-';
+      } else if(data['out_' + k] < 0){
+        s = '-' + s;
+      } else {
+        s = '+' + s;
+      }
+
+     if(data.hasOwnProperty('d_' + k)){
+        ctx.textAlign = 'right';
+        ctx.fillText(s, xo, yy);
+      }
 
       ctx.textAlign = 'right';
-      ctx.fillText(data[k].toFixed(0), xr, yy);
+      ctx.fillText(data[k].toFixed(2), xr, yy);
       yy += xh;
     });
 

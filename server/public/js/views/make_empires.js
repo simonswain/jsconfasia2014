@@ -48,11 +48,26 @@ App.Views.make_empires = Backbone.View.extend({
       var data = star.toJSON();
       ctx.fillStyle = data.color;
       ctx.strokeStyle = data.color;
-      ctx.lineWidth = 2;
+      var p = 12;
+      var r = data.size * xw/24;
+      var m = 0.7;
+      ctx.save();
       ctx.beginPath();
-      ctx.arc(data.x, data.y, data.size * xw/24, 0, 2 * Math.PI, true);
+      ctx.translate(data.x, data.y);
+      ctx.moveTo(0,0-r);
+      for (var i = 0; i < p; i++) {
+        ctx.rotate(Math.PI / p);
+        ctx.lineTo(0, 0 - (r*m));
+        ctx.rotate(Math.PI / p);
+        ctx.lineTo(0, 0 - r);
+      }
       ctx.fill();
-      ctx.stroke();
+      ctx.restore();
+      // ctx.lineWidth = 2;
+      // ctx.beginPath();
+      // ctx.arc(data.x, data.y, data.size * xw/24, 0, 2 * Math.PI, true);
+      // ctx.fill();
+      // ctx.stroke();
     });
 
     var vals = [

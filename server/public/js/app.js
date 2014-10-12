@@ -58,6 +58,7 @@ App.index = [
 
   ['testpattern', 'Test Pattern'],
   //['emergence', 'Emergence'],
+  ['glider', 'Glider'],
   
   ['rules_of_life', 'Rules of Life'],
   ['life', 'Life'],
@@ -81,7 +82,7 @@ App.index = [
   ['canvas', 'HTML5 Canvas'],
 
   ['rules_of_ships', 'Rules of Ships'], // Show single ship. JS object illustrate params
-  ['ship_behaviour', 'Make the ship behave'], // Chase, run, laser, missile
+  //['ship_behaviour', 'Make the ship behave'], // Chase, run, laser, missile
   ['fighting_ships', 'Fighting Ships'], // in the orbiting planets
 
 

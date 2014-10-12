@@ -221,6 +221,12 @@ App.Views.rules_of_ships = Backbone.View.extend({
       }
     }();
 
+    this.theta += 0.01;
+
+    if(this.theta >= 360){
+      this.theta = 0;
+    }
+
     var tick_ships = function(){
 
       var ship, theta, r, g, angle, thrust;
@@ -231,9 +237,11 @@ App.Views.rules_of_ships = Backbone.View.extend({
         self.ships[i].laser = false;
       }
 
-      for (i in self.ships ) {
+      _.each(self.ships, function(ship, ix){
 
-        ship = self.ships[i];
+        if(!ship){
+          return;
+        }
 
         // charge ship up to max energy
         ship.energy = ship.energy + ( ship.recharge * ( 1 - ( 1 / ship.energy_max ) * ship.damage ) );
@@ -256,15 +264,34 @@ App.Views.rules_of_ships = Backbone.View.extend({
             color: ship.color
           });
           self.ships.splice(i, 1);
-          continue;
+          return;
         }
 
-        // // inertial damping
-        // ship.vx = ship.vx * 0.92;
-        // ship.vy = ship.vy * 0.92;
+        var other;
+        var theta = self.theta;
+        var fx = 3 * xw;
+        if(ix === 0){
+          ship.x = ((self.w / 2) - fx * Math.sin(theta)) - xw;
+          ship.y = (self.h / 2) - fx * Math.cos(theta);
 
-        // ship.x = ship.x + ship.vx;
-        // ship.y = ship.y + ship.vy;
+          other = self.ships[1];
+          if(other){
+            ship.a = ra_de(G.angle ( ship.x, ship.y, other.x, other.y )) - 90;
+          }
+        }
+
+        if(ix === 1){
+          theta = 180 - theta;
+          fx = -fx;
+          ship.x = ((self.w / 2) + fx * Math.sin(theta)) + xw;
+          ship.y = (self.h / 2) + fx * Math.cos(theta);
+
+          other = self.ships[0];
+          if(other){
+            ship.a = ra_de(G.angle ( ship.x, ship.y, other.x, other.y )) - 90;
+          }
+
+        }
 
         if ( ship.x < 0 ) {
           ship.x = this.w;
@@ -332,7 +359,7 @@ App.Views.rules_of_ships = Backbone.View.extend({
 
         }
 
-      }
+      });
 
     }();
 
@@ -343,9 +370,9 @@ App.Views.rules_of_ships = Backbone.View.extend({
   },
   init: function(){
     var self = this;
-
+    
+    this.theta = 0;
     this.trails = true;
-    this.init_ships = 16;
 
     var xw = this.w/16;
     var xh = this.h/16;
@@ -448,7 +475,7 @@ App.Views.rules_of_ships = Backbone.View.extend({
     this.running = true;
     this.draw();
     setTimeout(this.tick.bind(this), this.period);
-    setInterval(this.init.bind(this), 20000);
+    setInterval(this.init.bind(this), 10000);
 
     // restart every 20s
   },

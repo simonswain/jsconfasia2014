@@ -39,9 +39,9 @@ App.Views.make_stars = Backbone.View.extend({
     ctxfx.translate(this.x, this.y);
     ctxfx.scale(this.scale, this.scale);
     
-    var xw = this.w/16;
-    var xh = this.h/16;
-    var xx = Math.min(this.w, this.h)/16;
+    var xw = this.w/8;
+    var xh = this.h/8;
+    var xx = Math.min(this.w, this.h)/8;
     // draw here
 
     // scale for drawing elements within a system
@@ -85,11 +85,21 @@ App.Views.make_stars = Backbone.View.extend({
         var data = star.toJSON();
         ctx.fillStyle = data.color;
         ctx.strokeStyle = data.color;
-        ctx.lineWidth = 2;
+        var p = 12;
+        var r = data.size * xw/24;
+        var m = 0.7;
+        ctx.save();
         ctx.beginPath();
-        ctx.arc(data.x, data.y, data.size * xw/4, 0, 2 * Math.PI, true);
+        ctx.translate(data.x, data.y);
+        ctx.moveTo(0,0-r);
+        for (var i = 0; i < p; i++) {
+          ctx.rotate(Math.PI / p);
+          ctx.lineTo(0, 0 - (r*m));
+          ctx.rotate(Math.PI / p);
+          ctx.lineTo(0, 0 - r);
+        }
         ctx.fill();
-        ctx.stroke();
+        ctx.restore();
       });
 
       system.planets.each(function(planet){
