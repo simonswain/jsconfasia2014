@@ -108,11 +108,13 @@ App.Views.fighting_ships = Backbone.View.extend({
         ctx.fillStyle = ship.color;
         ctx.strokeStyle = ship.color;
         ctx.beginPath();
+
         ctx.moveTo(0, -1.5*z);
         ctx.lineTo(z, z);
         ctx.lineTo(0, 0);
         ctx.lineTo(-z, z);
         ctx.lineTo(0, -1.5*z);
+
         ctx.closePath();     
         ctx.stroke();
         ctx.fill();

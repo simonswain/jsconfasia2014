@@ -45,10 +45,10 @@ App.Views.make_planet = Backbone.View.extend({
     // draw here
 
     var data = this.planet.toJSON();
-    var radius = xh;
-    data.x = Number(this.w/2);
-    data.y = Number(xh*2);
-    ctx.fillStyle = '#69c';
+    var radius = xh * 2;
+    data.x = Number(3*xw);
+    data.y = Number(3*xh);
+    ctx.fillStyle = '#222';
     ctx.beginPath();
     ctx.arc(data.x, data.y, radius, 0, 2 * Math.PI, true);
     ctx.closePath();
@@ -57,21 +57,24 @@ App.Views.make_planet = Backbone.View.extend({
     var segments = {
       pop: '#fff',
       pol: '#c00',
-      agr: '#090',
-      ind: '#0cc'
+      ind: '#0cc',
+      agr: '#090'
     };
-    
-    var oldAngle = 0;    
+
+    var oldAngle = 0;
     _.each(segments, function(color, k){
-      var portion =data[k] / data.land;
-      var wedge = 2 * Math.PI * portion;
+      var val = data[k] / data.land;
+      if(k === 'pol'){
+        val = data.land * (val/100);
+      }
+      var wedge = 2 * Math.PI * val;
       var angle = oldAngle + wedge;
       ctx.beginPath();
+      ctx.fillStyle = color;
       ctx.arc(data.x, data.y, radius, oldAngle, angle);
       ctx.lineTo(data.x, data.y);
       ctx.closePath();
-      ctx.fillStyle = color;
-      ctx.fill();    // fill with wedge color
+      ctx.fill();
       oldAngle += wedge;
     });
 
@@ -86,32 +89,38 @@ App.Views.make_planet = Backbone.View.extend({
       'land',
       'pop',
       // 'birthrate',
-      // 'deathrate', 
+      // 'deathrate',
       'agr',
       'pol',
       'ind',
       'cr'
     ];
-    var xl = this.w/2 - xw*5;
-    var xd = this.w/2 + xw*3;
-    var xr = this.w/2 - xw/4;
-    var xo = this.w/2 + xw*6;
-    var yy = 5.5*xh;
+    var xl = xw;
+    var xr = 6*xw;
+    var xp = 9*xw;
+    var xd = this.w - (4*xw);
+    var xo = this.w - (xw);
+    var yy = 8*xh;
 
     ctx.font = '32pt arial';
 
     ctx.fillStyle = '#aaa';
-    ctx.textAlign = 'center';
-    ctx.fillText(data.name, this.w/2, 4*xh);
-
     vals.forEach(function(k){
-      
+
       if(segments[k]){
         ctx.fillStyle = segments[k];
       }
 
       ctx.textAlign = 'left';
       ctx.fillText(k, xl, yy);
+
+      var val = data[k];
+      if(k === 'pol'){
+        val = data.land * (val/100);
+      }
+
+      var pct = val / data.land * 100;
+
       var s;
       // deltas
       s = data['d_' + k]
@@ -120,12 +129,18 @@ App.Views.make_planet = Backbone.View.extend({
       } else {
         s = s.toFixed(2);
       }
+
       if(data['d_' + k] === 0){
         s = '-';
       } else if(data['d_' + k] < 0){
         s = '-' + s;
       } else {
         s = '+' + s;
+      }
+
+     if(data.hasOwnProperty('d_' + k)){
+        ctx.textAlign = 'right';
+        ctx.fillText(s, xd, yy);
       }
 
      if(data.hasOwnProperty('d_' + k)){
@@ -143,9 +158,7 @@ App.Views.make_planet = Backbone.View.extend({
       if(data['out_' + k] === 0){
         s = '-';
       } else if(data['out_' + k] < 0){
-        s = '-' + s;
-      } else {
-        s = '+' + s;
+        s = s;
       }
 
      if(data.hasOwnProperty('d_' + k)){
@@ -154,9 +167,50 @@ App.Views.make_planet = Backbone.View.extend({
       }
 
       ctx.textAlign = 'right';
-      ctx.fillText(data[k].toFixed(2), xr, yy);
+      if(k === 'cr'){
+        ctx.fillText(data[k].toFixed(2), xr, yy);
+      } else {
+        ctx.fillText(val.toFixed(2), xr, yy);
+        ctx.fillText(pct.toFixed(2) + '%', xp, yy);
+      }
       yy += xh;
     });
+
+    // chart
+    var drawChart = function(){
+      var chart = self.chart;
+      var w = xw*8;
+      var h = xh*4
+      ctx.save();
+      ctx.translate(xw*6, xh);
+      ctx.fillStyle = '#222';
+      ctx.beginPath();
+      ctx.rect(0, 0, w,h);
+      ctx.fill();
+
+      ctx.lineWidth = xw/16;
+
+      _.each(self.chart, function(vals, key){
+        ctx.strokeStyle = segments[key];
+        var xstep = w /  self.chartLimit;
+        ctx.beginPath();
+        ctx.moveTo(0, h - (h * vals)[0]);
+        vals.forEach(function(val, ix){
+          ctx.lineTo(1+ ix * xstep, h - (h * val));
+        });
+        ctx.stroke();
+        ctx.closePath();
+      });
+
+      ctx.beginPath();
+      ctx.strokeStyle = '#444';
+      ctx.rect(0, 0, w,h);
+      ctx.stroke();
+
+      ctx.restore();
+
+
+    }();
 
 
     //
@@ -177,8 +231,21 @@ App.Views.make_planet = Backbone.View.extend({
 
     // tick here
 
-
-
+    var data = this.planet.toJSON();
+    _.each(['pop','pol','agr','ind'], function(key){
+      var val = data[key];
+      if(key === 'pol'){
+        val = val/100; // val is %
+      } else{
+        // express as
+        val = (val / data.land);
+      }
+      self.chart[key].push(val);
+      while(self.chart[key].length > self.chartLimit+1){
+        self.chart[key].shift();
+      }
+      //console.log(key, val);
+    });
     //
 
     if(this.tickTimer){
@@ -188,9 +255,16 @@ App.Views.make_planet = Backbone.View.extend({
   },
   init: function(){
     var self = this;
+    this.chartLimit = 1000;
+    this.chart = {
+      pop: [],
+      pol: [],
+      agr: [],
+      ind: []
+    };
 
     this.planet = new App.Models.Planet({name: 'Test Planet'});
-    this.period = 100;
+    this.period = 50;
 
   },
   start: function () {

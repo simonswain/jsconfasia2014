@@ -13,7 +13,7 @@ App.Models.Planet = Backbone.Model.extend({
     land: 1000, // available area
     agr: 0,
     pop: 0,
-    birthrate: 0.002,
+    birthrate: random0to(200) * 0.0005,
     deathrate: 0.001,
 
     //
@@ -42,7 +42,7 @@ App.Models.Planet = Backbone.Model.extend({
     a = 0;
     v = 0;
 
-    if(opts.system){    
+    if(opts.system){
       rr = opts.system.get('radius');
       r = ((0.1 * rr) + (0.4 *random.from0to(rr))).toFixed(2),
       a = random.from0to(360),
@@ -75,7 +75,7 @@ App.Models.Planet = Backbone.Model.extend({
     this.run();
   },
   run: function(){
-    
+
     this.physics();
 
     // 'POP + IND + AGR cannot exceed Size of Planet',
@@ -89,7 +89,7 @@ App.Models.Planet = Backbone.Model.extend({
     // 'Suplus POP will leave via ship',
     // 'IND & AGR can be traded'
 
-    
+
     var data = this.toJSON();
 
     // pollution recovery
@@ -103,9 +103,6 @@ App.Models.Planet = Backbone.Model.extend({
     var births = data.pop * (data.birthrate/100 * (50 + random.from1to(50)));
     var deaths = data.pop * (data.deathrate/100 * (50 + random.from1to(50)));
 
-    births = 0;
-    deaths = 0;
-   
     deaths += 0.5 * data.pop * (data.pol/100);
 
     // use tech to increase efficiency
@@ -188,7 +185,7 @@ App.Models.Planet = Backbone.Model.extend({
     a = this.get('a');
     r = this.get('r');
     v = this.get('v');
-    
+
     a += v;
     a = a % 360;
 

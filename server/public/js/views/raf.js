@@ -3,7 +3,7 @@
 /*jshint browser:true */
 /*jshint strict:false */
 
-App.Views.make_empires = Backbone.View.extend({
+App.Views.raf = Backbone.View.extend({
   template: _.template('<div class="canvas"></div><div class="fx"></div>'),
   initialize : function(opts) {
     _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick');
@@ -44,98 +44,17 @@ App.Views.make_empires = Backbone.View.extend({
 
     // draw here
 
-    self.system.stars.each(function(star){
-      var data = star.toJSON();
-      ctx.fillStyle = data.color;
-      ctx.strokeStyle = data.color;
-      var p = 12;
-      var r = data.size * xw/24;
-      var m = 0.7;
-      ctx.save();
-      ctx.beginPath();
-      ctx.translate(data.x, data.y);
-      ctx.moveTo(0,0-r);
-      for (var i = 0; i < p; i++) {
-        ctx.rotate(Math.PI / p);
-        ctx.lineTo(0, 0 - (r*m));
-        ctx.rotate(Math.PI / p);
-        ctx.lineTo(0, 0 - r);
-      }
-      ctx.fill();
-      ctx.restore();
-      // ctx.lineWidth = 2;
-      // ctx.beginPath();
-      // ctx.arc(data.x, data.y, data.size * xw/24, 0, 2 * Math.PI, true);
-      // ctx.fill();
-      // ctx.stroke();
+    var x = xw * 2;
+    var yy = 4 * xh;
+
+    ctx.fillStyle = '#0f0';
+    ctx.font = 'bold ' + Math.floor(xh * 0.7) + 'pt courier';
+    ctx.textAlign = 'left';
+
+    this.content.forEach(function(s){
+      ctx.fillText(s, x, yy);
+      yy += xh * 1.3;
     });
-
-    var vals = [
-      'pop',
-      'agr',
-      'pol',
-      'ind',
-      'cr'
-    ];
-
-    self.system.planets.each(function(planet){
-      var data = planet.toJSON();
-      data.x = Number(data.x);
-      data.y = Number(data.y);
-      ctx.fillStyle = '#fff';
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(data.x, data.y, xw/24 * data.size, 0, 2 * Math.PI, true);
-      ctx.fill();
-      ctx.stroke();
-
-      var xl = data.x + xw/10;
-      var xr = data.x - xw/10;
-      var yy = data.y + (data.size * xw/8);
-
-      ctx.fillStyle = '#666';
-      ctx.font = '10pt arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(data.name, data.x, data.y - (2*data.size * xw/24));
-
-      vals.forEach(function(k){
-
-        ctx.textAlign = 'left';
-        ctx.fillText(k.substr(0,3), xl, yy);
-
-        ctx.textAlign = 'right';
-        ctx.fillText(data[k].toFixed(0), xr, yy);
-        yy += xw/4;
-      });      
-    });
-
-    self.system.ships.each(function(ship){
-      var data = ship.toJSON();
-      var z = xw / 8;
-      ctx.fillStyle = '#c00';
-      ctx.strokeStyle = '#c00';
-
-      ctx.save();
-      ctx.translate(data.x, data.y);        
-      // rotate 45 degrees clockwise
-      ctx.rotate(de_ra(data.a));
-
-      ctx.lineWidth = z/2;
-      ctx.fillStyle = data.color;
-      ctx.strokeStyle = data.color;
-      ctx.beginPath();
-      ctx.moveTo(0, -1.5*z);
-      ctx.lineTo(z, z);
-      ctx.lineTo(0, 0);
-      ctx.lineTo(-z, z);
-      ctx.lineTo(0, -1.5*z);
-      ctx.closePath();     
-      ctx.stroke();
-      ctx.fill();
-      ctx.restore();
-    });
-
 
     //
 
@@ -155,6 +74,10 @@ App.Views.make_empires = Backbone.View.extend({
 
     // tick here
 
+
+
+    //
+
     if(this.tickTimer){
       clearTimeout(this.tickTimer);
     }
@@ -163,13 +86,16 @@ App.Views.make_empires = Backbone.View.extend({
   init: function(){
     var self = this;
 
-    this.system = new App.Models.System({
-      w: this.w,
-      h: this.h,
-      radius: Math.min(this.w, this.h)
-    });
 
-    this.period = 1000;
+    this.content = [
+      'var draw = function(){',
+      '  // paint stuff here',
+      '  requestAnimationFrame(draw);',
+      '};',
+      'draw();'
+    ];
+
+    this.period = 100;
 
   },
   start: function () {
@@ -177,7 +103,7 @@ App.Views.make_empires = Backbone.View.extend({
     this.running = true;
     this.draw();
     setTimeout(this.tick.bind(this), this.period);
-    //setInterval(this.init.bind(this), 20000);
+    setInterval(this.init.bind(this), 20000);
 
     // restart every 20s
   },

@@ -28,7 +28,7 @@ App.Views.glider = Backbone.View.extend({
     ctx.save();
     ctxfx.save();
 
-    ctxfx.fillStyle = 'rgba(1,1,1,.18)';
+    ctxfx.fillStyle = 'rgba(1,1,1,.5)';
     ctxfx.fillRect(0,0, this.cw,this.ch);
 
     ctx.clearRect(0,0,this.cw,this.ch);
@@ -63,6 +63,8 @@ App.Views.glider = Backbone.View.extend({
         ctx.fill();
         ctx.stroke();
         ctx.closePath();     
+
+     
       } 
     }
 

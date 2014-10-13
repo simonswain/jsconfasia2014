@@ -74,15 +74,11 @@ App.Views.make_system = Backbone.View.extend({
     });
 
     var vals = [
-      'raw',
-      'consumed',
-      'population',
-      // 'birthrate',
-      // 'deathrate', 
-      'agriculture',
-      'pollution',
-      'industry',
-      'credit'
+      'pop',
+      'agr',
+      'pol',
+      'ind',
+      'cr'
     ];
 
     self.system.planets.each(function(planet){
@@ -107,7 +103,6 @@ App.Views.make_system = Backbone.View.extend({
       ctx.fillText(data.name, data.x, data.y - (2*data.size * xw/24));
 
       vals.forEach(function(k){
-
         ctx.textAlign = 'left';
         ctx.fillText(k.substr(0,3), xl, yy);
 
