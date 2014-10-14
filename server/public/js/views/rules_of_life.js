@@ -219,7 +219,7 @@ App.Views.rules_of_life = Backbone.View.extend({
       ]
     ];
 
-    this.period = 2500;
+    this.period = 1500;
 
   },
   start: function () {
