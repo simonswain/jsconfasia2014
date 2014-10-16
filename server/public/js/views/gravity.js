@@ -4,7 +4,7 @@
 /*jshint strict:false */
 
 App.Views.gravity = Backbone.View.extend({
-  template: _.template('<div class="canvas"></div>'),
+  template: _.template('<div class="canvas"></div><div class="fx"></div>'),
   initialize : function(opts) {
     _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick');
     this.render();   
@@ -23,19 +23,21 @@ App.Views.gravity = Backbone.View.extend({
     }
 
     var ctx = this.cview.getContext('2d');
-    ctx.save();
+    var ctxfx = this.fxview.getContext('2d');
 
-    if(this.trails){
-      ctx.fillStyle = 'rgba(0,0,0,.1)';
-      ctx.fillRect(0,0, this.cw,this.ch);
-    } else {
-      ctx.clearRect(0,0,this.cw,this.ch);
-    }
+    ctx.save();
+    ctxfx.save();
+
+    ctxfx.fillStyle = 'rgba(1,1,1,.025)';
+    ctxfx.fillRect(0,0, this.cw,this.ch);
+
+    ctx.clearRect(0,0,this.cw,this.ch);
 
     ctx.translate(this.x, this.y);
     ctx.scale(this.scale, this.scale);
 
-
+    ctxfx.translate(this.x, this.y);
+    ctxfx.scale(this.scale, this.scale);
 
     var xw = this.w/16;
     var xh = this.h/16;
@@ -43,13 +45,10 @@ App.Views.gravity = Backbone.View.extend({
     // planet
     var draw_planet = function(){
       var planet = self.planet;
-      ctx.fillStyle = '#369';	
-      ctx.strokeStyle = '#69c';	
-      ctx.lineWidth = 2;			
+      ctx.fillStyle = '#c00';	
       ctx.beginPath();
-      ctx.arc(planet.x, planet.y, xw, 0, 2 * Math.PI, true);            
+      ctx.arc(planet.x, planet.y, xw/4, 0, 2 * Math.PI, true);            
       ctx.fill();
-      ctx.stroke();   
     }();
 
     // planet
@@ -58,21 +57,42 @@ App.Views.gravity = Backbone.View.extend({
       var ship;
       for(var i=0, ii=ships.length; i<ii; i++){
         ship = ships[i];
-        ctx.fillStyle = 'rgba(100%,100%,100%,1)';	
-        ctx.strokeStyle = 'rgba(100%,100%,100%,1)';	
+
+        ctx.strokeStyle = '#0cc';	
+
+        // vector
+        ctx.beginPath();
+        ctx.moveTo(ship.x, ship.y) 
+        ctx.lineTo(ship.x + (ship.vx  * 10), ship.y + (ship.vy * 10));
+        ctx.stroke();
+        ctx.closePath();
+
+
+        ctx.fillStyle = '#fff';	
+        ctx.strokeStyle = '#fff';	
         ctx.lineWidth = 2;			
         ctx.beginPath();
         //ctx.rect(ship.x, ship.y, 12, 12);
-        ctx.arc(ship.x - xw/16, ship.y-xh/16, xw/8, xh/8, 2 * Math.PI, true);
+        ctx.arc(ship.x, ship.y, xw/8, 0, 2 * Math.PI, true);
         ctx.closePath()
         ctx.fill();
         ctx.stroke();   
+
+        ctxfx.fillStyle = 'rgba(100%,100%,100%,0.25)';	
+        ctxfx.strokeStyle = 'rgba(100%,100%,100%,0.25)';	
+        ctxfx.lineWidth = 2;			
+        ctxfx.beginPath();
+        ctxfx.arc(ship.x, ship.y, xw/16, 0, 2 * Math.PI, false);
+        ctxfx.closePath()
+        ctxfx.fill();
+        ctxfx.stroke();   
         
       }
     }();
 
 
     ctx.restore();
+    ctxfx.restore();
 
     this.requestId = window.requestAnimationFrame(this.draw);
 
@@ -92,14 +112,14 @@ App.Views.gravity = Backbone.View.extend({
       var ship;
       var r, g, theta, angle;
           
-      if(ships.length < 5 && random0to(100) < 20){
+      while(ships.length < 1){
         ships.push({
           x: random0to(self.w),
           y: random0to(self.h),
           vx: 0,
           vy: 0,
           age: 0,
-          maxage: 250 + random0to(250),
+          maxage: 500 + random0to(500),
           thrust: 1
         });
       }
@@ -204,14 +224,20 @@ App.Views.gravity = Backbone.View.extend({
     this.stop();
     this.$el.html(this.template());
     this.$('.canvas').html('<canvas id="canvas"></canvas>');
+    this.$('.fx').html('<canvas id="fx"></canvas>');
 
     // virtual scren size
     this.w = 1024;
     this.h = 768;
+
     // actual screen size
     this.cview = document.getElementById('canvas');
     this.cw = this.cview.width = this.$('.canvas').width();
     this.ch = this.cview.height = this.$('.canvas').height();
+
+    this.fxview = document.getElementById('fx');
+    this.fxview.width = this.$('.fx').width();
+    this.fxview.height = this.$('.fx').height();
 
     this.fitToView();
 

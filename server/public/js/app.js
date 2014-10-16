@@ -73,7 +73,7 @@ App.index = [
 
   ['raf', 'RaF'],            // explain Canvas and RaF
   
-  ['rules_pf_gravity', 'The Physics of Gravity'], // explain physics of gravity (diagram, vectors)
+  ['rules_of_gravity', 'The Physics of Gravity'], // explain physics of gravity (diagram, vectors)
   ['gravity', 'Gravity'],  // like click to add a ship from codepen
 
   ['orbiting_planets', 'Orbiting Planets'], // we fake gravity for the planets

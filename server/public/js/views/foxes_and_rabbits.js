@@ -258,7 +258,7 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
   init: function(){
     var self = this;
 
-    this.period = 50;
+    this.period = 25;
 
     this.foxnum = 0.03;
     this.rabbitnum = 0.3;

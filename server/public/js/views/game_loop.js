@@ -43,24 +43,40 @@ App.Views.game_loop = Backbone.View.extend({
     var xw = this.w/this.gridxy;
     var xh = this.h/this.gridxy;
 
+    // ball
 
     var y;
     var hh = this.h - 2*xh;
     y = (hh / 1000) * this.height;
     
+    var ballx = this.w/2 + 1.5* xw;
     ctx.fillStyle = '#0cc';	
     ctx.beginPath();
-    ctx.arc(this.w/2, this.h - xh - y, xw/2, 0, 2 * Math.PI, true);           
+    ctx.arc(ballx, this.h - xh - y, xw/2, 0, 2 * Math.PI, true);           
     ctx.fill();
     ctx.stroke();   
 
     ctxfx.fillStyle = '#044';	
     ctxfx.beginPath();
-    ctxfx.arc(this.w/2, this.h - xh - y, xw/2, 0, 2 * Math.PI, true);           
+    ctxfx.arc(ballx, this.h - xh - y, xw/2, 0, 2 * Math.PI, true);           
     ctxfx.fill();
     ctxfx.stroke();   
 
-    // draw here
+    // code
+
+    var x = xw/2;
+    var yy = 3 * xh;
+
+    ctx.fillStyle = '#0f0';
+    ctx.font = 'bold ' + Math.floor(xh * 0.6) + 'pt courier';
+    ctx.textAlign = 'left';
+
+    this.content.forEach(function(s){
+      ctx.fillText(s, x, yy);
+      yy += xh * 1.2;
+    });
+
+    // data
 
     if(this.ticked){
       ctx.fillStyle = '#fff';
@@ -70,30 +86,34 @@ App.Views.game_loop = Backbone.View.extend({
 
     ctx.font = '48pt arial';
     ctx.textAlign = 'right';
-    ctx.fillText(this.height.toFixed(0), this.w/2 - xw, this.h/2 - 2*xh);
-    ctx.fillText(this.velo.toFixed(0), this.w/2 - xw, this.h/2);
-    ctx.fillText(this.gravity, this.w/2 - xw, this.h/2 + 2*xh);
+
+    var valuex = this.w - 2*xw;
+    var labelx = this.w - 5.5*xw;
+
+    ctx.fillText(this.height.toFixed(0), valuex, this.h/2 - 1.5*xw);
+    ctx.fillText(this.velo.toFixed(0), valuex, this.h/2);
+    ctx.fillText(this.gravity, valuex, this.h/2 + 1.5*xw);
 
     ctx.textAlign = 'left';
-    ctx.fillText('height', this.w/2 + xw, this.h/2 - 2*xh);
-    ctx.fillText('velocity', this.w/2 + xw, this.h/2);
-    ctx.fillText('gravity', this.w/2 + xw, this.h/2 + 2*xh);
+    ctx.fillText('y =', labelx, this.h/2 - 1.5*xw);
+    ctx.fillText('v =', labelx, this.h/2);
+    ctx.fillText('g =', labelx, this.h/2 + 1.5*xw);
 
 
 
-    var delta = new Date().getTime() - this.t;
+    //var delta = new Date().getTime() - this.t;
     
-    if(!this.fps || new Date().getTime() - this.sec > 1000){
-      this.fps = (1000/delta).toFixed(0);
-      this.sec = new Date().getTime();
-    }
+    // if(!this.fps || new Date().getTime() - this.sec > 1000){
+    //   this.fps = (1000/delta).toFixed(0);
+    //   this.sec = new Date().getTime();
+    // }
     
-    ctx.fillStyle = '#900';
-    ctx.textAlign = 'right';
-    ctx.fillText(this.fps, this.w/2 - xw, this.h/2 - 4*xh);
+    // ctx.fillStyle = '#900';
+    // ctx.textAlign = 'right';
+    // ctx.fillText(this.fps, valuex, 8*xh);
 
-    ctx.textAlign = 'left';
-    ctx.fillText('fps', this.w/2 + xw, this.h/2 - 4*xh);
+    // ctx.textAlign = 'left';
+    // ctx.fillText('fps',  labelx, 8*xh);
 
     ctx.restore();
     ctxfx.restore();
@@ -140,12 +160,25 @@ App.Views.game_loop = Backbone.View.extend({
   },
   init: function(){
     var self = this;
+
     this.t = new Date().getTime();
     this.height = 1000;
     this.velo = 0;
     this.gravity = .98
 
     this.period = 25;
+
+    this.content = [
+      'var tick = function(){',
+      ' y -= v;',
+      ' v -= this.g;',
+      ' if(y < 0){',
+      '  v = -v;',
+      ' }',
+      ' setTimeout(tick, 25)',
+      '};',
+      'tick();',
+    ];
 
   },
   start: function () {

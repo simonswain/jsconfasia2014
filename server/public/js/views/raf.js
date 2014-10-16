@@ -81,11 +81,14 @@ App.Views.raf = Backbone.View.extend({
     if(this.tickTimer){
       clearTimeout(this.tickTimer);
     }
+
     this.tickTimer = setTimeout(this.tick.bind(this), this.period);
+
   },
   init: function(){
     var self = this;
 
+    this.t = new Date().getTime();
 
     this.content = [
       'var draw = function(){',
