@@ -58,12 +58,29 @@ App.Views.gravity = Backbone.View.extend({
       for(var i=0, ii=ships.length; i<ii; i++){
         ship = ships[i];
 
-        ctx.strokeStyle = '#0cc';	
+        ctx.lineWidth = 2;
+       
+        // g vector
+        ctx.strokeStyle = '#cc0';	
+        ctx.beginPath();
+        ctx.moveTo(ship.x, ship.y) 
+        ctx.lineTo(self.w/2, self.h/2);
+        ctx.stroke();
+        ctx.closePath();
 
-        // vector
+        // velo vector
+        ctx.strokeStyle = '#0cc';	
         ctx.beginPath();
         ctx.moveTo(ship.x, ship.y) 
         ctx.lineTo(ship.x + (ship.vx  * 10), ship.y + (ship.vy * 10));
+        ctx.stroke();
+        ctx.closePath();
+
+        // thrust vector
+        ctx.strokeStyle = '#f0f';	
+        ctx.beginPath();
+        ctx.moveTo(ship.x, ship.y) 
+        ctx.lineTo(ship.x + (ship.tx  * 100), ship.y + (ship.ty * 100));
         ctx.stroke();
         ctx.closePath();
 
@@ -119,6 +136,7 @@ App.Views.gravity = Backbone.View.extend({
           vx: 0,
           vy: 0,
           age: 0,
+          rot: ((Math.random() > 0.5) ? 1 : -1),
           maxage: 500 + random0to(500),
           thrust: 1
         });
@@ -147,16 +165,19 @@ App.Views.gravity = Backbone.View.extend({
           g = 3;
         }
 
-        angle = de_ra ( ra_de (theta) + 90 ); 
-        ship.vx = ship.vx + (0.35 * ship.thrust * g) * Math.cos(angle);
-        ship.vy = ship.vy + (0.35 * ship.thrust * g) * Math.sin(angle);
+        // thrust vector
+        angle = de_ra ( ra_de (theta) + (ship.rot * 90) ); 
+        ship.tx = (0.35 * ship.thrust * g) * Math.cos(angle)
+        ship.ty =  + (0.35 * ship.thrust * g) * Math.sin(angle)
+        ship.vx = ship.vx + ship.tx;
+        ship.vy = ship.vy + ship.ty;
 
         // convert gravity to xy. apply
         ship.vx = ship.vx + g * Math.cos(theta);
         ship.vy = ship.vy + g * Math.sin(theta);      
 
-        ship.vx = ship.vx * 0.95;
-        ship.vy = ship.vy * 0.95;
+        ship.vx = ship.vx * 0.97;
+        ship.vy = ship.vy * 0.97;
 
         ship.x += ship.vx;
         ship.y += ship.vy;

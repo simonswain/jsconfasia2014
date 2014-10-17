@@ -71,24 +71,32 @@ App.Views.rules_of_gravity = Backbone.View.extend({
     ctx.strokeStyle = '#ccc';
     ctx.lineWidth = xw/32;
     ctx.beginPath();
-    if(mass_y < planet_y && planet_x > mass_x){
-      ctx.moveTo(mass_x, mass_y) ;
-      ctx.lineTo(mass_x, planet_y);
-      ctx.lineTo(planet_x, planet_y);
-    }else if(mass_y < planet_y && planet_x < mass_x){
-      ctx.moveTo(mass_x, mass_y) ;
-      ctx.lineTo(mass_x, planet_y);
-      ctx.lineTo(planet_x, planet_y);
-    }else if(mass_y > planet_y && planet_x < mass_x){
-      ctx.moveTo(mass_x, mass_y) ;
-      ctx.lineTo(mass_x, planet_y);
-      ctx.lineTo(planet_x, planet_y);
-    }else if(mass_y > planet_y && planet_x > mass_x){
-      ctx.moveTo(mass_x, mass_y) ;
-      ctx.lineTo(mass_x, planet_y);
-      ctx.lineTo(planet_x, planet_y);
-    }
-    ctx.fill();
+
+    ctx.moveTo(mass_x, mass_y) ;
+    ctx.lineTo(planet_x, mass_y);
+    ctx.lineTo(planet_x, planet_y);
+    ctx.lineTo(mass_x, planet_y);
+    ctx.lineTo(mass_x, mass_y);
+
+    // if(mass_y < planet_y && planet_x > mass_x){
+    //   ctx.moveTo(mass_x, mass_y) ;
+    //   ctx.lineTo(planet_x, planet_y);
+    //   ctx.lineTo(planet_x, planet_y);
+    // }else if(mass_y < planet_y && planet_x < mass_x){
+    //   ctx.moveTo(mass_x, mass_y) ;
+    //   ctx.lineTo(mass_x, planet_y);
+    //   ctx.lineTo(planet_x, planet_y);
+    // }else if(mass_y > planet_y && planet_x < mass_x){
+    //   ctx.moveTo(mass_x, mass_y) ;
+    //   ctx.lineTo(mass_x, planet_y);
+    //   ctx.lineTo(planet_x, planet_y);
+    // }else if(mass_y > planet_y && planet_x > mass_x){
+    //   ctx.moveTo(mass_x, mass_y) ;
+    //   ctx.lineTo(mass_x, planet_y);
+    //   ctx.lineTo(planet_x, planet_y);
+    // }
+
+    //ctx.fill();
     ctx.stroke();
     ctx.closePath();
 
@@ -97,14 +105,14 @@ App.Views.rules_of_gravity = Backbone.View.extend({
     // xy lines
 
 
-    // x line
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = xw/32;
-    ctx.beginPath();
-    ctx.moveTo(planet_x, xh * 1.5);
-    ctx.lineTo(planet_x, this.w - xh * 1.5);
-    ctx.stroke();
-    ctx.closePath();
+    // // x line
+    // ctx.strokeStyle = '#fff';
+    // ctx.lineWidth = xw/32;
+    // ctx.beginPath();
+    // ctx.moveTo(planet_x, xh * 1.5);
+    // ctx.lineTo(planet_x, this.w - xh * 1.5);
+    // ctx.stroke();
+    // ctx.closePath();
 
     
     // y line
@@ -157,29 +165,29 @@ App.Views.rules_of_gravity = Backbone.View.extend({
     var aax = (this.w/2) + (distance/2) * Math.cos(angle/2);
     var aay = (this.h/2) + (distance/2) * Math.sin(angle/2);
 
-    var a0 = (this.a + 180) % 360;
-    var a1 = this.a % 90;
-    var a2 = (a0 - a1) % 360;
+    // var a0 = (this.a + 180) % 360;
+    // var a1 = this.a % 90;
+    // var a2 = (a0 - a1) % 360;
 
-    ctx.strokeStyle = '#0cc';
-    ctx.beginPath();
-    ctx.stroke();
-
-    // ctx.fillStyle = '#000';
+    // ctx.strokeStyle = '#0cc';
     // ctx.beginPath();
+    // ctx.stroke();
 
-    if(mass_y < planet_y && planet_x > mass_x){
-      ctx.arc(planet_x, planet_y, radius * 2, de_ra(180 + this.a), de_ra(270), false);
-    }else if(mass_y < planet_y && planet_x < mass_x){
-      ctx.arc(planet_x, planet_y, radius * 2, de_ra(270), de_ra(180 + this.a), false);
-    }else if(mass_y > planet_y && planet_x < mass_x){
-      ctx.arc(planet_x, planet_y, radius * 2, de_ra(this.a-180), de_ra(90), false);
-    }else if(mass_y > planet_y && planet_x > mass_x){
-      ctx.arc(planet_x, planet_y, radius * 2, de_ra(90), de_ra(this.a-180), false);
-    }
+    // // ctx.fillStyle = '#000';
+    // // ctx.beginPath();
 
-    ctx.stroke();
-    ctx.closePath();
+    // if(mass_y < planet_y && planet_x > mass_x){
+    //   ctx.arc(planet_x, planet_y, radius * 2, de_ra(180 + this.a), de_ra(270), false);
+    // }else if(mass_y < planet_y && planet_x < mass_x){
+    //   ctx.arc(planet_x, planet_y, radius * 2, de_ra(270), de_ra(180 + this.a), false);
+    // }else if(mass_y > planet_y && planet_x < mass_x){
+    //   ctx.arc(planet_x, planet_y, radius * 2, de_ra(this.a-180), de_ra(90), false);
+    // }else if(mass_y > planet_y && planet_x > mass_x){
+    //   ctx.arc(planet_x, planet_y, radius * 2, de_ra(90), de_ra(this.a-180), false);
+    // }
+
+    // ctx.stroke();
+    // ctx.closePath();
     
 
     // backfill for angle value

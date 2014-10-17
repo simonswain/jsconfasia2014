@@ -276,7 +276,7 @@ App.Views.fighting_ships = Backbone.View.extend({
 
           //thrust ship at 90 deg to star
 
-          angle = de_ra ( ra_de (theta) + 90 );
+          angle = de_ra ( ra_de (theta) + (ship.rot * 90) );
           thrust = ship.fg;
 	  ship.vx = ship.vx + thrust * Math.cos(angle);
 	  ship.vy = ship.vy + thrust * Math.sin(angle);
@@ -482,6 +482,7 @@ App.Views.fighting_ships = Backbone.View.extend({
       vx:vx,
       vy:vy,
       a: a,
+      rot: ((Math.random() > 0.5) ? 1 : -1),
       hue: hue,
       energy_max: energy_max,
       damage: 0,
