@@ -9,8 +9,9 @@ App.Models.System = Backbone.Model.extend({
     x: null,
     y: null
   },
+  interval: 25,
   initialize: function(opts) {
-    _.bindAll(this, 'addPlanet','initPlanets');
+    _.bindAll(this, 'run','addPlanet','initPlanets');
 
     this.universe = opts.universe || false;
 
@@ -20,42 +21,49 @@ App.Models.System = Backbone.Model.extend({
 
     this.starCount = 1;
 
-    this.planetCount = random.from1to(3);
-    //this.planetCount = 1;
+    this.planetCount = random.from1to(3) + 1;
 
     this.stars = new App.Collections.Stars();
     this.planets = new App.Collections.Planets();
-    this.ships = new App.Collections.Ships();
+    this.ships = new App.Collections.Ships([]);
+    this.booms = [];
+
     this.initStars();
     this.initPlanets();
-    this.spawnShip();
-    this.spawnShip();
-    this.spawnShip();
-  },
 
+    this.run();
+    this.ticks ++;
+
+  },
+  run: function(){
+    var self = this;
+    this.ships.each(function(ship){
+      ship.run();
+    });
+    this.ships.each(function(ship){
+      if(!ship){
+        return;
+      }
+
+      if(ship.get('boom')){
+        self.booms.push({
+          x: ship.get('x'),
+          y: ship.get('y'),
+          color: ship.get('color')
+        });
+        self.ships.remove(ship);
+      }
+    });
+    this.timer = setTimeout(this.run, this.interval);
+  },
   initStars: function(){
+
     while(this.stars.length < this.starCount){
       this.addStar();
     }
-  },
 
-  // fake ship created in system
-  spawnShip: function(){
-
-    var x, y;
-
-    x = random.from0upto(this.get('radius'));
-    y = random.from0upto(this.get('radius'));
-
-    var ship = new App.Models.Ship({
-      state: 'system',
-      x: random0to(this.get('w')),
-      y: random0to(this.get('h'))
-    }, {
-      system: this,
-    });
-
-    this.ships.add(ship);
+    this.timer = false;
+    this.run();
 
   },
 
@@ -68,7 +76,6 @@ App.Models.System = Backbone.Model.extend({
 
     var x, y;
 
-    var d;
     if(this.stars.length === 0){
       x = this.get('w')/2;
       y = this.get('h')/2;
@@ -97,43 +104,33 @@ App.Models.System = Backbone.Model.extend({
     });
     this.planets.add(planet);
   },
+  
+  addShip: function(ship){
+    this.ships.add(ship);
+  },
 
-  addPlanetXY: function(i){
+  removeShip: function(ship){
+    this.ships.remove(ship);
+  },
 
-    var self = this;
-    
+  // fake ship created in system
+  spawnShip: function(){
+
     var x, y;
-    var d;
-    var spacing = this.get('radius') * 0.3;
 
-    var gen = function(){
-      return (self.get('radius') * 0.3) + random.from0upto(self.get('radius') * 0.4);
-    };
+    x = random.from0upto(this.get('radius'));
+    y = random.from0upto(this.get('radius'));
 
-
-    d = 0;
-
-    if(this.planets.length === 0){
-      x = gen();
-      y = gen();
-    }
-
-    while (this.planets.length > 0 && d < spacing){
-      x = gen();
-      y = gen();
-      this.planets.each(function(p){
-        var dx = Math.abs(p.get('x') - x);
-        var dy = Math.abs(p.get('y') - y);
-        d = Math.sqrt((dx*dx) + (dy*dy));
-      });
-    }
-
-    var planet = new App.Models.Planet({
-      x:x,
-      y:y,
-      name: 'Planet ' + String(Number(this.planets.length + 1)),
-      system: this
+    var ship = new App.Models.Ship({
+      state: 'system',
+      x: random0to(this.get('w')),
+      y: random0to(this.get('h'))
+    }, {
+      system: this,
     });
-    this.planets.add(planet);
+
+    this.ships.add(ship);
+
   }
+
 });

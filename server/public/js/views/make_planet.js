@@ -141,7 +141,7 @@ App.Views.make_planet = Backbone.View.extend({
      if(data.hasOwnProperty('d_' + k)){
         ctx.textAlign = 'right';
         ctx.fillText(s, xd, yy);
-      }
+     }
 
      if(data.hasOwnProperty('d_' + k)){
         ctx.textAlign = 'right';
@@ -208,8 +208,6 @@ App.Views.make_planet = Backbone.View.extend({
       ctx.stroke();
 
       ctx.restore();
-
-
     }();
 
 

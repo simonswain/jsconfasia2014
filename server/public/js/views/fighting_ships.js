@@ -122,6 +122,7 @@ App.Views.fighting_ships = Backbone.View.extend({
 
         // if shooting draw laser
         if (ship.laser) {
+          console.log(ship.laser_x, ship.laser_y);
           ctx.lineWidth = xw/32;
           ctx.strokeStyle = 'rgba(255,255,255,0.8)'; //ship.color;
           ctx.beginPath();
@@ -505,8 +506,6 @@ App.Views.fighting_ships = Backbone.View.extend({
     this.draw();
     setTimeout(this.tick.bind(this), this.period);
     setInterval(this.init.bind(this), 20000);
-
-    // restart every 20s
   },
   stop: function(){
     this.running = false;

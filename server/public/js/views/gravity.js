@@ -68,6 +68,23 @@ App.Views.gravity = Backbone.View.extend({
         ctx.stroke();
         ctx.closePath();
 
+        // // arrowhead
+        // ctx.save();
+        // ctx.translate(self.w/2, self.h/2);
+        // ctx.rotate(angle - Math.PI/2);
+
+        // ctx.strokeStyle = '#c00';
+        // var zz = xw/4
+        // ctx.beginPath();
+        // ctx.moveTo(-zz, zz) 
+        // ctx.lineTo(0, 0)
+        // ctx.lineTo(zz, zz) 
+        // ctx.stroke();
+        // ctx.closePath();
+        
+        // ctx.restore();
+
+
         // velo vector
         ctx.strokeStyle = '#0cc';	
         ctx.beginPath();

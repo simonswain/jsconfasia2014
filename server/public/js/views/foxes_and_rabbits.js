@@ -6,7 +6,7 @@
 App.Views.foxes_and_rabbits = Backbone.View.extend({
   template: _.template('<div class="canvas"></div><div class="fx"></div>'),
   initialize : function(opts) {
-    _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick');
+    _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick','sample');
     this.render();
     $(window).on('resize', this.render);
   },
@@ -73,64 +73,81 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
 
     // chart
 
-    var renderChart = function(){
-      var dd = (self.h/1000) / 2;
-      var yo = self.h / 2;
-      var i,ii; 
+    // var renderChart = function(){
+    //   var dd = (self.h/1000) / 2;
+    //   var yo = self.h / 2;
+    //   var i,ii; 
+    //   ctx.beginPath();
+    //   ctx.lineWidth = 4;
+    //   ctx.strokeStyle = '#f00';
+    //   //ctx.moveTo(self.w, yo + (self.numFox * dd));
+    //   for(i=0, ii=self.foxhist.length; i<ii; i++){
+    //     x = self.w - ii*4 + i*4;
+    //     if(x<0){
+    //       continue;
+    //     }
+    //     ctx.lineTo(x, self.h - (self.foxhist[i] * dd));
+    //   }
+    //   ctx.stroke();
+
+    //   ctx.beginPath();
+    //   ctx.lineWidth = 4;
+    //   ctx.strokeStyle = '#0bb';
+    //   //ctx.moveTo(self.w, yo + (self.numRabbit * dd));
+    //   for(i=0, ii=self.rabbithist.length; i<ii; i++){
+    //     x = self.w - ii*4 + i*4;
+    //     if(x<0){
+    //       continue;
+    //     }
+    //     ctx.lineTo(x, self.h - (self.rabbithist[i] * dd));
+    //   }
+    //   ctx.stroke();
+    // }();
+
+    // // chart
+    var drawChart = function(){
+
+      var segments = {
+        numFox: '#c00',
+        numRabbit: '#0cc'
+      };
+      
+      var chart = self.chart;
+      var w = self.w;
+      var h = self.h *0.4
+      ctx.save();
+      ctx.translate(0, self.h * 0.55);
+      ctx.fillStyle = '#222';
       ctx.beginPath();
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = '#f00';
-      //ctx.moveTo(self.w, yo + (self.numFox * dd));
-      for(i=0, ii=self.foxhist.length; i<ii; i++){
-        x = self.w - ii*4 + i*4;
-        if(x<0){
-          continue;
-        }
-        ctx.lineTo(x, self.h - (self.foxhist[i] * dd));
-      }
-      ctx.stroke();
+      ctx.fillRect(0, 0, w, h);
+      ctx.fill();
+
+      ctx.lineWidth = xw/5;
+
+      _.each(self.chart, function(vals, key){
+        ctx.strokeStyle = segments[key];
+        var xstep = w /  self.chartLimit;
+        ctx.beginPath();
+        ctx.moveTo(0, h - (h * vals)[0]);
+        vals.forEach(function(val, ix){
+          val = (h/self.valMax) * val;
+          ctx.lineTo(1+ix * xstep, h - val);
+        });
+        ctx.stroke();
+        ctx.closePath();
+      });
 
       ctx.beginPath();
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = '#0bb';
-      //ctx.moveTo(self.w, yo + (self.numRabbit * dd));
-      for(i=0, ii=self.rabbithist.length; i<ii; i++){
-        x = self.w - ii*4 + i*4;
-        if(x<0){
-          continue;
-        }
-        ctx.lineTo(x, self.h - (self.rabbithist[i] * dd));
-      }
+      ctx.strokeStyle = '#444';
+      ctx.rect(0, 0, w,h);
       ctx.stroke();
+
+      ctx.restore();
+
     }();
     
-    // ctx.putImageData(slideframe, -xw/4, this.ch/2);
-
-    // var dd = (this.h/1000) / 2;
-    // var chart_r = xw/3;
-    // ctx.fillStyle = '#f00';
-    // ctx.beginPath();
-    // ctx.arc(this.w-2, this.h - (this.numFox * dd), chart_r, 0, 2 * Math.PI, true);
-    // ctx.fill();
-    // //ctx.fillRect(this.w-2, this.h - (this.numFox * dd), xw/2, xw/2);
-
-    // ctx.fillStyle = '#cc0';
-    // ctx.beginPath();
-    // ctx.arc(this.w-2, this.h - (this.numRabbit * dd), chart_r, 0, 2 * Math.PI, true);
-    // ctx.fill();
-
-    //ctx.fillRect(this.w-2, this.h - (this.numRabbit * dd), xw/2, xw/2);
-
-    //
-
     ctx.restore();
     ctxfx.restore();
-
-    // ctx.fillStyle = '#aaa';
-    // ctx.font = '12pt arial';
-    // ctx.textAlign = 'right';
-    // ctx.fillText(this.numFox, 32, 16);
-    // ctx.fillText(this.numRabbit, 32, 32);
 
     this.requestId = window.requestAnimationFrame(this.draw);
 
@@ -254,11 +271,33 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
       clearTimeout(this.tickTimer);
     }
     this.tickTimer = setTimeout(this.tick.bind(this), this.period);
+    this.sampleTimer = setTimeout(this.sample.bind(this), 125);
+  },
+  sample: function(){
+    
+    var self = this;
+    _.each(['numRabbit','numFox'], function(key){
+      var val = self[key];
+      if(val > self.valMax){
+        self.valMax = val;
+      }
+      self.chart[key].push(val);
+      while(self.chart[key].length > self.chartLimit+1){
+        self.chart[key].shift();
+      }
+    });
   },
   init: function(){
     var self = this;
 
     this.period = 25;
+    this.valMax = 100;
+    this.chart = {
+      numRabbit: [],
+      numFox: []
+    };
+    
+    this.chartLimit = 100;
 
     this.foxnum = 0.03;
     this.rabbitnum = 0.3;

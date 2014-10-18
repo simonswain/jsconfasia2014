@@ -73,11 +73,11 @@ App.index = [
 
   ['raf', 'RaF'],            // explain Canvas and RaF
   
-  ['rules_of_gravity', 'The Physics of Gravity'], // explain physics of gravity (diagram, vectors)
-  ['gravity', 'Gravity'],  // like click to add a ship from codepen
+  ['rules_of_gravity', 'Rules of Gravity'], // explain physics of gravity (diagram, vectors)
+  ['gravity', 'Gravity and Spaceships'],  // like click to add a ship from codepen
 
-  ['orbiting_planets', 'Orbiting Planets'], // we fake gravity for the planets
-  ['orbiting_planets_with_ships', 'Orbiting With Ships'], // but the ships respect gravity
+  ['orbiting_planets', 'Heliocentric Orbits'], // we fake gravity for the planets
+  ['orbiting_planets_with_ships', 'Planets and Ships'], // but the ships respect gravity
 
   ['canvas', 'HTML5 Canvas'],
 
@@ -100,9 +100,9 @@ App.index = [
 
   ['make_planet', 'Make a planet'], // what makes up a planet? Show the stats.
   
-  // show three planets trading
-  ['surplus_and_deficit', 'Trade and Commerce'], // create some surplus and deficit for the same of the game
-  // now it has motivation to send ships out to do things
+  // // show three planets trading
+  // ['surplus_and_deficit', 'Trade and Commerce'], // create some surplus and deficit for the same of the game
+  // // now it has motivation to send ships out to do things
 
   // Lets make some space
   ['make_system', 'Make a System'], // star with random number of orbitin planets (sped up). 'next' key zooms in to a planet as lead in to next slide

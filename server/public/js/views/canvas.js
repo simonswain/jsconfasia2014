@@ -56,12 +56,17 @@ App.Views.canvas = Backbone.View.extend({
       yy += xh * 1.2;
     });
 
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold ' + Math.floor(xh * 0.6) + 'pt courier';
+    ctx.textAlign = 'right';
+    ctx.fillText(this.angle + '°', this.w * 0.8, this.h - 2*xh);
+
     //
 
 
     // draw ship body
     ctx.save();
-    ctx.translate(this.w/2 + 4.5*xw, this.h/2);
+    ctx.translate(this.w * 0.8 , this.h/2);
     var z = 2 * xw;
     ctx.scale(z, z);
     ctx.rotate(de_ra(this.angle));

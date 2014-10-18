@@ -2,15 +2,19 @@ App.Models.Ship = Backbone.Model.extend({
   defaults: { 
 
     id: null,
-    state: 'system',
-    intent: 'fight',
+    // ships spawn on planet
+    state: 'planet',
+
+    // initial intent is to load population
+    intent: 'load',
+
     name:'Ship', 
-    
+    boom: false,
     // position
     ux: null, // universe x when jumping
     uy: null, // universe y when jumping
-    x: null, // system x when in system
-    y: null, // system y when in system
+    x: 0, // system x when in system
+    y: 0, // system y when in system
     vx: 0, // system x velocity
     vy: 0, // system y velocity
     a: 0, // angle ship is facing when in system
@@ -18,25 +22,51 @@ App.Models.Ship = Backbone.Model.extend({
     pr: null, // orbital position radius when at planet
     pa: null, // oribital position angle when at planet
 
+    pop: 0, //  how many population the ship is carrying
+    max_pop: 1000,
+
+    // vector away from planet cw or ccw
+    rot: ((Math.random() > 0.5) ? 1 : -1),
+    
     // attributes
-    jump_speed: 0, // warp drive speed
-    jump_range: 0, // warp drive range
-    thrust: random1to(3), // grav drive power
-    laser_power: 0, // laser power
-    laser_range: 0, // laser range
+    jump_speed: 1, // warp drive speed
+    jump_range: 1, // warp drive range
+    thrust: 1, // grav drive power
+    laser_power: 1, // laser power
+    laser_range: 0.1 + random0to(10)/100, // laser range as fraction of system radius
+    laser_accuracy: 5,
+    laser: false, // laser firing?
+    laser_x: null,
+    laser_y: null,
+    hit: false, // ship is hit? (for animation)
     missile: 0,
-    energy_max: 0,
-    energy: 0,
+    energy_max: 200,
+    energy: 200,
     recharge: 1, //rate of recharge
-    power: 0,
+    power: 5,
     damage: 0,
-    shield: 0,
+    shield: 0
   },
   interval: 20,
   initialize: function(vals, opts) {
-    _.bindAll(this, 'run','runSpace','runPlanet','runSpace','stop','systemPhysics');
+    _.bindAll(this, 
+              'run','runSpace','runPlanet','runSpace','stop',
+              'systemPhysics','leavePlanet','boom'
+             );
+
+
+    var energy = 200 + random0to(200);
     this.set({
-      id: uuid.v4()
+      id: uuid.v4(),
+      jump_speed: random1to(5),
+      jump_range: random1to(5),
+      laser_accuracy: random1to(10),
+      laser_power: random0to(20) + 5,
+      power: random0to(5),
+      thrust: 2 + random1to(30)/10,
+      recharge: 1 + ( random1to(10) ) / 10,
+      energy_max: energy,
+      energy_max: energy
     });
 
     // ship belongs to this empire
@@ -44,63 +74,156 @@ App.Models.Ship = Backbone.Model.extend({
 
     // ship is in orbit at this planet (starts with birth planet)
     this.planet = opts.planet || false;
-    
+
     // ship is in this system
-    this.system = opts.system;
+    this.system = opts.system || false;
 
     this.target_planet = null;
     this.target_system = null;
 
-    this.ticks = 0;
-
-    // this.set({
-    // });
-    //console.log(this.toJSON());
-    this.timer = false;
-    this.run();
-
   },
   runPlanet: function(){
     // things to do when the ship is locked in orbit at a planet
+    var self = this;
+    if(!this.planet){
+      return;
+    }
 
     var state = this.get('state');
     var intent = this.get('intent');
 
-    // repaired? cargo? fuel?
+    // load up some population
 
-    if(this.get('cargo') > 10){
-      // ready to leave
-      intent = 'jump';
-      this.leavePlanet();
-      return;
+    if(this.planet.empire === this.empire){
+      // repaired? cargo? fuel?
+      var capacity = this.get('max_pop') - this.get('pop');
+      if(capacity > 0){
+        var getpop = this.planet.takePop(capacity);
+        this.set('pop', this.get('pop') + getpop);
+      }
+      
+      if(this.get('pop') >= this.get('max_pop')){
+        // ready to leave
+        this.set('intent', 'colonize');
+        this.leavePlanet();
+        return;
+      }
     }
-
-    // fake some trading
-    this.set({cargo: s.cargo + 1});
-    
-    // repairs
-    
-      // 
 
 
   },
   runSystem: function(){
     // things to do when the ship is in a system
+    var self = this;
 
-    this.systemPhysics();
+    // if enemy ships in system, then fight
+    if(!this.system){
+      return;
+    }
+
+    // else go to an unoccupied or enemy planet
+
+    var enemies;
+    enemies = this.system.ships.reduce(function(total, x){
+      if(!x){
+        return;
+      }
+      
+      if(x.empire !== self.empire){
+        total ++;
+      }
+      return total;
+    }, 0);
+
+    var opts = {
+      fight: false
+    }
+
+    if(enemies > 0){
+      opts.fight = true
+    }
+
+    // pick planet in local system to populate
+    if(enemies === 0 && !this.target_planet && !this.target_system){
+        var potentials;
+        potentials = this.system.planets.reduce(function(list, planet){
+          if(!planet){
+            return total;
+          }         
+          if(planet.empire !== self.empire){
+            list.push(planet);
+          }
+          return list;
+        }, []);
+
+        // ship will thrust towards this planet
+        if(potentials.length > 0){
+          this.target_planet = potentials[random0to(potentials.length-1)];
+        }
+
+        if(potentials.length === 0){
+          // just out system to find a planet
+          //this.target_system = xxx
+          //this.intent = 'jump'
+        }     
+
+      }
+    
+    this.systemPhysics(opts);
 
   },
   runSpace: function(){
     // things to do when the ship is in deep space
 
   },
+  boom: function(){
+    if(this.get('boom')){
+      return;
+    }
+    this.set({
+      boom: true,
+      color: this.empire.get('color')
+    });
+    this.empire.ships.remove(this);
+  },
   run: function(){
-    this.ticks ++;
-    var s = this.toJSON();
+
+    var ship = this.toJSON();
+
+    if(ship.boom){
+      return;
+    }
+
     var state = this.get('state');
     var intent = this.get('intent');
 
-    switch(this.get('state')){
+    ship.hit = false; // consumed by animation
+    ship.laser = false;
+    ship.laser_x = null;
+    ship.laser_y = null;
+
+    // basics
+    ship.energy = ship.energy + ( ship.recharge * ( 1 - ( 1 / ship.energy_max ) * ship.damage ) );
+    if ( ship.energy > ship.energy_max ) {
+      ship.energy = ship.energy_max;
+    }
+
+    ship.damage = ship.damage - ship.recharge;
+
+    if ( ship.damage < 0 ) {
+      ship.damage = 0;
+    }
+
+    // ship is destroyed!
+    if (ship.damage > ship.energy_max) {
+      this.boom();
+      return;
+    }
+
+
+    this.set(ship);
+
+    switch(state){
       case 'planet':      
       this.runPlanet();
       break;
@@ -113,7 +236,7 @@ App.Models.Ship = Backbone.Model.extend({
       this.runSpace();
       break;
     }
-    this.timer = setTimeout(this.run, this.interval);
+
   },
 
   stop: function(){
@@ -128,12 +251,24 @@ App.Models.Ship = Backbone.Model.extend({
     this.system = null;
   },
 
-  enterPlanet: function(planet){
+  enterPlanet: function(){
     this.planet = planet;
     this.set({state: 'planet'});
+    this.planet.ships.add(this);
+    this.system.remove.add(this); 
   },
 
-  leavePlanet: function(planet){
+  leavePlanet: function(){    
+    if(!this.planet){
+      return;
+    }
+    this.set({
+      'x': this.planet.get('x'),
+      'y': this.planet.get('y'),
+      'state': 'system'
+    });
+    this.planet.ships.remove(this);
+    this.system.ships.add(this);
     this.planet = null;
   },
 
@@ -144,27 +279,68 @@ App.Models.Ship = Backbone.Model.extend({
 
   },
 
-  systemPhysics: function(){
+  systemPhysics: function(opts){
 
-    var ship = this;
+    var self = this;
 
-    var intent = ship.get('intent');
+    if(!opts){
+      opts = {};
+    }
 
-    var x, y, vx, vy, a, v, gx, gy, thrust, angle;
+    var ship = this.toJSON();
 
+    var intent = ship.intent;
+    var x, y, a, v, gx, gy, thrust, angle;
     var radius;
     radius = this.system.get('radius');
 
-    x = Number(ship.get('x'));
-    y = Number(ship.get('y'));
+    ship.x = Number(ship.x);
+    ship.y = Number(ship.y);
 
-    vx = Number(ship.get('vx'));
-    vy = Number(ship.get('vy'));
+    ship.vx = Number(ship.vx);
+    ship.vy = Number(ship.vy);
 
-    thrust = Number(ship.get('thrust'));
+    thrust = Number(ship.thrust);
 
-    _.each(
-      this.system.planets.models, 
+    // star gravity
+    this.system.stars.each(
+      function(star){
+
+        var g, px, py, angle;
+
+        px = star.get('x');
+        py = star.get('y');
+
+        // angle between ship and star
+        var theta = G.angle (px, py, ship.x, ship.y);
+        // distance between ship and star
+        var r = G.distance (ship.x, ship.y, px, py);
+
+        // force of gravity from stars on ship
+        g = 600 * ( 5 / ( r * r ) )
+        //g = 1000 * ( 50 / ( r * r ) )
+
+        // max gravity
+        if ( g > 3 ) {
+          g = 3;
+        }
+
+        // convert gravity to xy. apply
+	ship.vx = ship.vx + g * Math.cos(theta);
+	ship.vy = ship.vy + g * Math.sin(theta);
+
+        // thrust vector across star's pull
+        angle = de_ra ( ra_de (theta) + (ship.rot * 90) ); 
+        var tx = (3 * ship.thrust * g) * Math.cos(angle)
+        var ty = (3 * ship.thrust * g) * Math.sin(angle)
+        ship.vx = ship.vx + tx;
+        ship.vy = ship.vy + ty;
+
+      });
+
+
+    // planet gravity
+    this.system.planets.each(
       function(planet){
 
         var g, px, py, angle;
@@ -173,104 +349,184 @@ App.Models.Ship = Backbone.Model.extend({
         py = planet.get('y');
 
         // angle between ship and planet
-        var theta = G.angle ( px, py, x, y );
-        // angle between ship and planet
-        var r = G.distance ( x, y, px, py );
-
-        // gravity
+        var theta = G.angle (px, py, ship.x, ship.y);
+        // distance between ship and planet
+        var r = G.distance (ship.x, ship.y, px, py);
 
         // force of gravity from planets on ship
-        
-        // calc gravity vector
-        g = 1000 * ( 50 / ( r * r ) )
+        g = 200 * ( 5 / ( r * r ) )
+        //g = 1000 * ( 50 / ( r * r ) )
 
-        if ( g > 10 ) {
-          g = 10;
+        // max gravity
+        if ( g > 3 ) {
+          g = 3;
         }
 
         // convert gravity to xy. apply
-	vx = vx + g * Math.cos(theta);
-	vy = vy + g * Math.sin(theta);
+	ship.vx = ship.vx + g * Math.cos(theta);
+	ship.vy = ship.vy + g * Math.sin(theta);
 
-        //console.log(ra_de(theta), r, g);
-        // ship thrust based on intent
-        
-        //console.log(ra_de(theta).toFixed(2), r.toFixed(2), g.toFixed(2), vx.toFixed(2), vy.toFixed(2));
-
-        // console.log(angle, thrust);
-        if(intent === 'jump'){
-          // thrust away from planet to get to edge of system
-          angle = de_ra ( ra_de (theta)+  180 ); 
-	  vx = vx + (0.5 * thrust) * Math.cos(angle);
-	  vy = vy + (0.5 * thrust) * Math.sin(angle);
-        }
-
-        if(intent === 'fight'){
-          //thrust ship at 90 deg to planet to stay in system
-          angle = de_ra ( ra_de (theta) + 90 ); 
-	  vx = vx + (0.5 * thrust * g) * Math.cos(angle);
-	  vy = vy + (0.5 * thrust * g) * Math.sin(angle);
-        }
+        // thrust vector across planet's pull
+        angle = de_ra ( ra_de (theta) + (ship.rot * 90) ); 
+        var tx = (0.2 * ship.thrust * g) * Math.cos(angle)
+        var ty = (0.2 * ship.thrust * g) * Math.sin(angle)
+        ship.vx = ship.vx + tx;
+        ship.vy = ship.vy + ty;
 
       });
 
-    // if(intent === 'fight'){
-    // find enemy ships and attack
+
+
+    //find enemy ships and attack
+    var fight = function(){
+
+      var c = 0;
+      var t = 0;
+      var a = 0;       
+
+      ship.laser = false;
+      ship.laser_x = null;
+      ship.laser_y = null;
+
+      self.system.ships.each(function(model){
+
+        if(model.get('boom') === true){
+          return;
+        }
+        
+
+        // must be in system space
+        if(model.get('state') !== 'system'){
+          return;
+        }
+
+        // friendly
+        if(model.empire === self.empire){
+          return;
+        }       
+
+        var other = model.toJSON();
+        var theta = G.angle (other.x, other.y, ship.x, ship.y);
+        var range = G.distance (other.x, other.y, ship.x, ship.y);
+
+        // chase or tun
+        if(true || range < radius * 0.2){
+          c ++;
+          // run away from bigger, chase smaller. if energy < 20%
+          // always run
+          if (other.power > ship.power || ship.energy < ship.energy_max * 0.2) {
+            a = a + de_ra ( ra_de (theta) + 180 );
+          } else { 
+            a = a + de_ra (ra_de (theta));
+          }
+        }
+
+        // enemy in range to shoot?
+        if(!ship.laser && range < (4 * radius * ship.laser_range) && ship.energy > ship.energy_max * 0.2 ) {
+          // laser uses energy
+          ship.energy = ship.energy - 1;
+          ship.laser = true;
+          var f = ( random1to(2) === 1 ) ? -1 : 1;
+          ship.laser_x = other.x + ( f * random1to( 20 - ship.laser_accuracy ) );
+          ship.laser_y = other.y + ( f * random1to( 20 - ship.laser_accuracy ) );
+          //console.log(radius/20, G.distance (ship.laser_x, ship.laser_y, other.x, other.y));
+          if (G.distance (ship.laser_x, ship.laser_y, other.x, other.y) < radius / 10 ) {
+            model.set({
+              hit: true,
+              energy: Math.max(0, other.energy - ship.laser_power),
+              damage: other.damage + ship.laser_power
+            });
+          }
+        }
+      });
+
+      if(c>0){
+        a = a / c;
+        a = a % 360;
+	ship.vx = ship.vx + (0.25 * ship.thrust) * Math.cos(a);
+	ship.vy = ship.vy + (0.25 * ship.thrust) * Math.sin(a);          
+      }
+
+    };
+    
+    var target_planet = function(){
+      var planet = self.target_planet;
+      var theta = G.angle (planet.get('x'), planet.get('y'), ship.x, ship.y);
+      ship.vx += (0.75 * ship.thrust) * Math.cos(theta);
+      ship.vy += (0.75 * ship.thrust) * Math.sin(theta);
+
+        var range = G.distance (planet.get('x'), planet.get('y'), ship.x, ship.y);
+      
+      // if in range, shoot at target planet to remove population
+      if(planet.get('pop') > 0 && range < (radius * ship.laser_range) && ship.energy > ship.energy_max * 0.2) {
+        // laser uses energy
+        ship.energy = ship.energy - 1;
+        ship.laser = true;
+        ship.laser_x = planet.get('x');
+        ship.laser_y = planet.get('y');
+        self.system.booms.push({
+          x: planet.get('x'),
+          y: planet.get('y'),
+          color: ship.color
+        });          
+        planet.killPop(ship.laser_power);         
+      }
+
+      // take over planet, consume ship
+      if(planet.get('pop') === 0){
+        planet.empire = self.empire;
+        planet.set({
+          pop: ship.pop
+        });
+        self.boom();
+        return;
+      }
+
+    };
+
+    if(opts.fight){
+      fight();
+    }
+
+    if(!opts.fight && this.target_planet){
+      target_planet();
+    }
+
+
+
+    // // ship thrust based on intent
+    
+    // // console.log(angle, thrust);
+    // if(intent === 'jump'){
+    //   // thrust away from planet to get to edge of system
+    //   angle = de_ra ( ra_de (theta) + 180 ); 
+    //   ship.vx = ship.vx + (0.5 * thrust) * Math.cos(angle);
+    //   ship.vy = ship.vy + (0.5 * thrust) * Math.sin(angle);
     // }
 
     // if(intent === 'jump'){
     // thrust to edge of system in direction of target star (safe jump range)
     // }
-
-    // if(intent === 'planet'){
-    //   // thrust towards planet
-    //   // target planet
-    //   angle = de_ra ( ra_de (theta) + 90 ); 
-    //   vx = vx + thrust * Math.cos(angle);
-    //   vy = vy + thrust * Math.sin(angle);
-    // }
     
-    var inner = radius;
     // damping
-    vx = vx * 0.92;
-    vy = vy * 0.92;
+    ship.vx = ship.vx * 0.92;
+    ship.vy = ship.vy * 0.92;
 
-    x = x + Number(vx);
-    y = y + Number(vy);
+    // angle ship is facing from movement vector
+    ship.a = ra_de ( G.angle ( 0, 0, ship.vx, ship.vy ) ) - 90;
 
-    if ( x < (inner * 0.1) ) {
-      x = (inner * 0.1);
-      vx = - vx * 0.1;
-    }
+    ship.x += Number(ship.vx);
+    ship.y += Number(ship.vy);
 
-    if ( x > (inner * 0.8) ) {
-      x = (inner * 0.8);
-      vx = - vx * 0.1;
-    }
-
-    if ( y < (inner * 0.1) ) {
-      y = (inner * 0.1);
-      vy = - vy * 0.1;
-    }
-
-    if ( y > (inner * 0.8) ) {
-      y = (inner * 0.8);
-      vy = - vy * 0.1;
-    }
-
-    // angle ship is facing
-    a = ra_de ( G.angle ( 0, 0, vx, vy ) ) - 90;
-
-    //console.log(a.toFixed(4), x.toFixed(4), y.toFixed(4), vx.toFixed(4), vy.toFixed(4));
-
-    // ship.energypc = ( 100 / ship.energy_max ) * ship.energy;
-    // ship.energyf = ( 1 / ship.energy_max ) * ship.energy;
-    ship.set({
-      x: x.toFixed(2),
-      y: y.toFixed(2),
-      vx: vx.toFixed(2),
-      vy: vy.toFixed(2),
-      a: a.toFixed(2)
+    this.set({
+      x: ship.x,
+      y: ship.y,
+      vx: ship.vx,
+      vy: ship.vy,
+      a: ship.a,
+      laser: ship.laser,
+      laser_x: ship.laser_x,
+      laser_y: ship.laser_y
     });
   },
 

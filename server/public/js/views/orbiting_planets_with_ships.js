@@ -56,8 +56,8 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
       var star;
       for (var i in self.stars) {
         star = self.stars[i];
-        ctx.fillStyle = '#900';	
-        ctx.strokeStyle = '#c00';	
+        ctx.fillStyle = '#f00';	
+        ctx.strokeStyle = '#f00';	
 
         var p = 12;
         var r = xw/3;
@@ -177,6 +177,7 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
           y: random0to(self.h),
           vx: 0,
           vy: 0,
+          rot: ((Math.random() > 0.5) ? 1 : -1),
           age: 0,
           thrust: 0.2 + random.from1to(5)/5
         });
@@ -202,7 +203,9 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
           if ( g > 3 ) {
             g = 3;
           }
-          angle = de_ra ( ra_de (theta) + 90 ); 
+
+          angle = de_ra ( ra_de (theta) + (ship.rot * 90) ); 
+          //angle = de_ra ( ra_de (theta) + 90 ); 
           ship.vx = ship.vx + (0.5 * ship.thrust * g) * Math.cos(angle);
           ship.vy = ship.vy + (0.5 * ship.thrust * g) * Math.sin(angle);
           // convert gravity to xy. apply
@@ -319,6 +322,7 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
       r: (Math.min(this.w,this.h) * 0.2) + (random.from0to(Math.min(this.w,this.h) * 0.1)),
       d: random.from0to(360),
       v: 0.001 * (random.from0to(100)),
+      rot: ((Math.random() > 0.5) ? 1 : -1),
       x: 0,
       y: 0
     };

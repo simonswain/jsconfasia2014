@@ -19,7 +19,7 @@ App.Models.Planet = Backbone.Model.extend({
     //
     pol: 0,
     ind: 0,
-    cr: 0,
+    cr: 1000,
 
     // deltas from last tick
     d_pop: 0,
@@ -35,7 +35,7 @@ App.Models.Planet = Backbone.Model.extend({
 
     opts = opts || {};
 
-    _.bindAll(this, 'run', 'stop', 'physics');
+    _.bindAll(this, 'run', 'stop', 'physics','takePop','spawnShip','addShip','removeShip');
 
     var r, a, v, rr;
     r = 0;
@@ -62,19 +62,26 @@ App.Models.Planet = Backbone.Model.extend({
       pol: 0,
       size: 1 * random.from1to(9),
       land: land,
-      cr: 0,
+      cr: 1000,
     });
 
 
     this.system = opts && opts.system || null;
     this.empire = null;
-    this.ships = new App.Collections.Ships();
+    this.ships = new App.Collections.Ships([]);
     this.shipcost = 1000;
     this.timer = false;
-
     this.run();
   },
   run: function(){
+
+    var self = this;
+    this.ships.each(function(x){
+      if(!x){
+        return;
+      }
+      x.run();
+    });
 
     this.physics();
 
@@ -88,7 +95,6 @@ App.Models.Planet = Backbone.Model.extend({
     // 'IND creates credit to make Ships',
     // 'Suplus POP will leave via ship',
     // 'IND & AGR can be traded'
-
 
     var data = this.toJSON();
 
@@ -118,7 +124,6 @@ App.Models.Planet = Backbone.Model.extend({
       data.pop = data.out_agr;
     }
 
-
     data.d_pop = births + deaths;
 
     // pop and ind creates pol, expressed as a percentage of total
@@ -142,26 +147,29 @@ App.Models.Planet = Backbone.Model.extend({
 
     // planet wants to buy ag, raw, goods depending on stats ('need' factor)
 
-    // Calculate earnings from planet
-    var earnings = ((data.ind / 1000) * (data.pop / 1000)) * ((50 + random0to(50))/100);
+    if(this.empire){
+      // Calculate earnings from planet
+      var earnings = ((data.ind / 1000) * (data.pop / 1000)) * ((50 + random0to(50))/100);
 
-    data.d_cr = earnings;
-    data.cr += earnings;
+      data.d_cr = earnings;
+      data.cr += earnings;
+    }
+
     data.age ++;
-
 
     // enough credit spawns ships to carray away pop
 
     this.set(data);
 
-    if(this.system){
+    if(this.empire){
+
       // wrap in check for system so planet can be simmed in isolation
 
-      if(this.system.empire && this.system.ships.length === 0){
-        this.spawnShip();
-      }
+      // if(this.system.empire && this.system.ships.length === 0){
+      //   this.spawnShip();
+      // }
 
-      if(this.system.empire && this.get('cr') > this.shipcost){
+      if(this.get('cr') > this.shipcost){
         this.spawnShip();
       }
 
@@ -169,7 +177,21 @@ App.Models.Planet = Backbone.Model.extend({
 
     this.timer = setTimeout(this.run, this.get('interval'));
   },
-
+  takePop: function(max){
+    // up to 10% of pop, or max
+    var pop = Math.floor(this.get('pop') * 0.1);
+    pop = Math.min(pop, max);
+    this.set('pop', this.get('pop') - pop);
+    return pop;
+  },
+  killPop: function(n){
+    var pop = this.get('pop');
+    pop = Math.min(0, pop - n*10);
+    if(pop<0){
+      pop = 0;
+    }
+    this.set({'pop': pop});
+  },
   physics: function(){
 
     if(!this.system){
@@ -199,12 +221,18 @@ App.Models.Planet = Backbone.Model.extend({
     });
 
   },
+  addShip: function(ship){
+    this.ships.add(ship);
+  },
+
+  removeShip: function(ship){
+    this.ships.remove([ship]);
+  },
   spawnShip: function(){
 
-    var x, y;
-
-    x = random.from0upto(this.system.get('radius'));
-    y = random.from0upto(this.system.get('radius'));
+    if(this.empire.ships.length >= 2){
+      return;
+    }
 
     // calculate desired ship
     var shipcost = this.shipcost;
@@ -213,27 +241,26 @@ App.Models.Planet = Backbone.Model.extend({
       cr: this.get('cr') - shipcost
     });
 
-    console.log(' @ Spawn ' + this.system.get('name') + ':' + this.get('name') + ':' + this.system.empire.get('name'));
-
+    //console.log(' @ Spawn ' + this.system.get('name') + ':' + this.get('name') + ':' + this.empire.get('name'));
+    
     var ship = new App.Models.Ship({
-      state: 'system',
+      state: 'planet',
       ux: this.system.get('x'),
       uy: this.system.get('y'),
-      x: x,
-      y: y
+      x: this.get('x'),
+      y: this.get('y')
     }, {
-      empire: this.system.empire,
+      empire: this.empire,
+      system: this.system,
       planet: this
-    })
+    });
 
-    this.ships.add(ship);
-
-    if(this.system){
-      this.system.ships.add(ship);
-    }
-
+    // add to planet's ships
+    this.addShip(ship);
+    
+    // add to planets empire
     if(this.empire){
-      this.system.empire.ships.add(ship);
+      this.empire.addShip(ship);
     }
 
   },

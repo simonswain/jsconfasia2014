@@ -44,6 +44,14 @@ App.Views.make_empires = Backbone.View.extend({
 
     // draw here
 
+    var r = Math.min(this.w, this.h);
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = xw/32;
+    ctx.beginPath();
+    ctx.arc(this.w/2, this.h/2, r/2, 0, 2 * Math.PI, true);
+    ctx.stroke();
+    ctx.closePath();
+
     self.system.stars.each(function(star){
       var data = star.toJSON();
       ctx.fillStyle = data.color;

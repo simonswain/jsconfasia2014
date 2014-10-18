@@ -65,6 +65,15 @@ App.Views.rules_of_gravity = Backbone.View.extend({
     var by = (this.h/2) + (radius) * Math.sin(angle);
 
 
+    // y line to sin
+    ctx.strokeStyle = '#099';
+    ctx.lineWidth = xw/32;
+    ctx.beginPath();
+    ctx.moveTo( xw * 1.5, planet_y) ;
+    ctx.lineTo( planet_x, planet_y);
+    ctx.stroke();
+    ctx.closePath();
+
     // xy triangle
 
     ctx.fillStyle = '#222';
@@ -115,14 +124,6 @@ App.Views.rules_of_gravity = Backbone.View.extend({
     // ctx.closePath();
 
     
-    // y line
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = xw/32;
-    ctx.beginPath();
-    ctx.moveTo(xw * 1.5, planet_y) ;
-    ctx.lineTo(this.w - xw * 1.5, planet_y);
-    ctx.stroke();
-    ctx.closePath();
 
 
 
@@ -227,15 +228,16 @@ App.Views.rules_of_gravity = Backbone.View.extend({
     //
 
     // x
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 24pt Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText( (planet_x - mass_x).toFixed(0), planet_x, xh);
 
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 24pt Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText( (planet_x - mass_x).toFixed(0), planet_x, xh);
+    // ctx.fillStyle = '#fff';
+    // ctx.font = 'bold 24pt Arial';
+    // ctx.textAlign = 'center';
+    // ctx.fillText( (planet_x - mass_x).toFixed(0), planet_x, xh);
+
+    // ctx.fillStyle = '#fff';
+    // ctx.font = 'bold 24pt Arial';
+    // ctx.textAlign = 'center';
+    // ctx.fillText( (planet_x - mass_x).toFixed(0), planet_x, xh);
 
 
     // x sin
@@ -246,10 +248,10 @@ App.Views.rules_of_gravity = Backbone.View.extend({
     ctxfx.fill();
 
     // x
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 24pt Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText( (planet_y - mass_y).toFixed(0), xw, planet_y);
+    // ctx.fillStyle = '#fff';
+    // ctx.font = 'bold 24pt Arial';
+    // ctx.textAlign = 'center';
+    // ctx.fillText( (planet_y - mass_y).toFixed(0), xw, planet_y);
 
 
     // math

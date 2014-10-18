@@ -43,13 +43,17 @@ App.Views.game_loop = Backbone.View.extend({
     var xw = this.w/this.gridxy;
     var xh = this.h/this.gridxy;
 
+    // snapshot bottom half for sliding chart
+    var slideframe = ctxfx.getImageData(0, 0, this.cw, this.ch);
+    ctxfx.putImageData(slideframe, xw/64, 0);
+
     // ball
 
     var y;
     var hh = this.h - 2*xh;
     y = (hh / 1000) * this.height;
     
-    var ballx = this.w/2 + 1.5* xw;
+    var ballx = this.w/2 + 1.25 * xw;
     ctx.fillStyle = '#0cc';	
     ctx.beginPath();
     ctx.arc(ballx, this.h - xh - y, xw/2, 0, 2 * Math.PI, true);           
@@ -171,7 +175,7 @@ App.Views.game_loop = Backbone.View.extend({
     this.content = [
       'var tick = function(){',
       ' y -= v;',
-      ' v -= this.g;',
+      ' v -= g;',
       ' if(y < 0){',
       '  v = -v;',
       ' }',
