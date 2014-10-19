@@ -66,13 +66,21 @@ App.Views.rules_of_gravity = Backbone.View.extend({
 
 
     // y line to sin
-    ctx.strokeStyle = '#099';
-    ctx.lineWidth = xw/32;
-    ctx.beginPath();
-    ctx.moveTo( xw * 1.5, planet_y) ;
-    ctx.lineTo( planet_x, planet_y);
-    ctx.stroke();
-    ctx.closePath();
+    // ctx.strokeStyle = '#099';
+    // ctx.lineWidth = xw/32;
+    // ctx.beginPath();
+    // ctx.moveTo( xw * 1.5, planet_y) ;
+    // ctx.lineTo( planet_x, planet_y);
+    // ctx.stroke();
+    // ctx.closePath();
+
+    //119, 170, 170
+
+    ctxfx.fillStyle = 'rgba(0,0,255,0.9)';
+    ctxfx.beginPath();
+    ctxfx.arc(mass_x, planet_y, xw/32, 0, 2 * Math.PI, true);
+    ctxfx.closePath();
+    ctxfx.fill();
 
     // xy triangle
 
@@ -145,7 +153,7 @@ App.Views.rules_of_gravity = Backbone.View.extend({
     ctx.textBaseline='middle'; 
     // mass
 
-    ctx.fillStyle = '#69c';
+    ctx.fillStyle = '#0ff';
     ctx.beginPath();
     ctx.arc(mass_x, mass_y, radius, 0, 2 * Math.PI, true);
     ctx.closePath();
@@ -158,6 +166,12 @@ App.Views.rules_of_gravity = Backbone.View.extend({
     ctx.arc(planet_x, planet_y, radius/2, 0, 2 * Math.PI, true);
     ctx.closePath();
     ctx.fill();
+
+    ctxfx.fillStyle = 'rgbaa(119, 170, 170,0.5)';
+    ctxfx.beginPath();
+    ctxfx.arc(planet_x, planet_y, radius/2, 0, 2 * Math.PI, true);
+    ctxfx.closePath();
+    ctxfx.fill();
     
     // angle
     // var aax = (this.w/2) + (distance/2) * Math.cos(angle/2);
@@ -241,11 +255,12 @@ App.Views.rules_of_gravity = Backbone.View.extend({
 
 
     // x sin
-    ctxfx.fillStyle = '#0cc';
-    ctxfx.beginPath();
-    ctxfx.arc(xw * 1.5, planet_y, xw/32, 0, 2 * Math.PI, true);
-    ctxfx.closePath();
-    ctxfx.fill();
+    // ctxfx.fillStyle = '#0cc';
+    // ctxfx.beginPath();
+    // ctxfx.arc(xw * 1.5, planet_y, xw/32, 0, 2 * Math.PI, true);
+    // ctxfx.closePath();
+    // ctxfx.fill();
+
 
     // x
     // ctx.fillStyle = '#fff';

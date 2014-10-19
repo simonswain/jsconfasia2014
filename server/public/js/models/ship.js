@@ -10,9 +10,7 @@ App.Models.Ship = Backbone.Model.extend({
 
     name:'Ship', 
     boom: false,
-    // position
-    ux: null, // universe x when jumping
-    uy: null, // universe y when jumping
+    // in-system position and movement
     x: 0, // system x when in system
     y: 0, // system y when in system
     vx: 0, // system x velocity
@@ -21,6 +19,9 @@ App.Models.Ship = Backbone.Model.extend({
     v: 0, // velocity
     pr: null, // orbital position radius when at planet
     pa: null, // oribital position angle when at planet
+
+    space_x: null,
+    space_y: null,
 
     pop: 0, //  how many population the ship is carrying
     max_pop: 1000,
@@ -31,6 +32,7 @@ App.Models.Ship = Backbone.Model.extend({
     // attributes
     jump_speed: 1, // warp drive speed
     jump_range: 1, // warp drive range
+    jump_pct: null, // % of jump complete
     thrust: 1, // grav drive power
     laser_power: 1, // laser power
     laser_range: 0.1 + random0to(10)/100, // laser range as fraction of system radius
@@ -50,8 +52,8 @@ App.Models.Ship = Backbone.Model.extend({
   interval: 20,
   initialize: function(vals, opts) {
     _.bindAll(this, 
-              'run','runSpace','runPlanet','runSpace','stop',
-              'systemPhysics','leavePlanet','boom'
+              'run','runSpace','runPlanet','runSpace',
+              'systemPhysics','leavePlanet','boom', 'prepJump', 'doJump','unJump'
              );
 
 
@@ -63,7 +65,7 @@ App.Models.Ship = Backbone.Model.extend({
       laser_accuracy: random1to(10),
       laser_power: random0to(20) + 5,
       power: random0to(5),
-      thrust: 20 + random1to(100)/10,
+      thrust: 10 + random1to(50)/10,
       recharge: 1 + ( random1to(10) ) / 10,
       energy_max: energy,
       energy: energy
@@ -80,6 +82,7 @@ App.Models.Ship = Backbone.Model.extend({
 
     this.target_planet = null;
     this.target_system = null;
+    this.origin_system = null;
 
   },
   runPlanet: function(){
@@ -113,6 +116,7 @@ App.Models.Ship = Backbone.Model.extend({
 
   },
   runSystem: function(){
+
     // things to do when the ship is in a system
     var self = this;
 
@@ -121,30 +125,38 @@ App.Models.Ship = Backbone.Model.extend({
       return;
     }
 
+    
+
     // else go to an unoccupied or enemy planet
 
+    // load up opts to tell physics what to do
+    var opts = {
+      fight: false,
+      jump: false
+    }
+
+    // how many enemies in the system
     var enemies;
     enemies = this.system.ships.reduce(function(total, x){
       if(!x){
         return;
       }
-      
       if(x.empire !== self.empire){
         total ++;
       }
       return total;
     }, 0);
 
-    var opts = {
-      fight: false
-    }
-
     if(enemies > 0){
-      opts.fight = true
+      opts.fight = true;
     }
 
     // pick planet in local system to populate
-    if(enemies === 0 && !this.target_planet && !this.target_system){
+    if(enemies === 0){
+
+      if(this.get('intent') === 'jump'){
+        opts.jump = true;
+      } else if(!this.target_planet){
         var potentials;
         potentials = this.system.planets.reduce(function(list, planet){
           if(!planet){
@@ -152,7 +164,7 @@ App.Models.Ship = Backbone.Model.extend({
           }         
           if(planet.empire !== self.empire){
             list.push(planet);
-          }
+app          }
           return list;
         }, []);
 
@@ -162,18 +174,123 @@ App.Models.Ship = Backbone.Model.extend({
         }
 
         if(potentials.length === 0){
-          // just out system to find a planet
-          //this.target_system = xxx
-          //this.intent = 'jump'
-        }     
+          // no potentials -- keep the system msave
+          if(this.get('intent') === 'colonize'){
+            this.set({
+              intent: 'patrol'
+            })
+          }
 
+          // enough friendlies patrolling? go out-system and colonize
+          if(self.get('intent') !== 'jump'){
+            // already trying to jump?
+            
+            // minimum 2 ships on patrol
+            if(this.system.ships.filter(function(x){
+              return (x != self && x.empire === self.empire && x.get('intent') === 'patrol');
+            }).length >= 2){
+              self.prepJump();
+            } 
+          }
+        }
       }
+    }
     
     this.systemPhysics(opts);
+    
+  },
+  prepJump: function(){
+
+    // select a target, and set jump intent to naviagte to the
+    // outersystem
+
+    if(this.get('intent') === 'jump'){
+      return;
+    }
+
+    var self = this;
+
+    // only if there are other stars present
+    if(!this.system.universe){
+      return;
+    }
+
+    var targets = this.system.universe.systems.filter(function(x){
+      return (x !== self.system);
+    });
+
+    var target = targets[random0to(targets.length)-1];
+    this.target_system = target;
+    this.origin_system = this.system;
+    this.set({
+      intent: 'jump'
+    });
+
+  },
+  doJump: function(){
+    // select a target, and set jump intent to naviagte to the
+    // outersystem
+    this.system.removeShip(this);
+    this.system = null;
+    this.set({
+      state: 'space',
+      intent: null,
+      jump_pct: 0
+    });
+    this.origin_system.universe.addShip(this);
+  },
+  unJump: function(){
+    // select a target, and set jump intent to naviagte to the
+    // outersystem
+    this.origin_system.universe.removeShip(this);
+
+    this.system = this.target_system;
+
+    this.target_system = null;
+    this.origin_system = null;
+
+    this.set({
+      state: 'system',
+      intent: 'colonize',
+      jump_pct: null,
+      x: random0to(this.system.get('w')),
+      y: random0to(this.system.get('h'))
+    });
+    this.system.addShip(this);
 
   },
   runSpace: function(){
     // things to do when the ship is in deep space
+    var ship = this;
+    if(!ship.origin_system || ! ship.target_system){
+      return;
+    }
+    var theta = G.angle(ship.target_system.get('x'), ship.target_system.get('y'), ship.origin_system.get('x'), ship.origin_system.get('y'));
+    var range = G.distance(ship.target_system.get('x'), ship.target_system.get('y'), ship.origin_system.get('x'), ship.origin_system.get('y'));
+
+    var pct = ship.get('jump_pct');
+    pct  += 10;
+
+    if(pct > 100){
+      // unjump here
+      pct = 100;
+      this.unJump();
+      return;
+    }
+    
+    var dist = range * (1 - (pct/100));
+    
+    var space_x = ship.target_system.get('x') - (dist * Math.cos(theta));
+    var space_y = ship.target_system.get('y') - (dist * Math.sin(theta));
+    
+    //console.log(pct, ship.origin_system.get('x'), ship.origin_system.get('y'), ship.target_system.get('x'), ship.target_system.get('y'), Number(space_x.toFixed(2)), Number(space_y.toFixed(2)));
+
+    ship.set({
+      jump_pct: pct,
+      space_x: space_x,
+      space_y: space_y
+    });
+
 
   },
   boom: function(type, x, y){
@@ -239,7 +356,6 @@ App.Models.Ship = Backbone.Model.extend({
 
 
     this.set(ship);
-
     switch(state){
       case 'planet':      
       this.runPlanet();
@@ -256,23 +372,25 @@ App.Models.Ship = Backbone.Model.extend({
 
   },
 
-  stop: function(){
-  },
-
   enterSystem: function(system){
+    this.system.universe.removeShip(this);
+    this.system.addShip(this);
     this.system = system;
     this.set({state: 'system'});
   },
 
   leaveSystem: function(system){
-    this.system = null;
+    // this.system.removeShip(this);
+    // this.system = null;
+    // this.system.universe.addShip(this);
+    // this.set({state: 'space'});
   },
 
   enterPlanet: function(){
     this.planet = planet;
     this.set({state: 'planet'});
     this.planet.ships.add(this);
-    this.system.remove.add(this); 
+    this.system.removeShip(this); 
   },
 
   leavePlanet: function(){    
@@ -299,6 +417,10 @@ App.Models.Ship = Backbone.Model.extend({
   systemPhysics: function(opts){
 
     if(this.get('boom')){
+      return;
+    }
+
+    if(!this.system){
       return;
     }
 
@@ -401,8 +523,6 @@ App.Models.Ship = Backbone.Model.extend({
         }
 
       });
-
-
 
     //find enemy ships and attack
     var fight = function(){
@@ -534,8 +654,18 @@ App.Models.Ship = Backbone.Model.extend({
           return;
         }
       }
+    };
 
 
+
+    var jumpzone = function(){
+      var theta = G.angle (self.system.get('w')/2, self.system.get('h')/2, ship.x, ship.y) + Math.PI;
+      ship.vx += (1.75 * ship.thrust) * Math.cos(theta);
+      ship.vy += (1.75 * ship.thrust) * Math.sin(theta);
+      var range = (self.system.get('w')/2, self.system.get('h')/2, ship.x, ship.y);
+      //if(range > self.system.get('radius') * 0.4){
+        self.doJump();
+      //}
     };
 
     if(opts.fight){
@@ -547,6 +677,10 @@ App.Models.Ship = Backbone.Model.extend({
     }
 
 
+    if(opts.jump){
+      // fly to jump safe area (outer system)
+      jumpzone();
+    }
 
     // // ship thrust based on intent
     
@@ -572,27 +706,24 @@ App.Models.Ship = Backbone.Model.extend({
     ship.x += Number(ship.vx);
     ship.y += Number(ship.vy);
 
-    // stay in system
+    // stay in system bounds
+    if(this.system){
+      if ( ship.x < 0 ) {
+        ship.x = 0;
+      }
 
+      if ( ship.x > this.system.get('w') ) {
+        ship.x = this.system.get('w');
+      }
 
-    if ( ship.x < 0 ) {
-      ship.x = 0;
+      if ( ship.y < 0 ) {
+        ship.y = 0;
+      }
+
+      if ( ship.y > this.system.get('h') ) {
+        ship.y = this.system.get('h');
+      }
     }
-
-    if ( ship.x > this.system.get('w') ) {
-      ship.x = this.system.get('w');
-    }
-
-    if ( ship.y < 0 ) {
-      ship.y = 0;
-    }
-
-    if ( ship.y > this.system.get('h') ) {
-      ship.y = this.system.get('h');
-    }
-
-
-
 
     this.set({
       x: ship.x,

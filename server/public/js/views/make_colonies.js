@@ -3,7 +3,7 @@
 /*jshint browser:true */
 /*jshint strict:false */
 
-App.Views.make_war = Backbone.View.extend({
+App.Views.make_colonies = Backbone.View.extend({
   template: _.template('<div class="canvas"></div><div class="fx"></div>'),
   initialize : function(opts) {
     _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick');
@@ -66,6 +66,9 @@ App.Views.make_war = Backbone.View.extend({
       ctx.arc(self.w/2, self.h/2, r/2, 0, 2 * Math.PI, true);
       ctx.stroke();
       ctx.closePath();
+      
+
+
     }();
 
     var draw_booms = function(){
@@ -267,7 +270,9 @@ App.Views.make_war = Backbone.View.extend({
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = 'bold 10pt arial';
-      //ctx.fillText(ship.get('intent'), 0, -xh/4);
+      if(ship.get('intent')){
+        ctx.fillText(ship.get('intent'), 0, -xh/2);
+      }
       ctx.fillText( ((ship.get('energy')/ship.get('energy_max'))*100).toFixed(0), 0, xh/2);
 
       if(ship.target_planet){
@@ -365,13 +370,6 @@ App.Views.make_war = Backbone.View.extend({
     this.empires.add(empire);
     empire.addPlanet(this.system.planets.at(0));
     //this.system.planets.at(0).empire = empire;
-
-    empire = new App.Models.Empire({
-      name: 'Criminal Element',
-      color: '#cc0'
-    });
-    this.empires.add(empire);
-    empire.addPlanet(this.system.planets.at(1));
 
     this.period = 1000;
 

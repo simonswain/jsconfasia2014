@@ -65,7 +65,21 @@ App.index = [
   //['species_of_life', 'Species of Life'],
   ['life_hd', 'Life HD'],
 
+  ['rules_of_ecology', 'Ecology'],   // foxes and rabbits rules
+  ['foxes_and_rabbits', 'Foxes and Rabbits'],  // 
+  //['foxes_rabbits_grass', 'Foxes, Rabbits and Grass'], // http://www.shodor.org/interactivate/activities/RabbitsAndWolves/
+
   ['game_loop', 'Game Loop'],
+
+  ['rules_of_gravity', 'Rules of Gravity'], // explain physics of gravity (diagram, vectors)
+  ['gravity', 'Gravity and Spaceships'],  // like click to add a ship from codepen
+
+  ['orbiting_planets', 'Heliocentric Orbits'], // we fake gravity for the planets
+  ['orbiting_planets_with_ships', 'Planets and Ships'], // but the ships respect gravity
+
+  ['canvas_transforms', 'Canvas Transforms'], // translate, rotate
+
+  ['canvas_layers', 'Canvas Layers'], // layers, fx layer, fades
 
   ['rules_of_boid', 'Boid'],
   ['boids', 'Boids'],
@@ -73,13 +87,6 @@ App.index = [
 
   ['raf', 'RaF'],            // explain Canvas and RaF
   
-  ['rules_of_gravity', 'Rules of Gravity'], // explain physics of gravity (diagram, vectors)
-  ['gravity', 'Gravity and Spaceships'],  // like click to add a ship from codepen
-
-  ['orbiting_planets', 'Heliocentric Orbits'], // we fake gravity for the planets
-  ['orbiting_planets_with_ships', 'Planets and Ships'], // but the ships respect gravity
-
-  ['canvas', 'HTML5 Canvas'],
 
   ['rules_of_ships', 'Rules of Ships'], // Show single ship. JS object illustrate params
   //['ship_behaviour', 'Make the ship behave'], // Chase, run, laser, missile
@@ -87,10 +94,6 @@ App.index = [
 
 
   // simulating life
-
-  ['rules_of_ecology', 'Ecology'],   // 
-  ['foxes_and_rabbits', 'Foxes and Rabbits'],  // 
-  //['foxes_rabbits_grass', 'Foxes, Rabbits and Grass'], // http://www.shodor.org/interactivate/activities/RabbitsAndWolves/
 
   // http://en.wikipedia.org/wiki/Prospective_Outlook_on_Long-term_Energy_Systems
 
@@ -115,15 +118,21 @@ App.index = [
   // Ships have a motivation to comquer, colonize or trade
   // colonization
 
-  ['make_empires', 'Make Empires'], 
+  ['make_colonies', 'Make Colonies'], // colonize! one empire
 
-  ['make_stars', 'Make Stars'], 
+  ['make_war', 'Make War'], // colonize! two empires
+
+
+  ['make_empires', 'Make Empires'], // take over the stars
+
+  //['make_stars', 'Make Stars'], 
   // random starfield. Auto zoom, pan (pick system at random, easing), different density on randomisation; explain spacing algorithm. 'next' key zooms in to a star as lead in to next slide
   
- 
-  ['make_war', 'Make War'], // lets tweak our ship a bit. Add jump range and speed.
+  ['make_universe', 'Make A Univese'] // big starfield zooming in/out
+  // of random stars, almost looking
+  // like Life (fake zooming in to systems)
 
-  ['make_universe', 'Make it Big'] // how to run serverside and across multiple machines (theory and challenge)
+// how to run serverside and across multiple machines (theory and challenge)
 ];
 
 /*global Backbone:true,  _:true, $:true, App:true */

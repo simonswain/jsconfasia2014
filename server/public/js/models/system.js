@@ -9,7 +9,7 @@ App.Models.System = Backbone.Model.extend({
     x: null,
     y: null
   },
-  interval: 250,
+  interval: 25,
   initialize: function(opts) {
     _.bindAll(this, 'run','addPlanet','initPlanets');
 
@@ -53,6 +53,10 @@ App.Models.System = Backbone.Model.extend({
       }
     });
     this.ships.each(function(ship){
+      // ship has gone(eg jumped)
+      if(!ship){
+        return;
+      }
       ship.run();
     });
     this.timer = setTimeout(this.run, this.interval);
