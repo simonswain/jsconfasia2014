@@ -44,29 +44,78 @@ App.Views.make_system = Backbone.View.extend({
 
     // draw here
 
-    //. system border
-    var r = Math.min(this.w, this.h);
-    ctx.strokeStyle = '#888';
-    ctx.lineWidth = xw/32;
-    ctx.beginPath();
-    ctx.arc(this.w/2, this.h/2, r/2, 0, 2 * Math.PI, true);
-    ctx.stroke();
-    ctx.closePath();
-    
+    var systemBorder = function(){
+      var colors = [];
+      self.system.planets.each(function(planet){
+        if(!planet.empire){
+          colors.push(false);
+          return;
+        }
+        colors.push(planet.empire.get('color'));
+      });
+
+      ctx.strokeStyle = '#888';
+      if(_.uniq(colors).length === 1 && colors[0]){
+        // if this empire owns the whole system, draw it in their color
+        ctx.strokeStyle = colors[0];
+      }
+
+      var r = Math.min(self.w, self.h);
+      ctx.lineWidth = xw/32;
+      ctx.beginPath();
+      ctx.arc(self.w/2, self.h/2, r/2, 0, 2 * Math.PI, true);
+      ctx.stroke();
+      ctx.closePath();
+      
+
+
+    }();
 
     var draw_booms = function(){
       var boom;
       for (var i in self.system.booms) {
         boom = self.system.booms[i];
+        boom.ttl --;
+        if(boom.ttl < 0){
+          self.system.booms.splice(i, 1);
+          continue;
+        }
+
+        boom.x = Number(boom.x);
+        boom.y = Number(boom.y);
+
         ctxfx.fillStyle = boom.color;
         ctxfx.strokeStyle = boom.color;
-        ctxfx.lineWidth = 2;
-        ctxfx.beginPath();
-        ctxfx.arc(boom.x, boom.y, xw, 0, 2 * Math.PI, true);
-        ctxfx.fill();
-        ctxfx.stroke();
+
+        if(boom.type && boom.type == 'nop'){
+        }
+
+        if(boom.type && boom.type === 'takeover'){
+          ctxfx.lineWidth = xw/32;
+          ctxfx.beginPath();
+          ctxfx.rect(boom.x - xh, boom.y - xh, xh * 2, xh * 2);
+          ctxfx.closePath();
+          ctxfx.stroke();
+        }       
+
+        if(boom.type && boom.type == 'colonize'){
+          ctxfx.lineWidth = xw/32;
+          ctxfx.beginPath();
+          ctxfx.arc(boom.x, boom.y, xw, 0, 2 * Math.PI, true);
+          ctxfx.closePath();
+          ctxfx.stroke();
+        }
+
+        if(!boom.type || boom.type == 'boom'){
+          ctxfx.beginPath();
+          ctxfx.arc(boom.x, boom.y, xw, 0, 2 * Math.PI, true);
+          ctxfx.fill();
+          ctxfx.closePath();
+          ctxfx.stroke();
+        }
+
       }
-      self.system.booms = [];
+
     }();
 
 
@@ -121,7 +170,7 @@ App.Views.make_system = Backbone.View.extend({
 
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(data.x, data.y, xw/24 * data.size, 0, 2 * Math.PI, true);
+      ctx.arc(data.x, data.y, Math.max(xw/8, xw/24 * data.size), 0, 2 * Math.PI, true);
       ctx.fill();
       ctx.stroke();
 
@@ -254,18 +303,22 @@ App.Views.make_system = Backbone.View.extend({
 
     var yy = xh/2;
 
-    self.empires.each(function(empire){
+    ctx.font = 'bold 10pt arial';
+    ctx.fillStyle = '#888';
+    ctx.textAlign = 'center';
+    ctx.fillText('ships', xw, yy);
+    ctx.fillText('planets', 2 * xw, yy);
+    //ctx.fillText('systems', 2 * xw, yy);
 
+    self.empires.each(function(empire){
+      yy += xh/2;
       ctx.fillStyle = empire.get('color');
-      ctx.font = 'bold 10pt arial';
       ctx.textAlign = 'left';
       ctx.fillText(empire.get('name'), 2.5 * xw, yy);
-      ctx.textAlign = 'right';
+      ctx.textAlign = 'center';
       ctx.fillText(empire.ships.length, xw, yy);
-      ctx.fillText(empire.planets.length, 1.5 * xw, yy);
-      ctx.fillText(empire.systems.length, 2 * xw, yy);
-
-      yy += xh/2;
+      ctx.fillText(empire.planets.length, 2 * xw, yy);
+      //ctx.fillText(empire.systems.length, 2 * xw, yy);
     });
 
     ctx.fillStyle = '#fff';
@@ -309,20 +362,19 @@ App.Views.make_system = Backbone.View.extend({
     this.empires = new App.Collections.Empires([]);
 
     empire = new App.Models.Empire({
-      name: 'The Meat Eaters',
+      name: 'Meat Eaters',
       color: '#0c0'
     });
     this.empires.add(empire);
-    this.system.planets.at(0).empire = empire;
-
+    empire.addPlanet(this.system.planets.at(0));
+    //this.system.planets.at(0).empire = empire;
 
     empire = new App.Models.Empire({
-      name: 'The Criminal Element',
+      name: 'Criminal Element',
       color: '#cc0'
     });
     this.empires.add(empire);
-    this.system.planets.at(1).empire = empire;
-
+    empire.addPlanet(this.system.planets.at(1));
 
     this.period = 1000;
 

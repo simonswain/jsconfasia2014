@@ -11,23 +11,22 @@ App.Models.Empire = Backbone.Model.extend({
     this.ships = new App.Collections.Ships([]);
   },
   addSystem: function(system){
-    console.log(' + ' + this.get('name') + ' owns ' + system.get('name'))
     if(this.system && this.system.empire){
       this.system.empire.removeSystem(this.system);
     }
     system.empire = this;
     this.systems.add([system]);
-
   },
   removeSystem: function(system){
     this.systems.remove(system);
     system.empire = null;
   },
   addPlanet: function(planet){
-    console.log(' + ' + this.get('name') + ' owns planet ' + planet.get('name'))
+    //console.log(' + ' + this.get('name') + ' owns planet ' + planet.get('name'))
     if(this.planet && this.planet.empire){
       this.planet.empire.removePlanet(this.planet);
     }
+
     planet.empire = this;
     this.planets.add([planet]);
 

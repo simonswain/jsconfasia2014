@@ -69,7 +69,7 @@ App.Models.Planet = Backbone.Model.extend({
     this.system = opts && opts.system || null;
     this.empire = null;
     this.ships = new App.Collections.Ships([]);
-    this.shipcost = 1000;
+    this.shipcost = 500 + random0to(1000);
     this.timer = false;
     this.run();
   },
@@ -186,7 +186,8 @@ App.Models.Planet = Backbone.Model.extend({
   },
   killPop: function(n){
     var pop = this.get('pop');
-    pop = Math.min(0, pop - n*10);
+    var before = pop;
+    pop = Math.max(0, pop - n*10);
     if(pop<0){
       pop = 0;
     }
@@ -230,7 +231,7 @@ App.Models.Planet = Backbone.Model.extend({
   },
   spawnShip: function(){
 
-    if(this.empire.ships.length >= 2){
+    if(this.empire.ships.length >= 3){
       return;
     }
 

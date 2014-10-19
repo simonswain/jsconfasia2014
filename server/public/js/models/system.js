@@ -9,7 +9,7 @@ App.Models.System = Backbone.Model.extend({
     x: null,
     y: null
   },
-  interval: 25,
+  interval: 250,
   initialize: function(opts) {
     _.bindAll(this, 'run','addPlanet','initPlanets');
 
@@ -38,21 +38,22 @@ App.Models.System = Backbone.Model.extend({
   run: function(){
     var self = this;
     this.ships.each(function(ship){
-      ship.run();
-    });
-    this.ships.each(function(ship){
       if(!ship){
         return;
       }
-
       if(ship.get('boom')){
         self.booms.push({
           x: ship.get('x'),
           y: ship.get('y'),
-          color: ship.get('color')
+          color: ship.get('color'),
+          ttl: 5,
+          type: ship.get('boom')
         });
         self.ships.remove(ship);
       }
+    });
+    this.ships.each(function(ship){
+      ship.run();
     });
     this.timer = setTimeout(this.run, this.interval);
   },
