@@ -194,6 +194,10 @@ App.Views.make_war = Backbone.View.extend({
         yy += xw/4;
       });
 
+      if(planet.empire){
+        ctx.fillText( ((data.cr/data.shipcost)*100).toFixed(0) + '%', xr, yy);
+      }
+
       ctx.fillStyle = '#000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';

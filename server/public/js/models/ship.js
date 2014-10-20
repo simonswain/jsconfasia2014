@@ -65,7 +65,7 @@ App.Models.Ship = Backbone.Model.extend({
       laser_accuracy: random1to(10),
       laser_power: random0to(20) + 5,
       power: random0to(5),
-      thrust: 10 + random1to(50)/10,
+      thrust: 20 + random1to(50)/10,
       recharge: 1 + ( random1to(10) ) / 10,
       energy_max: energy,
       energy: energy
@@ -125,8 +125,6 @@ App.Models.Ship = Backbone.Model.extend({
       return;
     }
 
-    
-
     // else go to an unoccupied or enemy planet
 
     // load up opts to tell physics what to do
@@ -164,34 +162,29 @@ App.Models.Ship = Backbone.Model.extend({
           }         
           if(planet.empire !== self.empire){
             list.push(planet);
-app          }
+          }
           return list;
         }, []);
 
         // ship will thrust towards this planet
         if(potentials.length > 0){
-          this.target_planet = potentials[random0to(potentials.length-1)];
-        }
-
-        if(potentials.length === 0){
-          // no potentials -- keep the system msave
-          if(this.get('intent') === 'colonize'){
+          this.target_planet = potentials[random0to(potentials.length)];
+          this.set({'intent':'colonize'});
+        } else if(this.system.ships.filter(function(x){
+          return (x != self && x.empire === self.empire && x.get('intent') === 'patrol');
+        }).length > 1){
+          // try and jump. if no suitable target then stay on patrol
+          if(!self.prepJump()){
             this.set({
               intent: 'patrol'
-            })
+            });
           }
-
-          // enough friendlies patrolling? go out-system and colonize
-          if(self.get('intent') !== 'jump'){
-            // already trying to jump?
-            
-            // minimum 2 ships on patrol
-            if(this.system.ships.filter(function(x){
-              return (x != self && x.empire === self.empire && x.get('intent') === 'patrol');
-            }).length >= 2){
-              self.prepJump();
-            } 
-          }
+        } else {
+          // no potentials -- keep the system safe unless enough
+          // friendlies patrolling? go out-system and colonize
+          this.set({
+            intent: 'patrol'
+          });
         }
       }
     }
@@ -219,13 +212,90 @@ app          }
       return (x !== self.system);
     });
 
-    var target = targets[random0to(targets.length)-1];
+    var targetGroups = _.groupBy(targets, function(system){
+      var state;
+
+      var empty = system.planets.reduce(function(total, planet){
+        if(!planet.empire){
+          total ++;
+        }
+        return total;
+      }, 0);
+
+      var friend = system.planets.reduce(function(total, planet){
+        if(planet.empire === self.empire){
+          total ++;
+        }
+        return total;
+      }, 0);
+
+      var enemy = system.planets.reduce(function(total, planet){
+        if(planet.empire && planet.empire !== self.empire){
+          total ++;
+        }
+        return total;
+      }, 0);
+
+      if(empty === system.planets.length){
+        return 'empty';
+      }
+
+      if(friend > 0 && enemy > 0 && friend + enemy === system.planets.length){
+        return 'contested';
+      }
+
+      if(friend > 0 && friend < system.planets.length && enemy === 0){
+        // partially owned
+        return 'partial';
+      }
+
+      if(friend === system.planets.length){
+        return 'friend';
+      }
+
+      if(enemy === system.planets.length){
+        return 'enemy';
+      }
+
+      if(enemy > 0){
+        return 'borderlands';
+      }
+
+
+      return 'mixed';
+      
+    });
+
+    if(targetGroups.contested){
+      // then partially occupied  systems (support our troops)
+      targets = targetGroups.contested;
+    } else if (targetGroups.partial){
+      // continue to colonize partially owned systems
+      targets = targetGroups.partial;
+    } else if (targetGroups.empty){
+      // then try and find an unowned system (colonize the wastelands)
+      targets = targetGroups.empty;
+    } else if(targetGroups.borderlands){
+      // take enemy borderlands
+      targets = targetGroups.borderlands;
+    } else if (targetGroups.enemy) {
+      // then try enemy systems (fight them at home)
+      targets = targetGroups.enemy;
+    } else {
+      // nowhere to go, stay in system. bad luck
+      return false;
+    }
+    //console.log(targetGroups);
+    var target = targets[random0to(targets.length)];
+    //console.log(targets.length, this.system.get('name'), target.get('name'))
+
     this.target_system = target;
     this.origin_system = this.system;
+    this.target_planet = null;
     this.set({
       intent: 'jump'
     });
-
+    return true;
   },
   doJump: function(){
     // select a target, and set jump intent to naviagte to the
@@ -244,20 +314,27 @@ app          }
     // outersystem
     this.origin_system.universe.removeShip(this);
 
-    this.system = this.target_system;
+    // position on edge of system closest to origin system
 
+    var theta = G.angle(this.target_system.get('x'), this.target_system.get('y'), this.origin_system.get('x'), this.origin_system.get('y'));
+    
+    var r = this.target_system.get('radius');
+    var x = this.target_system.get('w')/2 - (r * Math.cos(theta));
+    var y = this.target_system.get('h')/2 - (r * Math.sin(theta));
+
+    this.system = this.target_system;
     this.target_system = null;
     this.origin_system = null;
+    this.target_planet = null;
 
     this.set({
       state: 'system',
       intent: 'colonize',
       jump_pct: null,
-      x: random0to(this.system.get('w')),
-      y: random0to(this.system.get('h'))
+      x: x,
+      y: y
     });
     this.system.addShip(this);
-
   },
   runSpace: function(){
     // things to do when the ship is in deep space
@@ -265,11 +342,12 @@ app          }
     if(!ship.origin_system || ! ship.target_system){
       return;
     }
+
     var theta = G.angle(ship.target_system.get('x'), ship.target_system.get('y'), ship.origin_system.get('x'), ship.origin_system.get('y'));
     var range = G.distance(ship.target_system.get('x'), ship.target_system.get('y'), ship.origin_system.get('x'), ship.origin_system.get('y'));
 
     var pct = ship.get('jump_pct');
-    pct  += 10;
+    pct  += 1;
 
     if(pct > 100){
       // unjump here
@@ -440,11 +518,11 @@ app          }
     ship.x = Number(ship.x);
     ship.y = Number(ship.y);
 
-    ship.vx = Number(ship.vx);
-    ship.vy = Number(ship.vy);
-
     ship.vx = 0; //Number(ship.vx);
     ship.vy = 0; //Number(ship.vy);
+
+    ship.vx = Number(ship.vx);
+    ship.vy = Number(ship.vy);
 
     thrust = Number(ship.thrust);
 
@@ -467,8 +545,8 @@ app          }
         //g = 1000 * ( 50 / ( r * r ) )
 
         // max gravity
-        if ( g > 3 ) {
-          g = 3;
+        if ( g > 1 ) {
+          g = 1;
         }
 
         // convert gravity to xy. apply
@@ -504,9 +582,10 @@ app          }
         //g = 1000 * ( 50 / ( r * r ) )
 
         // max gravity
-        if ( g > 3 ) {
-          g = 3;
+        if ( g > 0.2 ) {
+          g = 0.2;
         }
+        //console.log(g);
 
         // convert gravity to xy. apply
 	ship.vx = ship.vx + g * Math.cos(theta);
@@ -559,13 +638,17 @@ app          }
         // chase or tun
         if(true || range < radius * 0.2){
           c ++;
+
+          // always attack
+          a = a + de_ra (ra_de (theta));
+
           // run away from bigger, chase smaller. if energy < 20%
           // always run
-          if (other.power > ship.power || ship.energy < ship.energy_max * 0.2) {
-            a = a + de_ra ( ra_de (theta) + 180 );
-          } else { 
-            a = a + de_ra (ra_de (theta));
-          }
+          // if (other.power > ship.power || ship.energy < ship.energy_max * 0.2) {
+          //   a = a + de_ra ( ra_de (theta) + 180 );
+          // } else { 
+          //   a = a + de_ra (ra_de (theta));
+          // }
         }
 
         // enemy in range to shoot?
@@ -638,18 +721,17 @@ app          }
               pop: Number(planet.get('pop')) + ship.pop
             });
           }
+          if(planet.empire){
+            planet.empire.removePlanet(planet);
+          }
           self.empire.addPlanet(planet);
-          // if(planet.empire){
-          //   planet.empire.removePlanet(planet);
-          // }
-          // planet.empire = self.empire;
           self.system.booms.push({
             x: planet.get('x'),
             y: planet.get('y'),
             type: 'colonize',
             color: self.empire.get('color'),
             ttl: 10
-          });          
+          });
           self.boom('nop');
           return;
         }
@@ -679,7 +761,8 @@ app          }
 
     if(opts.jump){
       // fly to jump safe area (outer system)
-      jumpzone();
+        self.doJump();
+      //jumpzone();
     }
 
     // // ship thrust based on intent

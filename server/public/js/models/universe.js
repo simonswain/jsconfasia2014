@@ -4,7 +4,7 @@ App.Models.Universe = Backbone.Model.extend({
     systemLimit: 5,
     empireLimit: 2,
     name: 'The Universe',
-    radius: 1024,
+    radius: 512,
     w: 1024,
     h: 1024,
   },
@@ -17,7 +17,7 @@ App.Models.Universe = Backbone.Model.extend({
     this.initSystems();
     this.run();
   },
-  interval: 250,
+  interval: 25,
   run: function(){
     var self = this;
     this.ships.each(function(ship){
@@ -62,10 +62,11 @@ App.Models.Universe = Backbone.Model.extend({
     
     var x, y;
     var d;
-    var spacing = this.get('radius') * 0.2;
+    var spacing = this.get('radius') * 0.4;
 
     var gen = function(max){
-      return (max * 0.1) + random.from0upto(max * 0.55);
+      var n = (max * 0.1) + (random.from0upto(max * 0.8));
+      return n;
     };
 
 
@@ -73,14 +74,14 @@ App.Models.Universe = Backbone.Model.extend({
 
     if(this.systems.length === 0){
       x = gen(this.get('w'));
-      y = gen(this.get('h'));
+      y = gen(this.get('h') * 0.75);
     }
     
     var ok = false;
     while (this.systems.length > 0 && !ok){
       ok = true;
       x = gen(this.get('w'));
-      y = gen(this.get('h'));
+      y = gen(this.get('h') * 0.75);
       self.systems.each(function(p){
         var dx = Math.abs(p.get('x') - x);
         var dy = Math.abs(p.get('y') - y);
@@ -94,9 +95,14 @@ App.Models.Universe = Backbone.Model.extend({
     var system = new App.Models.System({
       x: x,
       y: y,
-      name: 'System ' + String(Number(this.systems.length + 1)),
+      name: GREEK[random0to(NATO.length-1)] + ' ' + DEMONS[random0to(DEMONS.length-1)],
       universe: this
     });
     this.systems.add(system);
   }
 });
+
+
+var DEMONS = ['gares', 'aim', 'alloces', 'amdusias', 'amon', 'amy', 'andras', 'andrealphus', 'andromalius', 'asmoday', 'astaroth', 'bael', 'balam', 'barbatos', 'bathin', 'beleth', 'belial', 'baalberith', 'bifrons', 'botis', 'buer', 'buné', 'caim', 'cimeies', 'crocell', 'dantalion', 'decarabia', 'eligos', 'focalor', 'foras', 'forneus', 'furcas', 'furfur', 'gäap', 'glasya-labolas', 'gremory', 'gusion', 'häagenti', 'halphas', 'flauros', 'ipos', 'leraje', 'malphas', 'marax', 'marbas', 'marchosias', 'murmur', 'naberius', 'orias', 'orobas', 'osé', 'paimon', 'phenex', 'purson', 'räum', 'ronové', 'sabnock', 'sallos', 'samigina', 'seere', 'shax', 'sitri', 'stolas', 'valac', 'valefor', 'vapula', 'vassago', 'vepar', 'viné', 'vual', 'zagan', 'zepar'];
+
+var GREEK = ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'iota', 'kappa', 'lambda', 'mu', 'nu', 'xi', 'omicron', 'pi', 'rho', 'sigma', 'tau', 'upsilon', 'phi', 'chi', 'psi', 'omega'];

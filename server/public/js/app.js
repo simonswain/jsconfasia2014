@@ -66,6 +66,9 @@ App.index = [
   ['life_hd', 'Life HD'],
 
   ['rules_of_ecology', 'Ecology'],   // foxes and rabbits rules
+  
+  // http://jseed.sourceforge.net/lotka/index.html
+
   ['foxes_and_rabbits', 'Foxes and Rabbits'],  // 
   //['foxes_rabbits_grass', 'Foxes, Rabbits and Grass'], // http://www.shodor.org/interactivate/activities/RabbitsAndWolves/
 

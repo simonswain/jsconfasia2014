@@ -184,10 +184,11 @@ App.Views.make_colonies = Backbone.View.extend({
       var yy = (data.size * xw/8);
 
       ctx.fillStyle = '#666';
-      ctx.font = '10pt arial';
+      ctx.font = 'bold 10pt arial';
       ctx.textAlign = 'center';
       ctx.fillText(data.name, 0, 0 - (2*data.size * xw/24));
 
+      ctx.font = 'normal 10pt arial';
       vals.forEach(function(k){
         ctx.textAlign = 'left';
         ctx.fillText(k.substr(0,3), xl, yy);
@@ -197,6 +198,10 @@ App.Views.make_colonies = Backbone.View.extend({
         yy += xw/4;
       });
 
+      if(planet.empire){
+        ctx.fillText( ((data.cr/data.shipcost)*100).toFixed(0) + '%', xr, yy);
+      }
+      
       ctx.fillStyle = '#000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';

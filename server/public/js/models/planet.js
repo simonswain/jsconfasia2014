@@ -15,7 +15,7 @@ App.Models.Planet = Backbone.Model.extend({
     pop: 0,
     birthrate: random0to(200) * 0.0005,
     deathrate: 0.001,
-
+    shipcost: 5000,
     //
     pol: 0,
     ind: 0,
@@ -35,7 +35,7 @@ App.Models.Planet = Backbone.Model.extend({
 
     opts = opts || {};
 
-    _.bindAll(this, 'run', 'stop', 'physics','takePop','spawnShip','addShip','removeShip');
+    _.bindAll(this, 'run', 'physics','takePop','spawnShip','addShip','removeShip');
 
     var r, a, v, rr;
     r = 0;
@@ -63,13 +63,13 @@ App.Models.Planet = Backbone.Model.extend({
       size: 1 * random.from1to(9),
       land: land,
       cr: 1000,
+      shipcost: 2500 + random0to(2500)
     });
 
 
     this.system = opts && opts.system || null;
     this.empire = null;
     this.ships = new App.Collections.Ships([]);
-    this.shipcost = 500 + random0to(1000);
     this.timer = false;
     this.run();
   },
@@ -169,7 +169,7 @@ App.Models.Planet = Backbone.Model.extend({
       //   this.spawnShip();
       // }
 
-      if(this.get('cr') > this.shipcost){
+      if(this.get('cr') > this.get('shipcost')){
         this.spawnShip();
       }
 
@@ -231,23 +231,27 @@ App.Models.Planet = Backbone.Model.extend({
   },
   spawnShip: function(){
 
-    if(this.empire.ships.length >= 3){
+    var self = this;
+
+    // use the money no matter what
+    this.set({
+      cr: this.get('cr') - this.get('shipcost')
+    });
+
+    var friends = this.system.ships.filter(function(x){
+      return (x.empire === self.empire);
+    });
+    
+    if(friends.length > 2){
       return;
     }
 
     // calculate desired ship
-    var shipcost = this.shipcost;
-
-    this.set({
-      cr: this.get('cr') - shipcost
-    });
-
+    
     //console.log(' @ Spawn ' + this.system.get('name') + ':' + this.get('name') + ':' + this.empire.get('name'));
     
     var ship = new App.Models.Ship({
       state: 'planet',
-      ux: this.system.get('x'),
-      uy: this.system.get('y'),
       x: this.get('x'),
       y: this.get('y')
     }, {
@@ -260,12 +264,7 @@ App.Models.Planet = Backbone.Model.extend({
     this.addShip(ship);
     
     // add to planets empire
-    if(this.empire){
-      this.empire.addShip(ship);
-    }
+    this.empire.addShip(ship);
 
-  },
-  stop: function(){
   }
 });
-

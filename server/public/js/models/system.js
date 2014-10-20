@@ -3,7 +3,7 @@ App.Models.System = Backbone.Model.extend({
     id: null,
     name: 'Unknown System',
     color: '#fff',
-    radius: 1024,
+    radius: 512,
     w: 1024,
     h: 1024,
     x: null,
@@ -28,6 +28,8 @@ App.Models.System = Backbone.Model.extend({
     this.ships = new App.Collections.Ships([]);
     this.booms = [];
 
+    this.empire = null;
+
     this.initStars();
     this.initPlanets();
 
@@ -37,6 +39,7 @@ App.Models.System = Backbone.Model.extend({
   },
   run: function(){
     var self = this;
+
     this.ships.each(function(ship){
       if(!ship){
         return;
@@ -52,6 +55,7 @@ App.Models.System = Backbone.Model.extend({
         self.ships.remove(ship);
       }
     });
+
     this.ships.each(function(ship){
       // ship has gone(eg jumped)
       if(!ship){
@@ -59,6 +63,22 @@ App.Models.System = Backbone.Model.extend({
       }
       ship.run();
     });
+
+    var empires = _.uniq(this.planets.map(function(planet){
+      return planet.empire;
+    }));
+
+    if(empires.length === 1 && empires[0] !== null){
+      this.empire = empires[0];
+      this.empire.addSystem(this);
+    } else {
+      if(this.empire){
+        this.empire.removeSystem(this);
+      }
+      this.empire = null;
+    }
+
+
     this.timer = setTimeout(this.run, this.interval);
   },
   initStars: function(){
@@ -103,8 +123,10 @@ App.Models.System = Backbone.Model.extend({
   },
 
   addPlanet: function(i){
+    var name = NATO[this.planets.length];
+    name = name.substr(0,1).toUpperCase() + name.substr(1);
     var planet = new App.Models.Planet({
-      name: 'Planet ' + String(Number(this.planets.length + 1)),
+      name: name,
       system: this
     });
     this.planets.add(planet);
@@ -139,3 +161,6 @@ App.Models.System = Backbone.Model.extend({
   }
 
 });
+
+var NATO = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'india', 'juliet', 'kilo', 'lima', 'mike', 'november', 'oscar', 'papa', 'quebec', 'romeo', 'sierra', 'tango', 'uniform', 'victor', 'whiskey', 'x-ray', 'yankee', 'zulu'];
+

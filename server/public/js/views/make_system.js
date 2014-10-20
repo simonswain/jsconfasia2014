@@ -82,8 +82,7 @@ App.Views.make_system = Backbone.View.extend({
       'pop',
       'agr',
       'pol',
-      'ind',
-      'cr'
+      'ind'
     ];
 
     self.system.planets.each(function(planet){
@@ -98,24 +97,30 @@ App.Views.make_system = Backbone.View.extend({
       ctx.fill();
       ctx.stroke();
 
-      var xl = data.x + xw/10;
-      var xr = data.x - xw/10;
-      var yy = data.y + (data.size * xw/8);
+      var theta = G.angle (self.w/2, self.h/2, data.x, data.y) + Math.PI/2;
+      ctx.save();
+      ctx.translate(data.x, data.y);
+      ctx.rotate(theta);
+      var xl = 0 + xw/10;
+      var xr = 0 - xw/10;
+      var yy = (data.size * xw/8);
 
       ctx.fillStyle = '#666';
-      ctx.font = '10pt arial';
+      ctx.font = 'bold 10pt arial';
       ctx.textAlign = 'center';
-      ctx.fillText(data.name, data.x, data.y - (2*data.size * xw/24));
+      ctx.fillText(data.name, 0, 0 - (2*data.size * xw/24));
 
+      ctx.font = 'normal 10pt arial';
       vals.forEach(function(k){
-
         ctx.textAlign = 'left';
         ctx.fillText(k.substr(0,3), xl, yy);
 
         ctx.textAlign = 'right';
         ctx.fillText(data[k].toFixed(0), xr, yy);
         yy += xw/4;
-      });      
+      });
+      ctx.restore();
+
     });
 
     self.system.ships.each(function(ship){
