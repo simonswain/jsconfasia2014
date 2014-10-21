@@ -60,7 +60,7 @@ App.Models.Planet = Backbone.Model.extend({
       agr: (15 + random.from1to(25)) * land/100,
       ind: (5 + random.from1to(5)) * land/100,
       pol: 0,
-      size: 1 * random.from1to(9),
+      size: 2 + random.from0to(3),
       land: land,
       cr: 1000,
       shipcost: 2500 + random0to(2500)

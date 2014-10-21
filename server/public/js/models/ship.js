@@ -194,6 +194,8 @@ App.Models.Ship = Backbone.Model.extend({
   },
   prepJump: function(){
 
+    var self = this;
+
     // select a target, and set jump intent to naviagte to the
     // outersystem
 
@@ -209,7 +211,18 @@ App.Models.Ship = Backbone.Model.extend({
     }
 
     var targets = this.system.universe.systems.filter(function(x){
-      return (x !== self.system);
+      var range = G.distance(self.system.get('x'), self.system.get('y'), x.get('x'), x.get('y'));
+
+      if (x === self.system){
+        return false;
+      }
+
+      if(range > self.system.universe.get('radius') * 0.8){
+        return false;
+      }
+
+      return true;
+
     });
 
     var targetGroups = _.groupBy(targets, function(system){
@@ -709,7 +722,7 @@ App.Models.Ship = Backbone.Model.extend({
         planet.killPop(ship.laser_power);         
 
         // take over planet, consume ship
-        if(!planet.empire || planet.get('pop') === 0){
+        if(planet.get('pop') === 0){
           // colonize dead planet
           if(planet.get('pop') === 0){
             planet.set({

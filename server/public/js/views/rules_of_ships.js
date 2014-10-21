@@ -3,6 +3,15 @@
 /*jshint browser:true */
 /*jshint strict:false */
 
+var CYCLES = [
+  '#f00',
+  '#0f0',
+  '#00f',
+  '#ff0',
+  '#0ff',
+  '#f0f',
+  '#fff'];
+
 App.Views.rules_of_ships = Backbone.View.extend({
   template: _.template('<div class="canvas"></div><div class="fx"></div>'),
   initialize : function(opts) {
@@ -46,6 +55,13 @@ App.Views.rules_of_ships = Backbone.View.extend({
       var boom;
       for (var i in self.booms) {
         boom = self.booms[i];
+        boom.ttl --;
+
+        if(boom.ttl < 0){
+          self.booms.splice(i, 1);
+          continue;
+        }
+
         ctxfx.fillStyle = '#ffffff';
         ctxfx.strokeStyle = boom.color;
         ctxfx.lineWidth = 2;
@@ -69,7 +85,7 @@ App.Views.rules_of_ships = Backbone.View.extend({
         ctx.fillStyle = 'rgba(0,0,0,1)';
         ctx.strokeStyle = ship.tint;
         if (ship.hit){
-          ctx.fillStyle = '#fff';
+          ctx.fillStyle = '#666';
           ctx.strokeStyle = ship.color;
         };
 
@@ -104,28 +120,47 @@ App.Views.rules_of_ships = Backbone.View.extend({
         ctx.fill();
         ctx.restore();
 
+
         // if shooting draw laser
         if (ship.laser) {
-          ctx.lineWidth = xw/32;
-          ctx.strokeStyle = 'rgba(255,255,255,0.8)'; //ship.color;
+
+          var color = CYCLES[random0to(7)];
+          ctx.strokeStyle = '#fff';
+          ctx.lineCap = 'round';
+          ctx.lineWidth = xw/48;
           ctx.beginPath();
           ctx.moveTo(ship.x, ship.y);
           ctx.lineTo(ship.laserx, ship.lasery);
           ctx.closePath();     
           ctx.stroke();
+
+
+          ctxfx.strokeStyle = color;
+          ctxfx.lineCap = 'round';
+          ctxfx.lineWidth = xw/64;
+          ctxfx.beginPath();
+          ctxfx.moveTo(ship.x, ship.y);
+          ctxfx.lineTo(ship.laserx, ship.lasery);
+          ctxfx.closePath();     
+          ctxfx.stroke();
+
+          ctxfx.fillStyle = '#fff';
+          ctxfx.lineWidth = 2;
+          ctxfx.beginPath();
+          ctxfx.arc(ship.laserx, ship.lasery, xw/48, 0, 2 * Math.PI, true);
+          ctxfx.fill();
         }
 
       }
     }();
 
-    this.booms = [];
-
     var draw_missiles = function(){
       for (var i in self.missiles) {
         var missile = self.missiles[i]
         ctx.fillStyle = missile.color;
+        ctx.fillStyle = '#fff';
         ctx.beginPath();
-        ctx.arc(missile.x, missile.y, xw/32, 0, 2 * Math.PI, true);
+        ctx.arc(missile.x, missile.y, xw/48, 0, 2 * Math.PI, true);
         ctx.fill();
       }
     }();
@@ -135,28 +170,64 @@ App.Views.rules_of_ships = Backbone.View.extend({
     var tw = this.w/16;
     var th = this.h/16;
 
-    ctx.font = '36pt arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('energy', this.w/2, th);
-    ctx.fillText('damage', this.w/2, 2*th);
-    ctx.fillText('recharge', this.w/2, 3*th);
-    ctx.fillText('accuracy', this.w/2, 4*th);
+    if(this.ships.length > 0){
+      ctx.font = '32pt arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('energy', this.w/2, th);
+      ctx.fillText('damage', this.w/2, 2*th);
+      // ctx.fillText('recharge', this.w/2, 3*th);
+      // ctx.fillText('accuracy', this.w/2, 4*th);
+    }
 
     if(this.ships[0]){
-      ctx.textAlign = 'right';
-      ctx.fillText(this.ships[0].energy.toFixed(0), 6*tw, th);
-      ctx.fillText(this.ships[0].damage.toFixed(0), 6*tw, 2*th);
-      ctx.fillText(this.ships[0].recharge.toFixed(0), 6*tw, 3*th);
-      ctx.fillText(this.ships[0].accuracy.toFixed(0), 6*tw, 4*th);
+      // energy
+      ctx.fillStyle = '#444';
+      ctx.fillRect(this.w/2 - 2 * tw, th - th/4, - (6*tw/50) * 50, th*0.8);
+      ctx.fillStyle = '#0cc';
+      ctx.fillRect(this.w/2 - 2 * tw, th - th/4, - (6*tw/this.ships[0].energy_max) * this.ships[0].energy, th*0.8);
+      ctx.closePath();
+      // damage
+      ctx.fillStyle = '#444';
+      ctx.fillRect(this.w/2 - 8 * tw, 2*th - th/4, (6*tw/50) * 50, th*0.7);
+
+      ctx.fillStyle = '#c00';
+      ctx.fillRect(this.w/2 - 8 * tw, 2*th - th/4, (6*tw/this.ships[0].energy_max) *  this.ships[0].damage, th*0.7);
+      ctx.closePath();
+
+      //ctx.textAlign = 'right';
+      //ctx.fillText(this.ships[0].energy.toFixed(0), 6*tw, th);
+      // ctx.fillText(this.ships[0].damage.toFixed(0), 6*tw, 2*th);
+      // ctx.fillText(this.ships[0].energy.toFixed(0), 6*tw, th);
+
+      // ctx.fillText(this.ships[0].recharge.toFixed(0), 6*tw, 3*th);
+      // ctx.fillText(this.ships[0].accuracy.toFixed(0), 6*tw, 4*th);
 
     }
 
     if(this.ships[1]){
-      ctx.textAlign = 'left';
-      ctx.fillText(this.ships[1].energy.toFixed(0), this.w - 6*tw, th);
-      ctx.fillText(this.ships[1].damage.toFixed(0), this.w - 6*tw, 2*th);
-      ctx.fillText(this.ships[1].recharge.toFixed(0), this.w - 6*tw, 3*th);
-      ctx.fillText(this.ships[1].accuracy.toFixed(0), this.w - 6*tw, 4*th);
+
+      // energy
+      ctx.fillStyle = '#444';
+      ctx.fillRect(this.w/2 + 2 * tw, th - th/4, (6*tw/50) * 50, th*0.8);
+      ctx.fillStyle = '#cc0';
+      ctx.fillRect(this.w/2 + 2 * tw, th - th/4, (6*tw/this.ships[1].energy_max) * this.ships[1].energy, th*0.8);
+      ctx.closePath();
+      
+      // damage
+      ctx.fillStyle = '#444';
+      ctx.fillRect(this.w/2 + 8 * tw, 2*th - th/4, -(6*tw/50) * 50, th*0.7);
+
+      ctx.fillStyle = '#c00';
+      ctx.fillRect(this.w/2 + 8 * tw, 2*th - th/4, -(6*tw/this.ships[1].energy_max) *  this.ships[1].damage, th*0.7);
+      ctx.closePath();
+
+
+      // ctx.fillStyle = '#fff';
+
+      // ctx.fillText(this.ships[1].damage.toFixed(0), this.w - 6*tw, 2*th);
+      // ctx.fillText(this.ships[1].recharge.toFixed(0), this.w - 6*tw, 3*th);
+      // ctx.fillText(this.ships[1].accuracy.toFixed(0), this.w - 6*tw, 4*th);
     }
 
     ctx.restore();
@@ -211,11 +282,17 @@ App.Views.rules_of_ships = Backbone.View.extend({
         var r = G.distance ( other.x, other.y, missile.x, missile.y );
         if ( r < 5 ) {
           self.missiles.splice(i, 1);
+          other.energy = other.energy - 10;
+          other.damage = other.damage + 10;
+          if ( other.energy < 0 ) {
+            other.energy = 0;
+          }
           self.booms.push({
             x: other.x,
             y: other.y,
             r: 20,
-            color: other.color
+            color: other.color,
+            ttl: 5
           });
         }
       }
@@ -255,13 +332,18 @@ App.Views.rules_of_ships = Backbone.View.extend({
           ship.damage = 0;
         }
 
+        if ( ship.recharge < ship.recharge_max ) {
+          ship.recharge += 0.1;
+        }
+
         // ship is destroyed!
         if (ship.damage > ship.energy_max) {
           self.booms.push({
             x: ship.x,
             y: ship.y,
             r: ship.energy_max,
-            color: ship.color
+            color: ship.color,
+            ttl: 10
           });
           self.ships.splice(i, 1);
           return;
@@ -271,8 +353,8 @@ App.Views.rules_of_ships = Backbone.View.extend({
         var theta = self.theta;
         var fx = 3 * xw;
         if(ix === 0){
-          ship.x = ((self.w / 2) - fx * Math.sin(theta)) - xw;
-          ship.y = (self.h / 2) - fx * Math.cos(theta);
+          ship.x = ((self.w/2 ) - fx * Math.sin(theta)) - 2 * xw;
+          ship.y = (self.h/2) - fx * Math.cos(theta);
 
           other = self.ships[1];
           if(other){
@@ -283,8 +365,8 @@ App.Views.rules_of_ships = Backbone.View.extend({
         if(ix === 1){
           theta = 180 - theta;
           fx = -fx;
-          ship.x = ((self.w / 2) + fx * Math.sin(theta)) + xw;
-          ship.y = (self.h / 2) + fx * Math.cos(theta);
+          ship.x = ((self.w/2) + fx * Math.sin(theta)) + 2 * xw;
+          ship.y = (self.h/2) + fx * Math.cos(theta);
 
           other = self.ships[0];
           if(other){
@@ -309,9 +391,6 @@ App.Views.rules_of_ships = Backbone.View.extend({
           ship.y = 0;
         }
 
-        // angle ship is facing
-        //ship.a = ra_de ( G.angle ( 0, 0, ship.vx, ship.vy ) ) - 90;
-        
         ship.energypc = ( 100 / ship.energy_max ) * ship.energy;
         ship.energyf = ( 1 / ship.energy_max ) * ship.energy;
         if(ship.energyf < 0){
@@ -326,7 +405,7 @@ App.Views.rules_of_ships = Backbone.View.extend({
           for ( var ii in self.ships ) {
             var other = self.ships[ii];
 
-            if ( other.hue != ship.hue && random1to(1500) == 1 ) {
+            if ( other.hue != ship.hue && random1to(50) == 1 ) {
               self.missiles.push(self.makeMissile({
                 x:ship.x, y:
                 ship.y,
@@ -346,12 +425,15 @@ App.Views.rules_of_ships = Backbone.View.extend({
                 ship.lasery = other.y + ( f * random1to( 20 - ship.accuracy*10 ) );
                 if ( G.distance ( ship.x, ship.y, other.x, other.y ) < 500 ) {
                   other.hit = true;
-                  other.energy = other.energy - rng/50;
-                  other.recharge = other.recharge - rng/250;
+                  other.energy = other.energy - rng/2000;
+                  if ( other.energy < 0 ) {
+                    other.energy = 0;
+                  }
+                  other.recharge = other.recharge - rng/500;
                   if ( other.recharge < 0 ) {
                     other.recharge = 0;
                   }
-                  other.damage = other.damage + rng/1000;
+                  other.damage = other.damage + rng/1250;
                 }
               }
             }
@@ -363,16 +445,27 @@ App.Views.rules_of_ships = Backbone.View.extend({
 
     }();
 
+    if(this.ships.length < 2){
+      if(!this.restarting){
+        clearTimeout(this.restarter);
+        this.restarting = true;
+        this.restarter = setTimeout(this.init.bind(this), 2500);
+      }
+    }
+
     if(this.tickTimer){
       clearTimeout(this.tickTimer);
     }
     this.tickTimer = setTimeout(this.tick.bind(this), this.period);
+
   },
   init: function(){
     var self = this;
     
     this.theta = 0;
-    this.trails = true;
+
+    this.booms = [];
+    this.restarting = false;
 
     var xw = this.w/16;
     var xh = this.h/16;
@@ -387,17 +480,20 @@ App.Views.rules_of_ships = Backbone.View.extend({
     this.ships[0].x = this.w/2 - 2 * xw;
     this.ships[0].y = this.h/2 + xh;
     this.ships[0].a = 0;
-    this.ships[0].hue = '#00cccc';
-    this.ships[0].color = '#00cccc';
+    this.ships[0].hue = '#0ff';
+    this.ships[0].color = '#0ff';
     this.ships[0].tint =  'rgba(0,255,255,0.25)';
 
     this.ships[1] = this.makeShip();
     this.ships[1].x = this.w/2 + 2 * xw;
     this.ships[1].y = this.h/2 - xh;
     this.ships[1].a = 180;
-    this.ships[1].hue = '#ffff00';
-    this.ships[1].color = '#ffff00';
+    this.ships[1].hue = '#ff0';
+    this.ships[1].color = '#ff0';
     this.ships[1].tint =  'rgba(255,255,0,0.25)';
+
+    this.restarter = setTimeout(this.init.bind(this), 15000);
+    setTimeout(this.tick.bind(this), this.period);
 
   },
   makeMissile: function (opts) {
@@ -446,7 +542,7 @@ App.Views.rules_of_ships = Backbone.View.extend({
       var tint = 'rgba(0,255,0,0.25)';
     }
 
-    var energy_max = 20 + random1to(10);
+    var energy_max = 20 + random1to(30);
     var impulse = random1to(5);
     var ship = {
       x: x,
@@ -467,6 +563,9 @@ App.Views.rules_of_ships = Backbone.View.extend({
       tint: tint,
       v: v
     };
+
+    ship.recharge_max = ship.recharge;
+
     return ship;
 
   },
@@ -474,10 +573,6 @@ App.Views.rules_of_ships = Backbone.View.extend({
     this.init();
     this.running = true;
     this.draw();
-    setTimeout(this.tick.bind(this), this.period);
-    setInterval(this.init.bind(this), 10000);
-
-    // restart every 20s
   },
   stop: function(){
     this.running = false;

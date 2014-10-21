@@ -109,7 +109,13 @@ App.Views.rules_of_economics = Backbone.View.extend({
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 24pt Arial';
       ctx.textAlign = 'center';
-      ctx.fillText(ob.title, 0, 0);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ob.title, 0, xx/3);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 24pt Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(ob.chinese, 0, -xx/3);
 
       ctx.restore();
 
@@ -222,6 +228,7 @@ App.Views.rules_of_economics = Backbone.View.extend({
         x: 0,
         y: -1,
         title: 'Pop',
+        chinese: '人口',
         color: '#fff',
         to: ['ind']
       },
@@ -229,6 +236,7 @@ App.Views.rules_of_economics = Backbone.View.extend({
         x: -1,
         y: 0,
         title: 'Agr',
+        chinese: '農業',
         color: '#090',
         to: ['pop']
       },
@@ -243,6 +251,7 @@ App.Views.rules_of_economics = Backbone.View.extend({
         x: 0,
         y: 1,
         title: 'Ind',
+        chinese: '行業',
         color: '#0cc',
         to: ['pol','agr']
       },
@@ -250,6 +259,7 @@ App.Views.rules_of_economics = Backbone.View.extend({
         x: 1,
         y: 0,
         title: 'Pol',
+        chinese: '污染',
         color: '#c00',
         to: ['pop']
       }

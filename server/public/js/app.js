@@ -72,6 +72,21 @@ App.index = [
   ['foxes_and_rabbits', 'Foxes and Rabbits'],  // 
   //['foxes_rabbits_grass', 'Foxes, Rabbits and Grass'], // http://www.shodor.org/interactivate/activities/RabbitsAndWolves/
 
+  // simulating life
+
+  // http://en.wikipedia.org/wiki/Prospective_Outlook_on_Long-term_Energy_Systems
+
+  // http://en.wikipedia.org/wiki/World3
+
+  ['rules_of_economics', 'Economy'], // make the stats interplay (sliding charts from codepen) change over time, exonomic cycles
+
+  ['make_planet', 'Make a planet'], // what makes up a planet? Show the stats.
+  
+  // // show three planets trading
+  // ['surplus_and_deficit', 'Trade and Commerce'], // create some surplus and deficit for the same of the game
+  // // now it has motivation to send ships out to do things
+
+
   ['game_loop', 'Game Loop'],
 
   ['rules_of_gravity', 'Rules of Gravity'], // explain physics of gravity (diagram, vectors)
@@ -94,21 +109,6 @@ App.index = [
   ['rules_of_ships', 'Rules of Ships'], // Show single ship. JS object illustrate params
   //['ship_behaviour', 'Make the ship behave'], // Chase, run, laser, missile
   ['fighting_ships', 'Fighting Ships'], // in the orbiting planets
-
-
-  // simulating life
-
-  // http://en.wikipedia.org/wiki/Prospective_Outlook_on_Long-term_Energy_Systems
-
-  // http://en.wikipedia.org/wiki/World3
-
-  ['rules_of_economics', 'Economy'], // make the stats interplay (sliding charts from codepen) change over time, exonomic cycles
-
-  ['make_planet', 'Make a planet'], // what makes up a planet? Show the stats.
-  
-  // // show three planets trading
-  // ['surplus_and_deficit', 'Trade and Commerce'], // create some surplus and deficit for the same of the game
-  // // now it has motivation to send ships out to do things
 
   // Lets make some space
   ['make_system', 'Make a System'], // star with random number of orbitin planets (sped up). 'next' key zooms in to a planet as lead in to next slide
