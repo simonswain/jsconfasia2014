@@ -88,6 +88,10 @@ App.index = [
 
 
   ['game_loop', 'Game Loop'],
+  ['raf', 'RaF'],            // explain Canvas and RaF
+  ['canvas_layers', 'Canvas Layers'], // layers, fx layer, fades
+  ['canvas_transforms', 'Canvas Transforms'], // translate, rotate
+
 
   ['rules_of_gravity', 'Rules of Gravity'], // explain physics of gravity (diagram, vectors)
   ['gravity', 'Gravity and Spaceships'],  // like click to add a ship from codepen
@@ -95,16 +99,11 @@ App.index = [
   ['orbiting_planets', 'Heliocentric Orbits'], // we fake gravity for the planets
   ['orbiting_planets_with_ships', 'Planets and Ships'], // but the ships respect gravity
 
-  ['canvas_transforms', 'Canvas Transforms'], // translate, rotate
-
-  ['canvas_layers', 'Canvas Layers'], // layers, fx layer, fades
-
   ['rules_of_boid', 'Boid'],
   ['boids', 'Boids'],
   ['boids_and_predators', 'Boids and Predators'],
 
-  ['raf', 'RaF'],            // explain Canvas and RaF
-  
+ 
 
   ['rules_of_ships', 'Rules of Ships'], // Show single ship. JS object illustrate params
   //['ship_behaviour', 'Make the ship behave'], // Chase, run, laser, missile

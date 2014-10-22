@@ -227,7 +227,7 @@ App.Views.rules_of_economics = Backbone.View.extend({
       pop: {
         x: 0,
         y: -1,
-        title: 'Pop',
+        title: 'POP',
         chinese: '人口',
         color: '#fff',
         to: ['ind']
@@ -235,8 +235,8 @@ App.Views.rules_of_economics = Backbone.View.extend({
       agr: {
         x: -1,
         y: 0,
-        title: 'Agr',
-        chinese: '農業',
+        title: 'AGR',
+        chinese: '农业',
         color: '#090',
         to: ['pop']
       },
@@ -250,15 +250,15 @@ App.Views.rules_of_economics = Backbone.View.extend({
       ind: {
         x: 0,
         y: 1,
-        title: 'Ind',
-        chinese: '行業',
+        title: 'IND',
+        chinese: '行业',
         color: '#0cc',
         to: ['pol','agr']
       },
       pol: {
         x: 1,
         y: 0,
-        title: 'Pol',
+        title: 'POL',
         chinese: '污染',
         color: '#c00',
         to: ['pop']

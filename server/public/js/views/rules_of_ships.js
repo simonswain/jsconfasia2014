@@ -230,6 +230,20 @@ App.Views.rules_of_ships = Backbone.View.extend({
       // ctx.fillText(this.ships[1].accuracy.toFixed(0), this.w - 6*tw, 4*th);
     }
 
+
+    ctx.font = '48pt arial';
+    ctx.fillStyle = '#0cc';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(this.scores[0], xw/2, this.h * 0.8);
+
+    ctx.font = '48pt arial';
+    ctx.fillStyle = '#cc0';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(this.scores[1], this.w - xw/2, this.h * 0.8);
+
+
     ctx.restore();
     ctxfx.restore();
 
@@ -338,6 +352,7 @@ App.Views.rules_of_ships = Backbone.View.extend({
 
         // ship is destroyed!
         if (ship.damage > ship.energy_max) {
+
           self.booms.push({
             x: ship.x,
             y: ship.y,
@@ -345,6 +360,13 @@ App.Views.rules_of_ships = Backbone.View.extend({
             color: ship.color,
             ttl: 10
           });
+
+          if(i === 0){
+            self.scores[1] ++;
+          } else {
+            self.scores[0] ++;
+          }
+            
           self.ships.splice(i, 1);
           return;
         }
@@ -570,6 +592,10 @@ App.Views.rules_of_ships = Backbone.View.extend({
 
   },
   start: function () {
+    this.scores = {
+      0: 0,
+      1: 0
+    }
     this.init();
     this.running = true;
     this.draw();
