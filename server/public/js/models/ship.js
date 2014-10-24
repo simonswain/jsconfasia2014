@@ -65,7 +65,7 @@ App.Models.Ship = Backbone.Model.extend({
       laser_accuracy: random1to(10),
       laser_power: random0to(20) + 5,
       power: random0to(5),
-      thrust: 20 + random1to(50)/10,
+      thrust: 10 + random1to(30)/10,
       recharge: 1 + ( random1to(10) ) / 10,
       energy_max: energy,
       energy: energy
@@ -87,30 +87,107 @@ App.Models.Ship = Backbone.Model.extend({
   },
   runPlanet: function(){
     // things to do when the ship is locked in orbit at a planet
-    var self = this;
-    if(!this.planet){
+
+    var data = this.toJSON();
+    var ship = this;
+
+    var planet;
+
+    if(!ship.planet){
       return;
     }
 
-    var state = this.get('state');
-    var intent = this.get('intent');
+    var planet = ship.planet;
 
-    // load up some population
+    if(planet.empire === ship.empire){
+      // load up some population
 
-    if(this.planet.empire === this.empire){
-      // repaired? cargo? fuel?
-      var capacity = this.get('max_pop') - this.get('pop');
+      var capacity = data.max_pop - data.pop;
       if(capacity > 0){
-        var getpop = this.planet.takePop(capacity);
-        this.set('pop', this.get('pop') + getpop);
+        var getpop = planet.takePop(capacity);
+        ship.set('pop', data.pop + getpop);
       }
       
-      if(this.get('pop') >= this.get('max_pop')){
+      if(ship.get('pop') >= ship.get('max_pop')){
         // ready to leave
-        this.set('intent', 'colonize');
-        this.leavePlanet();
+        ship.set('intent', 'colonize');
+        ship.leavePlanet();
         return;
       }
+    }
+
+    if(planet.empire !== ship.empire){
+
+      // if there are any enemy ships in-system, leave the planet and
+      // go fight them
+
+      // how many enemies in the system
+      var enemies;
+      enemies = planet.system.ships.reduce(function(total, x){
+        if(!x){
+          return;
+        }
+        if(x.empire !== self.empire){
+          total ++;
+        }
+        return total;
+      }, 0);
+
+      if(enemies > 0){
+        ship.leavePlanet();
+        return;
+      }
+      
+      // shoot at target planet to remove population
+      if(planet.get('pop') > 0 && data.energy > data.energy_max * 0.2) {
+
+        // laser uses energy
+        ship.set('energy', data.energy - 1);
+        planet.killPop(data.laser_power);         
+
+        // do some fx
+        if(Math.random() < 0.25){
+          planet.system.booms.push({
+            x: planet.get('x'),
+            y: planet.get('y'),
+            type: 'takeover',
+            color: ship.empire.get('color'),
+            ttl: 10
+          });          
+        }
+
+      }
+
+      // take over planet, consume all attacking ships and put their
+      // pop on the planet
+
+      if(planet.get('pop') === 0){
+        planet.ships.each(function(x){
+          if(x.empire == ship.empire){
+            planet.set({
+              pop: planet.get('pop') + x.get('pop')
+            });
+          }
+          x.boom('nop');         
+        });
+
+        // colonize dead planet
+        if(planet.empire){
+          planet.empire.removePlanet(planet);
+        }
+
+        ship.empire.addPlanet(planet);
+
+        planet.system.booms.push({
+          x: planet.get('x'),
+          y: planet.get('y'),
+          type: 'colonize',
+          color: ship.empire.get('color'),
+          ttl: 10
+        });
+        return;
+      }
+      
     }
 
 
@@ -151,7 +228,6 @@ App.Models.Ship = Backbone.Model.extend({
 
     // pick planet in local system to populate
     if(enemies === 0){
-
       if(this.get('intent') === 'jump'){
         opts.jump = true;
       } else if(!this.target_planet){
@@ -374,8 +450,6 @@ App.Models.Ship = Backbone.Model.extend({
     var space_x = ship.target_system.get('x') - (dist * Math.cos(theta));
     var space_y = ship.target_system.get('y') - (dist * Math.sin(theta));
     
-    //console.log(pct, ship.origin_system.get('x'), ship.origin_system.get('y'), ship.target_system.get('x'), ship.target_system.get('y'), Number(space_x.toFixed(2)), Number(space_y.toFixed(2)));
-
     ship.set({
       jump_pct: pct,
       space_x: space_x,
@@ -477,11 +551,11 @@ App.Models.Ship = Backbone.Model.extend({
     // this.set({state: 'space'});
   },
 
-  enterPlanet: function(){
+  enterPlanet: function(planet){
     this.planet = planet;
     this.set({state: 'planet'});
-    this.planet.ships.add(this);
     this.system.removeShip(this); 
+    this.planet.ships.add(this);
   },
 
   leavePlanet: function(){    
@@ -500,8 +574,7 @@ App.Models.Ship = Backbone.Model.extend({
 
   spacePhysics: function(){
 
-    // progress towards jump target. If reached, insert at edge of
-    // system, at angle of system departed from
+    // universe manages this
 
   },
 
@@ -595,10 +668,9 @@ App.Models.Ship = Backbone.Model.extend({
         //g = 1000 * ( 50 / ( r * r ) )
 
         // max gravity
-        if ( g > 0.2 ) {
-          g = 0.2;
+        if ( g > 0.25 ) {
+          g = 0.25;
         }
-        //console.log(g);
 
         // convert gravity to xy. apply
 	ship.vx = ship.vx + g * Math.cos(theta);
@@ -632,7 +704,6 @@ App.Models.Ship = Backbone.Model.extend({
         if(model.get('boom') === true){
           return;
         }
-        
 
         // must be in system space
         if(model.get('state') !== 'system'){
@@ -692,6 +763,7 @@ App.Models.Ship = Backbone.Model.extend({
     };
     
     var target_planet = function(){
+
       var planet = self.target_planet;
 
       // already colonized?
@@ -700,58 +772,34 @@ App.Models.Ship = Backbone.Model.extend({
         return;
       }
 
+      // how many enemies in the system
+      var enemies;
+      enemies = self.system.ships.reduce(function(total, x){
+        if(!x){
+          return;
+        }
+        if(x.empire !== self.empire){
+          total ++;
+        }
+        return total;
+      }, 0);
+
+      // don't mess with the planet if there aren enemies in-system
+      if(enemies > 0){
+        return;
+      }
+
       var theta = G.angle (planet.get('x'), planet.get('y'), ship.x, ship.y);
       ship.vx += (0.75 * ship.thrust) * Math.cos(theta);
       ship.vy += (0.75 * ship.thrust) * Math.sin(theta);
       var range = G.distance (planet.get('x'), planet.get('y'), ship.x, ship.y);
 
-      // if in range, shoot at target planet to remove population
-      if(planet.get('pop') > 0 && range < (radius * 0.05) && ship.energy > ship.energy_max * 0.2) {
-        // laser uses energy
-        ship.energy = ship.energy - 1;
-        ship.laser = true;
-        ship.laser_x = planet.get('x');
-        ship.laser_y = planet.get('y');
-        self.system.booms.push({
-          x: planet.get('x'),
-          y: planet.get('y'),
-          type: 'takeover',
-          color: self.empire.get('color'),
-          ttl: 10
-        });          
-        planet.killPop(ship.laser_power);         
-
-        // take over planet, consume ship
-        if(planet.get('pop') === 0){
-          // colonize dead planet
-          if(planet.get('pop') === 0){
-            planet.set({
-              pop: ship.pop
-            });
-          } else {
-            // take over unowned planet
-            planet.set({
-              pop: Number(planet.get('pop')) + ship.pop
-            });
-          }
-          if(planet.empire){
-            planet.empire.removePlanet(planet);
-          }
-          self.empire.addPlanet(planet);
-          self.system.booms.push({
-            x: planet.get('x'),
-            y: planet.get('y'),
-            type: 'colonize',
-            color: self.empire.get('color'),
-            ttl: 10
-          });
-          self.boom('nop');
-          return;
-        }
+      // if in range, go in to orbit and try to take over planet
+      if(range < (radius * 0.05)) {
+        self.enterPlanet(planet);
+        return;
       }
     };
-
-
 
     var jumpzone = function(){
       var theta = G.angle (self.system.get('w')/2, self.system.get('h')/2, ship.x, ship.y) + Math.PI;

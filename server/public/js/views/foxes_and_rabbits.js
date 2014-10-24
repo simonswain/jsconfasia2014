@@ -70,40 +70,6 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
       } 
     }
 
-
-    // chart
-
-    // var renderChart = function(){
-    //   var dd = (self.h/1000) / 2;
-    //   var yo = self.h / 2;
-    //   var i,ii; 
-    //   ctx.beginPath();
-    //   ctx.lineWidth = 4;
-    //   ctx.strokeStyle = '#f00';
-    //   //ctx.moveTo(self.w, yo + (self.numFox * dd));
-    //   for(i=0, ii=self.foxhist.length; i<ii; i++){
-    //     x = self.w - ii*4 + i*4;
-    //     if(x<0){
-    //       continue;
-    //     }
-    //     ctx.lineTo(x, self.h - (self.foxhist[i] * dd));
-    //   }
-    //   ctx.stroke();
-
-    //   ctx.beginPath();
-    //   ctx.lineWidth = 4;
-    //   ctx.strokeStyle = '#0bb';
-    //   //ctx.moveTo(self.w, yo + (self.numRabbit * dd));
-    //   for(i=0, ii=self.rabbithist.length; i<ii; i++){
-    //     x = self.w - ii*4 + i*4;
-    //     if(x<0){
-    //       continue;
-    //     }
-    //     ctx.lineTo(x, self.h - (self.rabbithist[i] * dd));
-    //   }
-    //   ctx.stroke();
-    // }();
-
     // // chart
     var drawChart = function(){
 

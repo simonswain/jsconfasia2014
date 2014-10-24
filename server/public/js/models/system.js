@@ -20,8 +20,11 @@ App.Models.System = Backbone.Model.extend({
     });
 
     this.starCount = 1;
-
-    this.planetCount = random.from1to(3) + 1;
+    if(opts.planetCount){
+      this.planetCount = opts.planetCount;
+    } else {
+      this.planetCount = random.from1to(3) + 1;
+    }
 
     this.stars = new App.Collections.Stars();
     this.planets = new App.Collections.Planets();

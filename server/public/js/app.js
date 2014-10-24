@@ -86,6 +86,12 @@ App.index = [
   // ['surplus_and_deficit', 'Trade and Commerce'], // create some surplus and deficit for the same of the game
   // // now it has motivation to send ships out to do things
 
+  // Lets make some space
+  ['make_system', 'Make a System'],
+
+ // star with random number of orbitin planets (sped up). 'next' key zooms in to a
+
+  ////
 
   ['game_loop', 'Game Loop'],
   ['raf', 'RaF'],            // explain Canvas and RaF
@@ -109,8 +115,7 @@ App.index = [
   //['ship_behaviour', 'Make the ship behave'], // Chase, run, laser, missile
   ['fighting_ships', 'Fighting Ships'], // in the orbiting planets
 
-  // Lets make some space
-  ['make_system', 'Make a System'], // star with random number of orbitin planets (sped up). 'next' key zooms in to a planet as lead in to next slide
+  //planet as lead in to next slide
   // zoom back out to the system. Ships spawn from planet, travel to other planet in sustem
 
   // planet, orbit and outer system ownership??
@@ -137,9 +142,6 @@ App.index = [
 // how to run serverside and across multiple machines (theory and challenge)
 ];
 
-/*global Backbone:true,  _:true, $:true, App:true */
-/*jshint browser:true */
-/*jshint strict:false */
 
 App.Router = Backbone.Router.extend ({
   routes: {

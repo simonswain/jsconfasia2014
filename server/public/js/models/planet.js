@@ -33,7 +33,13 @@ App.Models.Planet = Backbone.Model.extend({
   },
   initialize: function(opts) {
 
+    var self = this;
+
     opts = opts || {};
+
+    this.system = opts && opts.system || null;
+    this.empire = null;
+    this.ships = new App.Collections.Ships([]);
 
     _.bindAll(this, 'run', 'physics','takePop','spawnShip','addShip','removeShip');
 
@@ -42,12 +48,34 @@ App.Models.Planet = Backbone.Model.extend({
     a = 0;
     v = 0;
 
-    if(opts.system){
-      rr = opts.system.get('radius');
-      r = ((0.1 * rr) + (0.4 *random.from0to(rr))).toFixed(2),
+    var spacing = this.system.get('radius') * 0.05;
+
+    var gen = function(){
+      var rr = self.system.get('radius');
+      var r = ((0.05 * rr) + (0.41 * random.from0to(rr))).toFixed(2);
+      return r;
+    };
+
+    if(this.system){
+      if(this.system.planets.length === 0){
+        r = gen();
+      }
       a = random.from0to(360),
-      v = 0.0001 + (random.from0to(100)/10000);
+      v = 0.001 + (random.from0to(100)/10000);
+
+      var ok = false;
+      while (this.system.planets.length > 0 && !ok){
+        ok = true;
+        r = gen();
+        this.system.planets.each(function(p){
+          var dd = Math.abs(p.get('r') - r);
+          if (dd < spacing){
+            ok = false;
+          }
+        });
+      }
     }
+
 
     var land = 10000 * random.from1to(10);
 
@@ -67,20 +95,21 @@ App.Models.Planet = Backbone.Model.extend({
     });
 
 
-    this.system = opts && opts.system || null;
-    this.empire = null;
-    this.ships = new App.Collections.Ships([]);
     this.timer = false;
     this.run();
   },
   run: function(){
 
     var self = this;
-    this.ships.each(function(x){
-      if(!x){
+
+    this.ships.each(function(ship){
+      if(!ship){
         return;
       }
-      x.run();
+      if(ship.get('boom')){
+        self.ships.remove(ship);
+      }
+      ship.run();
     });
 
     this.physics();
@@ -185,9 +214,11 @@ App.Models.Planet = Backbone.Model.extend({
     return pop;
   },
   killPop: function(n){
-    var pop = this.get('pop');
+    var pop = this.get('pop').toFixed(0);
     var before = pop;
-    pop = Math.max(0, pop - n*10);
+    var kill = n*50;
+
+    pop = Math.max(0, pop - kill);
     if(pop<0){
       pop = 0;
     }

@@ -376,10 +376,10 @@ App.Views.make_empires = Backbone.View.extend({
       color: '#cc0'
     });
 
-    // this.universe.addEmpire({
-    //   name: 'The Blackness',
-    //   color: '#c00'
-    // });
+    this.universe.addEmpire({
+      name: 'The Blackness',
+      color: '#0cc'
+    });
 
     this.period = 100;
 
