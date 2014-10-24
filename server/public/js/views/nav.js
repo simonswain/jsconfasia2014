@@ -4,7 +4,7 @@
 /*jshint strict:false */
 
 App.Views.Nav = Backbone.View.extend({
-  template: _.template('<h1><%= title %></h1>'),
+  template: _.template('<h1><%= title %></h1><h2>@simon_swain</h2>'),
   initialize : function(opts) {
     _.bindAll(this, 'render');
     this.controller = opts.controller;
