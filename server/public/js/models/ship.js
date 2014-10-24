@@ -65,7 +65,7 @@ App.Models.Ship = Backbone.Model.extend({
       laser_accuracy: random1to(10),
       laser_power: random0to(20) + 5,
       power: random0to(5),
-      thrust: 10 + random1to(30)/10,
+      thrust: 25 + random1to(30)/10,
       recharge: 1 + ( random1to(10) ) / 10,
       energy_max: energy,
       energy: energy
@@ -127,7 +127,7 @@ App.Models.Ship = Backbone.Model.extend({
         if(!x){
           return;
         }
-        if(x.empire !== self.empire){
+        if(x.empire !== ship.empire){
           total ++;
         }
         return total;
@@ -627,7 +627,7 @@ App.Models.Ship = Backbone.Model.extend({
         var r = G.distance (ship.x, ship.y, px, py);
 
         // force of gravity from stars on ship
-        g = 600 * ( 5 / ( r * r ) )
+        g = 300 * ( 5 / ( r * r ) )
         //g = 1000 * ( 50 / ( r * r ) )
 
         // max gravity
@@ -664,7 +664,7 @@ App.Models.Ship = Backbone.Model.extend({
         var r = G.distance (ship.x, ship.y, px, py);
 
         // force of gravity from planets on ship
-        g = 200 * ( 5 / ( r * r ) )
+        g = 150 * ( 5 / ( r * r ) )
         //g = 1000 * ( 50 / ( r * r ) )
 
         // max gravity
@@ -722,17 +722,17 @@ App.Models.Ship = Backbone.Model.extend({
         // chase or tun
         if(true || range < radius * 0.2){
           c ++;
-
+          
           // always attack
-          a = a + de_ra (ra_de (theta));
+          //a = a + de_ra (ra_de (theta));
 
           // run away from bigger, chase smaller. if energy < 20%
           // always run
-          // if (other.power > ship.power || ship.energy < ship.energy_max * 0.2) {
-          //   a = a + de_ra ( ra_de (theta) + 180 );
-          // } else { 
-          //   a = a + de_ra (ra_de (theta));
-          // }
+          if (other.power > ship.power || ship.energy < ship.energy_max * 0.2) {
+            a = a + de_ra ( ra_de (theta) + 180 );
+          } else { 
+            a = a + de_ra (ra_de (theta));
+          }
         }
 
         // enemy in range to shoot?
@@ -756,14 +756,14 @@ App.Models.Ship = Backbone.Model.extend({
       if(c>0){
         a = a / c;
         a = a % 360;
-	ship.vx = ship.vx + (0.25 * ship.thrust) * Math.cos(a);
-	ship.vy = ship.vy + (0.25 * ship.thrust) * Math.sin(a);          
+	ship.vx = ship.vx + (0.2 * ship.thrust) * Math.cos(a);
+	ship.vy = ship.vy + (0.2 * ship.thrust) * Math.sin(a);          
       }
 
     };
     
     var target_planet = function(){
-
+      
       var planet = self.target_planet;
 
       // already colonized?
@@ -790,8 +790,8 @@ App.Models.Ship = Backbone.Model.extend({
       }
 
       var theta = G.angle (planet.get('x'), planet.get('y'), ship.x, ship.y);
-      ship.vx += (0.75 * ship.thrust) * Math.cos(theta);
-      ship.vy += (0.75 * ship.thrust) * Math.sin(theta);
+      ship.vx += (0.2 * ship.thrust) * Math.cos(theta);
+      ship.vy += (0.2 * ship.thrust) * Math.sin(theta);
       var range = G.distance (planet.get('x'), planet.get('y'), ship.x, ship.y);
 
       // if in range, go in to orbit and try to take over planet
@@ -803,8 +803,8 @@ App.Models.Ship = Backbone.Model.extend({
 
     var jumpzone = function(){
       var theta = G.angle (self.system.get('w')/2, self.system.get('h')/2, ship.x, ship.y) + Math.PI;
-      ship.vx += (1.75 * ship.thrust) * Math.cos(theta);
-      ship.vy += (1.75 * ship.thrust) * Math.sin(theta);
+      ship.vx += (.5 * ship.thrust) * Math.cos(theta);
+      ship.vy += (.5 * ship.thrust) * Math.sin(theta);
       var range = (self.system.get('w')/2, self.system.get('h')/2, ship.x, ship.y);
       //if(range > self.system.get('radius') * 0.4){
         self.doJump();
