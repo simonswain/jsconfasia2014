@@ -91,8 +91,8 @@ App.Views.make_planet = Backbone.View.extend({
       // 'birthrate',
       // 'deathrate',
       'agr',
-      'pol',
       'ind',
+      'pol',
       'cr'
     ];
     var xl = xw;

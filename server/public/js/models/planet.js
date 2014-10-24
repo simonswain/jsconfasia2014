@@ -48,15 +48,16 @@ App.Models.Planet = Backbone.Model.extend({
     a = 0;
     v = 0;
 
-    var spacing = this.system.get('radius') * 0.05;
-
-    var gen = function(){
-      var rr = self.system.get('radius');
-      var r = ((0.05 * rr) + (0.41 * random.from0to(rr))).toFixed(2);
-      return r;
-    };
-
     if(this.system){
+
+      var spacing = this.system.get('radius') * 0.05;
+
+      var gen = function(){
+        var rr = self.system.get('radius');
+        var r = ((0.05 * rr) + (0.41 * random.from0to(rr))).toFixed(2);
+        return r;
+      };
+
       if(this.system.planets.length === 0){
         r = gen();
       }

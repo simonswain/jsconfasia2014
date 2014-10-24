@@ -81,8 +81,8 @@ App.Views.make_system = Backbone.View.extend({
     var vals = [
       'pop',
       'agr',
-      'pol',
-      'ind'
+      'ind',
+      'pol'
     ];
 
     self.system.planets.each(function(planet){
@@ -105,12 +105,12 @@ App.Views.make_system = Backbone.View.extend({
       var xr = 0 - xw/10;
       var yy = (data.size * xw/8);
 
-      ctx.fillStyle = '#666';
-      ctx.font = 'bold 10pt arial';
+      ctx.fillStyle = '#0cc';
+      ctx.font = 'bold 12pt arial';
       ctx.textAlign = 'center';
       ctx.fillText(data.name, 0, 0 - (2*data.size * xw/24));
 
-      ctx.font = 'normal 10pt arial';
+      ctx.font = 'normal 12pt arial';
       vals.forEach(function(k){
         ctx.textAlign = 'left';
         ctx.fillText(k.substr(0,3), xl, yy);

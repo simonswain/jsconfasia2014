@@ -45,7 +45,7 @@ App.Views.gravity = Backbone.View.extend({
     // planet
     var draw_planet = function(){
       var planet = self.planet;
-      ctx.fillStyle = '#0cc';	
+      ctx.fillStyle = '#369';	
       ctx.beginPath();
       ctx.arc(planet.x, planet.y, xw, 0, 2 * Math.PI, true);            
       ctx.fill();
@@ -101,7 +101,14 @@ App.Views.gravity = Backbone.View.extend({
         ctxfx.beginPath();
         ctxfx.arc(ship.x, ship.y, xw/8, 0, 2 * Math.PI, false);
         ctxfx.fill();
-        
+
+        ctx.font = '24pt arial';
+
+        ctx.fillStyle = '#fff';
+        ctx.textBaseline='middle';
+        ctx.fillText( 'vx: ' + ship.vx.toFixed(2), ship.x + xw/2, ship.y - xh/3);
+        ctx.fillText( 'vy: ' + ship.vy.toFixed(2), ship.x + xw/2, ship.y + xh/3);
+         
       }
     }();
 

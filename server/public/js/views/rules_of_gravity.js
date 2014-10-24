@@ -86,7 +86,7 @@ App.Views.rules_of_gravity = Backbone.View.extend({
     ctx.stroke();
     ctx.closePath();
 
-    ctx.fillStyle = '#0cc';
+    ctx.fillStyle = '#369';
     ctx.beginPath();
     ctx.arc(mass_x, mass_y, radius, 0, 2 * Math.PI, true);
     ctx.closePath();

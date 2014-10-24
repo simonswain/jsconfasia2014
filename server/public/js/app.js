@@ -65,7 +65,7 @@ App.index = [
   //['species_of_life', 'Species of Life'],
   ['life_hd', 'Life HD'],
 
-  ['rules_of_ecology', 'Ecology'],   // foxes and rabbits rules
+  //['rules_of_ecology', 'Ecology'],   // foxes and rabbits rules
   
   // http://jseed.sourceforge.net/lotka/index.html
 
