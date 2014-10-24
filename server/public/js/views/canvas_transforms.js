@@ -57,16 +57,16 @@ App.Views.canvas_transforms = Backbone.View.extend({
     });
 
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold ' + Math.floor(xh * 0.6) + 'pt courier';
+    ctx.font = 'bold ' + Math.floor(xh * 0.8) + 'pt courier';
     ctx.textAlign = 'right';
-    ctx.fillText(this.angle + '°', this.w * 0.8, this.h - 2*xh);
+    ctx.fillText(this.angle + '°', this.w * 0.855, this.h - 3*xh);
 
     //
 
 
     // draw ship body
     ctx.save();
-    ctx.translate(this.w * 0.8 , this.h/2);
+    ctx.translate(this.w * 0.8 , this.h * 0.4);
     var z = 2 * xw;
     ctx.scale(z, z);
     ctx.rotate(de_ra(this.angle));

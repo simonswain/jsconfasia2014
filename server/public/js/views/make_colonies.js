@@ -138,23 +138,8 @@ App.Views.make_colonies = Backbone.View.extend({
       }
       ctx.fill();
       ctx.restore();
-
-      // ctx.fillStyle = data.color;
-      // ctx.strokeStyle = data.color;
-      // ctx.lineWidth = 2;
-      // ctx.beginPath();
-      // ctx.arc(data.x, data.y, data.size * xw/24, 0, 2 * Math.PI, true);
-      // ctx.fill();
-      // ctx.stroke();
     });
 
-    var vals = [
-      'pop',
-      //'agr',
-      //'pol',
-      //      'ind',
-      'cr'
-    ];
 
     self.system.planets.each(function(planet){
       var data = planet.toJSON();
@@ -179,34 +164,37 @@ App.Views.make_colonies = Backbone.View.extend({
       ctx.save();
       ctx.translate(data.x, data.y);
       ctx.rotate(theta);
-      var xl = 0 + xw/10;
-      var xr = 0 - xw/10;
-      var yy = (data.size * xw/8);
+      var yy = xw/4;
 
-      ctx.fillStyle = '#666';
-      ctx.font = 'bold 10pt arial';
+      // planet name
+      ctx.fillStyle = '#aaa';
+      ctx.font = 'bold 12pt arial';
       ctx.textAlign = 'center';
-      ctx.fillText(data.name, 0, 0 - (2*data.size * xw/24));
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(data.name, 0, - yy);
 
-      ctx.font = 'normal 10pt arial';
-      vals.forEach(function(k){
-        ctx.textAlign = 'left';
-        ctx.fillText(k.substr(0,3), xl, yy);
+      // pop
+      ctx.font = 'normal 12pt arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(data.pop.toFixed(0), 0, yy);
 
-        ctx.textAlign = 'right';
-        ctx.fillText(data[k].toFixed(0), xr, yy);
-        yy += xw/4;
-      });
-
+      // build %
       if(planet.empire){
-        ctx.fillText( ((data.cr/data.shipcost)*100).toFixed(0) + '%', xr, yy);
+        ctx.font = 'normal 12pt arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText( ((data.cr/data.shipcost)*100).toFixed(0) + '%', 0, yy*2);
       }
       
-      ctx.fillStyle = '#000';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = 'bold 12pt arial';
-      ctx.fillText(planet.ships.length, 0, 0);
+      // ships landed
+      if(planet.ships.length>0){
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold 12pt arial';
+        ctx.fillText(planet.ships.length, 0, 0);
+      }
 
       ctx.restore();
 
@@ -249,6 +237,7 @@ App.Views.make_colonies = Backbone.View.extend({
         ctxfx.fill();
         //ship.set({'hit': false});
       }
+
 
       ctx.lineWidth = z/2;
       ctx.fillStyle = data.color;

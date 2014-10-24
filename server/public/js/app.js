@@ -72,30 +72,6 @@ App.index = [
   ['foxes_and_rabbits', 'Foxes and Rabbits'],  // 
   //['foxes_rabbits_grass', 'Foxes, Rabbits and Grass'], // http://www.shodor.org/interactivate/activities/RabbitsAndWolves/
 
-  ['game_loop', 'Game Loop'],
-
-  ['rules_of_gravity', 'Rules of Gravity'], // explain physics of gravity (diagram, vectors)
-  ['gravity', 'Gravity and Spaceships'],  // like click to add a ship from codepen
-
-  ['orbiting_planets', 'Heliocentric Orbits'], // we fake gravity for the planets
-  ['orbiting_planets_with_ships', 'Planets and Ships'], // but the ships respect gravity
-
-  ['canvas_transforms', 'Canvas Transforms'], // translate, rotate
-
-  ['canvas_layers', 'Canvas Layers'], // layers, fx layer, fades
-
-  ['rules_of_boid', 'Boid'],
-  ['boids', 'Boids'],
-  ['boids_and_predators', 'Boids and Predators'],
-
-  ['raf', 'RaF'],            // explain Canvas and RaF
-  
-
-  ['rules_of_ships', 'Rules of Ships'], // Show single ship. JS object illustrate params
-  //['ship_behaviour', 'Make the ship behave'], // Chase, run, laser, missile
-  ['fighting_ships', 'Fighting Ships'], // in the orbiting planets
-
-
   // simulating life
 
   // http://en.wikipedia.org/wiki/Prospective_Outlook_on_Long-term_Energy_Systems
@@ -111,7 +87,35 @@ App.index = [
   // // now it has motivation to send ships out to do things
 
   // Lets make some space
-  ['make_system', 'Make a System'], // star with random number of orbitin planets (sped up). 'next' key zooms in to a planet as lead in to next slide
+  ['make_system', 'Make a System'],
+
+ // star with random number of orbitin planets (sped up). 'next' key zooms in to a
+
+  ////
+
+  ['game_loop', 'Game Loop'],
+  ['raf', 'RaF'],            // explain Canvas and RaF
+  ['canvas_layers', 'Canvas Layers'], // layers, fx layer, fades
+  ['canvas_transforms', 'Canvas Transforms'], // translate, rotate
+
+
+  ['rules_of_gravity', 'Rules of Gravity'], // explain physics of gravity (diagram, vectors)
+  ['gravity', 'Gravity and Spaceships'],  // like click to add a ship from codepen
+
+  ['orbiting_planets', 'Heliocentric Orbits'], // we fake gravity for the planets
+  ['orbiting_planets_with_ships', 'Planets and Ships'], // but the ships respect gravity
+
+  ['rules_of_boid', 'Boid'],
+  ['boids', 'Boids'],
+  ['boids_and_predators', 'Boids and Predators'],
+
+ 
+
+  ['rules_of_ships', 'Rules of Ships'], // Show single ship. JS object illustrate params
+  //['ship_behaviour', 'Make the ship behave'], // Chase, run, laser, missile
+  ['fighting_ships', 'Fighting Ships'], // in the orbiting planets
+
+  //planet as lead in to next slide
   // zoom back out to the system. Ships spawn from planet, travel to other planet in sustem
 
   // planet, orbit and outer system ownership??
@@ -138,9 +142,6 @@ App.index = [
 // how to run serverside and across multiple machines (theory and challenge)
 ];
 
-/*global Backbone:true,  _:true, $:true, App:true */
-/*jshint browser:true */
-/*jshint strict:false */
 
 App.Router = Backbone.Router.extend ({
   routes: {

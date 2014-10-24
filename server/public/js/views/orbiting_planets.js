@@ -44,6 +44,53 @@ App.Views.orbiting_planets = Backbone.View.extend({
 
     // draw here
 
+    // ctx.lineWidth = 2;			
+    // ctx.beginPath();
+    // ctx.arc(this.w/2, this.h/2, xw/2, 0, 2 * Math.PI, true);
+    // ctx.fill();
+    // ctx.stroke();   
+
+    // planets
+    var draw_vectors = function(){
+      var planet;
+      for (var i in self.planets) {
+        planet = self.planets[i];
+
+        ctx.strokeStyle = 'rgba(0,255,255,0.4);';
+        ctx.lineWidth = xw/16;			
+        ctx.beginPath();
+        ctx.moveTo(self.w/2, self.h/2);
+        ctx.lineTo(planet.x, planet.y);
+        ctx.stroke();   
+
+        ctxfx.fillStyle = '#0cc';
+        ctxfx.strokeStyle = '#0ff';
+        ctxfx.lineWidth = 2;
+        ctxfx.beginPath();
+        ctxfx.arc(planet.x, planet.y, planet.size * xw/128, 0, 2 * Math.PI, true);
+        ctxfx.fill();
+        ctxfx.stroke();
+
+      }
+    }();
+
+    // planets
+    var draw_planets = function(){
+      var planet;
+      for (var i in self.planets) {
+        planet = self.planets[i];
+
+        ctx.fillStyle = '#0cc';
+        ctx.strokeStyle = '#0ff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(planet.x, planet.y, planet.size * xw/48, 0, 2 * Math.PI, true);
+        ctx.fill();
+        ctx.stroke();
+
+      }
+    }();
+
     // fake star
     ctx.fillStyle = '#ff0';	
     ctx.strokeStyle = '#ff0';	
@@ -64,35 +111,6 @@ App.Views.orbiting_planets = Backbone.View.extend({
     ctx.fill();
     ctx.restore();
 
-    // ctx.lineWidth = 2;			
-    // ctx.beginPath();
-    // ctx.arc(this.w/2, this.h/2, xw/2, 0, 2 * Math.PI, true);
-    // ctx.fill();
-    // ctx.stroke();   
-
-    // planets
-    var draw_planets = function(){
-      var planet;
-      for (var i in self.planets) {
-        planet = self.planets[i];
-        ctx.fillStyle = '#0cc';
-        ctx.strokeStyle = '#0ff';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(planet.x, planet.y, planet.size * xw/48, 0, 2 * Math.PI, true);
-        ctx.fill();
-        ctx.stroke();
-
-        ctxfx.fillStyle = '#0cc';
-        ctxfx.strokeStyle = '#0ff';
-        ctxfx.lineWidth = 2;
-        ctxfx.beginPath();
-        ctxfx.arc(planet.x, planet.y, planet.size * xw/128, 0, 2 * Math.PI, true);
-        ctxfx.fill();
-        ctxfx.stroke();
-
-      }
-    }();
 
 
     ctx.restore();
@@ -145,7 +163,7 @@ App.Views.orbiting_planets = Backbone.View.extend({
   },
   makePlanet: function() {
     var planet = {
-      size: random.from0to(Math.min(this.w,this.h) * 0.01),
+      size: (Math.min(this.w,this.h) * 0.01) + random.from0to(Math.min(this.w,this.h) * 0.01),
       r: Math.min(this.w,this.h) * 0.1 + random.from0to(Math.min(this.w,this.h) * 0.4),
       d: random.from0to(360),
       v: 0.00001 * (random.from0to(2000)),
@@ -159,9 +177,6 @@ App.Views.orbiting_planets = Backbone.View.extend({
     this.running = true;
     this.tick();
     this.draw();
-    setInterval(this.init.bind(this), 20000);
-
-    // restart every 20s
   },
   stop: function(){
     this.running = false;

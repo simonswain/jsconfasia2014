@@ -170,11 +170,33 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
       // ships = _.filter(ships, function(x){
       //   return (x.age < 250);
       // });
+
+      var x, y;
           
-      if(ships.length < 5 && random0to(100) < 100){
+      while(ships.length < 5){
+
+        switch(random1to(4)){ 
+        case 1:
+          x = self.w * 0.1;
+          y = random0to(self.h);
+          break;
+        case 2:
+          x = self.w * 0.9;
+          y = random0to(self.h);
+          break;
+        case 3:
+          x = random0to(self.w);
+          y = self.h * 0.1;
+          break;
+        case 4:
+          x = random0to(self.w);
+          y = self.h * 0.9;
+          break;
+        }
+
         ships.push({
-          x: random0to(self.w),
-          y: random0to(self.h),
+          x: x,
+          y: y,
           vx: 0,
           vy: 0,
           rot: ((Math.random() > 0.5) ? 1 : -1),
@@ -288,14 +310,12 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
       //   self.stars.push (self.makeStar());
       // }
     }();
-
-    
+   
     var init_planets = function(){
       for(var i=0, ii = random1to(3) + 1; i<ii; i++){
         self.planets.push (self.makePlanet());
       }
     }();
-
 
   },
   makeStar: function() {
@@ -316,24 +336,11 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
     };
     return planet;
   },
-  makeShip: function() {
-    var ship = {
-      size: random.from0to(Math.min(this.w,this.h) * 0.01),
-      r: (Math.min(this.w,this.h) * 0.2) + (random.from0to(Math.min(this.w,this.h) * 0.1)),
-      d: random.from0to(360),
-      v: 0.001 * (random.from0to(100)),
-      rot: ((Math.random() > 0.5) ? 1 : -1),
-      x: 0,
-      y: 0
-    };
-    return shoop;
-  },
   start: function () {
     this.init();
     this.running = true;
-    this.draw();
     this.tick();
-    setInterval(this.init.bind(this), 60000);
+    this.draw();
 
     // restart every 20s
   },

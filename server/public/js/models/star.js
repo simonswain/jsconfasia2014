@@ -22,7 +22,7 @@ App.Models.Star = Backbone.Model.extend({
   },
   initialize: function(opts) {
     var type = STAR_TYPES[random.from0to(STAR_TYPES.length-1)];
-    var size = 1 + random.from0to(5);
+    var size = 3 + random.from0to(3);
     this.set({
       id: uuid.v4(),
       type: type,

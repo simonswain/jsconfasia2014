@@ -92,7 +92,9 @@ App.Views.raf = Backbone.View.extend({
 
     this.content = [
       'var draw = function(){',
-      '  // paint stuff here',
+      '  // clear the canvas',
+      '  // paint stuff',
+      '  // ...',
       '  requestAnimationFrame(draw);',
       '};',
       'draw();'

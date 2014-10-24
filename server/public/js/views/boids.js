@@ -181,8 +181,6 @@ App.Views.boids = Backbone.View.extend({
 	vx += boid.v * Math.cos(angle) * 0.05;
 	vy += boid.v * Math.sin(angle) * 0.05;
 
-
-
         boid.x += vx;
         boid.y += vy;
 

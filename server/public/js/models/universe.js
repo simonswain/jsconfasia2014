@@ -95,7 +95,7 @@ App.Models.Universe = Backbone.Model.extend({
     var system = new App.Models.System({
       x: x,
       y: y,
-      name: GREEK[random0to(NATO.length-1)] + ' ' + DEMONS[random0to(DEMONS.length-1)],
+      name: GREEK[random0to(GREEK.length-1)] + ' ' + DEMONS[random0to(DEMONS.length-1)],
       universe: this
     });
     this.systems.add(system);

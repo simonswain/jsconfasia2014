@@ -45,9 +45,9 @@ App.Views.gravity = Backbone.View.extend({
     // planet
     var draw_planet = function(){
       var planet = self.planet;
-      ctx.fillStyle = '#c00';	
+      ctx.fillStyle = '#0cc';	
       ctx.beginPath();
-      ctx.arc(planet.x, planet.y, xw/4, 0, 2 * Math.PI, true);            
+      ctx.arc(planet.x, planet.y, xw, 0, 2 * Math.PI, true);            
       ctx.fill();
     }();
 
@@ -58,35 +58,19 @@ App.Views.gravity = Backbone.View.extend({
       for(var i=0, ii=ships.length; i<ii; i++){
         ship = ships[i];
 
-        ctx.lineWidth = 2;
+        ctx.lineWidth = xw/16;
+        ctx.lineCap = 'round';
        
         // g vector
-        ctx.strokeStyle = '#cc0';	
+        ctx.strokeStyle = '#f00';	
         ctx.beginPath();
         ctx.moveTo(ship.x, ship.y) 
         ctx.lineTo(self.w/2, self.h/2);
         ctx.stroke();
         ctx.closePath();
 
-        // // arrowhead
-        // ctx.save();
-        // ctx.translate(self.w/2, self.h/2);
-        // ctx.rotate(angle - Math.PI/2);
-
-        // ctx.strokeStyle = '#c00';
-        // var zz = xw/4
-        // ctx.beginPath();
-        // ctx.moveTo(-zz, zz) 
-        // ctx.lineTo(0, 0)
-        // ctx.lineTo(zz, zz) 
-        // ctx.stroke();
-        // ctx.closePath();
-        
-        // ctx.restore();
-
-
         // velo vector
-        ctx.strokeStyle = '#0cc';	
+        ctx.strokeStyle = '#f00';	
         ctx.beginPath();
         ctx.moveTo(ship.x, ship.y) 
         ctx.lineTo(ship.x + (ship.vx  * 10), ship.y + (ship.vy * 10));
@@ -94,7 +78,7 @@ App.Views.gravity = Backbone.View.extend({
         ctx.closePath();
 
         // thrust vector
-        ctx.strokeStyle = '#f0f';	
+        ctx.strokeStyle = '#f00';	
         ctx.beginPath();
         ctx.moveTo(ship.x, ship.y) 
         ctx.lineTo(ship.x + (ship.tx  * 100), ship.y + (ship.ty * 100));
@@ -107,19 +91,16 @@ App.Views.gravity = Backbone.View.extend({
         ctx.lineWidth = 2;			
         ctx.beginPath();
         //ctx.rect(ship.x, ship.y, 12, 12);
-        ctx.arc(ship.x, ship.y, xw/8, 0, 2 * Math.PI, true);
+        ctx.arc(ship.x, ship.y, xw/4, 0, 2 * Math.PI, true);
         ctx.closePath()
         ctx.fill();
         ctx.stroke();   
 
         ctxfx.fillStyle = 'rgba(100%,100%,100%,0.25)';	
-        ctxfx.strokeStyle = 'rgba(100%,100%,100%,0.25)';	
         ctxfx.lineWidth = 2;			
         ctxfx.beginPath();
-        ctxfx.arc(ship.x, ship.y, xw/16, 0, 2 * Math.PI, false);
-        ctxfx.closePath()
+        ctxfx.arc(ship.x, ship.y, xw/8, 0, 2 * Math.PI, false);
         ctxfx.fill();
-        ctxfx.stroke();   
         
       }
     }();
@@ -155,13 +136,13 @@ App.Views.gravity = Backbone.View.extend({
           age: 0,
           rot: ((Math.random() > 0.5) ? 1 : -1),
           maxage: 500 + random0to(500),
-          thrust: 1
+          thrust: 1.5
         });
       }
 
-      ships = _.filter(ships, function(x){
-        return (x.age < x.maxage);
-      });
+      // ships = _.filter(ships, function(x){
+      //   return (x.age < x.maxage);
+      // });
 
       for(var i=0, ii=ships.length; i<ii; i++){
         ship = ships[i];

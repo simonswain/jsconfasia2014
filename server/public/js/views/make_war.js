@@ -176,28 +176,30 @@ App.Views.make_war = Backbone.View.extend({
       ctx.save();
       ctx.translate(data.x, data.y);
       ctx.rotate(theta);
-      var xl = 0 + xw/10;
-      var xr = 0 - xw/10;
-      var yy = (data.size * xw/8);
+      var yy = xw/4;
 
-      ctx.fillStyle = '#666';
-      ctx.font = '10pt arial';
+      // planet name
+      ctx.fillStyle = '#aaa';
+      ctx.font = 'bold 12pt arial';
       ctx.textAlign = 'center';
-      ctx.fillText(data.name, 0, 0 - (2*data.size * xw/24));
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(data.name, 0, - yy);
 
-      vals.forEach(function(k){
-        ctx.textAlign = 'left';
-        ctx.fillText(k.substr(0,3), xl, yy);
+      // pop
+      ctx.font = 'normal 12pt arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(data.pop.toFixed(0), 0, yy);
 
-        ctx.textAlign = 'right';
-        ctx.fillText(data[k].toFixed(0), xr, yy);
-        yy += xw/4;
-      });
-
+      // build %
       if(planet.empire){
-        ctx.fillText( ((data.cr/data.shipcost)*100).toFixed(0) + '%', xr, yy);
+        ctx.font = 'normal 12pt arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText( ((data.cr/data.shipcost)*100).toFixed(0) + '%', 0, yy*2);
       }
-
+      
+      // ships landed
       ctx.fillStyle = '#000';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -354,6 +356,7 @@ App.Views.make_war = Backbone.View.extend({
     this.booms = [];
    
     this.system = new App.Models.System({
+      planetCount: 4,
       w: this.w,
       h: this.h,
       radius: Math.min(this.w, this.h),
