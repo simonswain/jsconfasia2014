@@ -114,7 +114,6 @@ App.Models.Ship = Backbone.Model.extend({
         return;
       }
 
-
       if(ship.get('pop') >= ship.get('max_pop')){
         // ready to leave
         ship.set('intent', 'colonize');
@@ -150,7 +149,7 @@ App.Models.Ship = Backbone.Model.extend({
         return total;
       }, 0);
 
-      if(enemies > friends){
+      if(enemies > 0 && enemies >= friends){
         ship.leavePlanet();
         return;
       }
@@ -232,20 +231,31 @@ App.Models.Ship = Backbone.Model.extend({
     }, 0);
 
 
-    if(enemies > 0){
+    friends = ship.system.ships.reduce(function(total, x){
+      if(!x){
+        return;
+      }
+      if(x.empire === ship.empire){
+        total ++;
+      }
+      return total;
+    }, 0);
+
+    // if enough friends fighting already, then do something else
+
+    if(enemies && enemies > friends){
       ship.set({
         intent: 'fight'
       });
-    }
-
-    // pick planet in local system to populate
-    if(enemies === 0){
+    } else if(enemies === 0 || enemies <= friends){
 
       if(ship.get('intent') === 'jump'){
 
         // nop
+        return;
+      }
 
-      } else if(!ship.target_planet && ship.system.get('enabled_colonize')){
+      if(!ship.target_planet && ship.system.get('enabled_colonize')){
 
         var potentials;
 
@@ -266,10 +276,12 @@ App.Models.Ship = Backbone.Model.extend({
           ship.set({
             'intent':'colonize'
           });
+          return;
+        }
 
-        } else if(ship.system.ships.filter(function(x){
+        if(ship.system.ships.filter(function(x){
           return (x != ship && x.empire === ship.empire && x.get('intent') === 'patrol');
-        }).length > 1){
+        }).length >= 1){
 
           // try and jump. if no suitable target then stay on patrol
           if(!ship.prepJump()){
@@ -278,21 +290,22 @@ App.Models.Ship = Backbone.Model.extend({
             });
           }
 
-        } else {
+          return;
+          
+        } 
 
-          // no potentials -- keep the system safe unless enough
-          // friendlies patrolling? go out-system and colonize
-          ship.set({
-            intent: 'patrol'
-          });
+        // no potentials -- keep the system safe unless enough
+        // friendlies patrolling? go out-system and colonize
+        ship.set({
+          intent: 'patrol'
+        });
 
-        }
 
       }
     }
-
+    
     ship.systemPhysics();
-
+    
   },
   prepJump: function(){
 

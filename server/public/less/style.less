@@ -30,17 +30,31 @@ body {
 
     .view {
         top: 64px;
-        
+
         &.view-default {
             h1 {
                 font-size: 48pt;
-                color: #69c;
+                color: #0cc;
             }
 
             ul {
                 list-style: none;
                 line-height: 140%;
+                text-align: center;
+                li {
+                    display: inline-block;
+                    margin: 8px;
+                    a {
+                        display: block;
+                        padding: 8px;
+                        background: #000;
+                        color: #999;
+                        font-weight: bold;
+                        border: 1px solid rgba(255, 0, 255, 0.2);
+                    }
+                }
             }
+
         }
 
     }
@@ -53,7 +67,7 @@ body {
     }
 
     .content {
-        background: #222;
+        background: #111;
 
         .toc {
             color: #000;
@@ -65,7 +79,7 @@ body {
                 }
                 color: #369;
                 &.available{
-                    color: #fff;
+                    color: #ddd;
                 }
             }
         }

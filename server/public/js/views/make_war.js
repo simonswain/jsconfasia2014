@@ -180,41 +180,28 @@ App.Views.make_war = Backbone.View.extend({
       ctx.closePath();
       ctx.fill();
 
+      // build %
+      if(planet.empire){
+        ctx.save();
+        ctx.translate(data.x, data.y);
+        var pctx = ((data.cr/data.shipcost)*100).toFixed(0);
+
+        ctx.fillStyle = 'rgba(255,255,255, 0.2);';
+        ctx.fillRect(-50, 0, 100, 8);
+        ctx.fillText(0, yy*1, 20, 20);
+
+        ctx.fillStyle = 'rgba(0,255,255, 0.5);';
+        ctx.fillRect(0 - pctx/2, 0, pctx, 8);
+        ctx.fillText(0, yy*1, 20, 20);
+        ctx.restore();
+      }
+      
+
       var theta = G.angle (self.w/2, self.h/2, data.x, data.y) + Math.PI/2;
       ctx.save();
       ctx.translate(data.x, data.y);
       ctx.rotate(theta);
       var yy = xh * 0.6;
-
-      // planet name
-      ctx.fillStyle = '#0cc';
-      ctx.font = 'bold 12pt arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(data.name, 0, - yy * 0.75);
-
-      // pop
-      ctx.font = 'normal 12pt arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillText(data.pop.toFixed(0), 0, yy * 0.75);
-
-      // build %
-      if(planet.empire){
-        ctx.font = 'normal 12pt arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillText( ((data.cr/data.shipcost)*100).toFixed(0) + '%', 0, yy*1.6);
-      }
-      
-      // ships landed
-      // if(planet.ships.length>0){
-      // ctx.fillStyle = '#000';
-      // ctx.textAlign = 'center';
-      // ctx.textBaseline = 'middle';
-      // ctx.font = 'bold 12pt arial';
-      // ctx.fillText(planet.ships.length, 0, 0);
-      // }
 
       planet.ships.each(function(ship, i){
 
@@ -228,7 +215,7 @@ App.Views.make_war = Backbone.View.extend({
 
         ctx.save();
         ctx.translate(x, y);        
-        //ctx.rotate(de_ra(data.a));
+        ctx.rotate(Math.PI);
         
         ctx.lineWidth = 4;
         ctx.beginPath();
@@ -270,8 +257,8 @@ App.Views.make_war = Backbone.View.extend({
       ctxfx.save();
       ctxfx.translate(data.x, data.y);        
       ctxfx.rotate(de_ra(data.a));
-      // // hit
 
+      // hit
       if(data.hit){
         ctx.beginPath(); 
         ctx.fillStyle = '#fff';
@@ -284,10 +271,9 @@ App.Views.make_war = Backbone.View.extend({
         ctxfx.arc(0, 0, z*4, 0, 2 * Math.PI, true);
         ctxfx.closePath();     
         ctxfx.fill();
-        //ship.set({'hit': false});
       }
 
-      ctx.lineWidth = z/2;
+      ctx.lineWidth = z;
       ctx.fillStyle = data.color;
       ctx.strokeStyle = data.color;
       ctx.beginPath();
@@ -302,24 +288,24 @@ App.Views.make_war = Backbone.View.extend({
  
       // shield
       ctx.beginPath(); 
-      ctx.lineWidth = z/4;
+      ctx.lineWidth = z;
       ctx.strokeStyle = color;
       ctx.arc(0, 0, xw/4 * Math.max(0, (data.energy / data.energy_max)), 0, 2 * Math.PI, true);
       ctx.closePath();     
       ctx.stroke();
 
-      ctx.fillStyle = '#fff';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = 'bold 10pt arial';
-      //ctx.fillText(ship.get('intent'), 0, -xh/4);
-      ctx.fillText( ((ship.get('energy')/ship.get('energy_max'))*100).toFixed(0), 0, xh/2);
+      // ctx.fillStyle = '#fff';
+      // ctx.textAlign = 'center';
+      // ctx.textBaseline = 'middle';
+      // ctx.font = 'bold 10pt arial';
+      // //ctx.fillText(ship.get('intent'), 0, -xh/4);
+      // ctx.fillText( ((ship.get('energy')/ship.get('energy_max'))*100).toFixed(0), 0, xh/2);
 
-      if(ship.target_planet){
-        ctx.fillText(ship.target_planet.get('name'), 0, -xh/4);
-      } else {
-        ctx.fillText(ship.get('intent'), 0, -xh/4);
-      }
+      // if(ship.target_planet){
+      //   ctx.fillText(ship.target_planet.get('name'), 0, -xh/4);
+      // } else {
+      //   ctx.fillText(ship.get('intent'), 0, -xh/4);
+      // }
 
       ctx.restore();
       ctxfx.restore();
@@ -347,22 +333,22 @@ App.Views.make_war = Backbone.View.extend({
 
     // scores
 
-    var yy = xh/2;
+    // var yy = xh/2;
 
-    ctx.font = 'bold 18pt arial';
-    ctx.fillStyle = '#888';
-    ctx.textAlign = 'center';
-    ctx.fillText('ships', xw, yy);
-    ctx.fillText('planets', 2.5 * xw, yy);
-    //ctx.fillText('systems', 2 * xw, yy);
+    // ctx.font = 'bold 18pt arial';
+    // ctx.fillStyle = '#888';
+    // ctx.textAlign = 'center';
+    // ctx.fillText('ships', xw, yy);
+    // ctx.fillText('planets', 2.5 * xw, yy);
+    // //ctx.fillText('systems', 2 * xw, yy);
 
-    self.empires.each(function(empire){
-      yy += xh * 0.75;
-      ctx.fillStyle = empire.get('color');
-      ctx.textAlign = 'center';
-      ctx.fillText(empire.ships.length, xw, yy);
-      ctx.fillText(empire.planets.length, 2.5 * xw, yy);
-    });
+    // self.empires.each(function(empire){
+    //   yy += xh * 0.75;
+    //   ctx.fillStyle = empire.get('color');
+    //   ctx.textAlign = 'center';
+    //   ctx.fillText(empire.ships.length, xw, yy);
+    //   ctx.fillText(empire.planets.length, 2.5 * xw, yy);
+    // });
 
     // ctx.fillStyle = '#fff';
     // ctx.font = 'bold 10pt arial';
