@@ -292,14 +292,13 @@ App.Models.Ship = Backbone.Model.extend({
 
           return;
           
-        } 
-
-        // no potentials -- keep the system safe unless enough
-        // friendlies patrolling? go out-system and colonize
-        ship.set({
-          intent: 'patrol'
-        });
-
+        } else {
+          // no potentials -- keep the system safe unless enough
+          // friendlies patrolling? go out-system and colonize
+          ship.set({
+            intent: 'patrol'
+          });
+        }
 
       }
     }
