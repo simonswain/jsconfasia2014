@@ -1,5 +1,5 @@
 App.Models.Ship = Backbone.Model.extend({
-  defaults: { 
+  defaults: {
 
     id: null,
     // ships spawn on planet
@@ -8,7 +8,7 @@ App.Models.Ship = Backbone.Model.extend({
     // initial intent is to load population
     intent: 'load',
 
-    name:'Ship', 
+    name:'Ship',
     boom: false,
     // in-system position and movement
     x: 0, // system x when in system
@@ -24,11 +24,11 @@ App.Models.Ship = Backbone.Model.extend({
     space_y: null,
 
     pop: 0, //  how many population the ship is carrying
-    max_pop: 1000,
+    max_pop: 5000,
 
     // vector away from planet cw or ccw
     rot: ((Math.random() > 0.5) ? 1 : -1),
-    
+
     // attributes
     jump_speed: 1, // warp drive speed
     jump_range: 1, // warp drive range
@@ -51,7 +51,7 @@ App.Models.Ship = Backbone.Model.extend({
   },
   interval: 20,
   initialize: function(vals, opts) {
-    _.bindAll(this, 
+    _.bindAll(this,
               'run','runSpace','runPlanet','runSpace',
               'systemPhysics','leavePlanet','boom', 'prepJump', 'doJump','unJump'
              );
@@ -65,7 +65,7 @@ App.Models.Ship = Backbone.Model.extend({
       laser_accuracy: random1to(10),
       laser_power: random0to(20) + 5,
       power: random0to(5),
-      thrust: 25 + random1to(30)/10,
+      thrust: 20 + random1to(50)/10,
       recharge: 1 + ( random1to(10) ) / 10,
       energy_max: energy,
       energy: energy
@@ -107,7 +107,14 @@ App.Models.Ship = Backbone.Model.extend({
         var getpop = planet.takePop(capacity);
         ship.set('pop', data.pop + getpop);
       }
-      
+
+      // for demo mode
+      if(planet.system.get('enabled_easy_spawn')){
+        ship.leavePlanet();
+        return;
+      }
+
+
       if(ship.get('pop') >= ship.get('max_pop')){
         // ready to leave
         ship.set('intent', 'colonize');
@@ -133,17 +140,27 @@ App.Models.Ship = Backbone.Model.extend({
         return total;
       }, 0);
 
-      if(enemies > 0){
+      friends = planet.system.ships.reduce(function(total, x){
+        if(!x){
+          return;
+        }
+        if(x.empire === ship.empire){
+          total ++;
+        }
+        return total;
+      }, 0);
+
+      if(enemies > friends){
         ship.leavePlanet();
         return;
       }
-      
+
       // shoot at target planet to remove population
       if(planet.get('pop') > 0 && data.energy > data.energy_max * 0.2) {
 
         // laser uses energy
         ship.set('energy', data.energy - 1);
-        planet.killPop(data.laser_power);         
+        planet.killPop(data.laser_power);
 
         // do some fx
         if(Math.random() < 0.25){
@@ -153,7 +170,7 @@ App.Models.Ship = Backbone.Model.extend({
             type: 'takeover',
             color: ship.empire.get('color'),
             ttl: 10
-          });          
+          });
         }
 
       }
@@ -168,7 +185,7 @@ App.Models.Ship = Backbone.Model.extend({
               pop: planet.get('pop') + x.get('pop')
             });
           }
-          x.boom('nop');         
+          x.boom('nop');
         });
 
         // colonize dead planet
@@ -187,7 +204,7 @@ App.Models.Ship = Backbone.Model.extend({
         });
         return;
       }
-      
+
     }
 
 
@@ -195,78 +212,87 @@ App.Models.Ship = Backbone.Model.extend({
   runSystem: function(){
 
     // things to do when the ship is in a system
-    var self = this;
+    var ship = this;
 
     // if enemy ships in system, then fight
-    if(!this.system){
+    if(!ship.system){
       return;
-    }
-
-    // else go to an unoccupied or enemy planet
-
-    // load up opts to tell physics what to do
-    var opts = {
-      fight: false,
-      jump: false
     }
 
     // how many enemies in the system
     var enemies;
-    enemies = this.system.ships.reduce(function(total, x){
+    enemies = ship.system.ships.reduce(function(total, x){
       if(!x){
         return;
       }
-      if(x.empire !== self.empire){
+      if(x.empire !== ship.empire){
         total ++;
       }
       return total;
     }, 0);
 
+
     if(enemies > 0){
-      opts.fight = true;
+      ship.set({
+        intent: 'fight'
+      });
     }
 
     // pick planet in local system to populate
     if(enemies === 0){
-      if(this.get('intent') === 'jump'){
-        opts.jump = true;
-      } else if(!this.target_planet){
+
+      if(ship.get('intent') === 'jump'){
+
+        // nop
+
+      } else if(!ship.target_planet && ship.system.get('enabled_colonize')){
+
         var potentials;
-        potentials = this.system.planets.reduce(function(list, planet){
+
+        potentials = ship.system.planets.reduce(function(list, planet){
           if(!planet){
             return total;
-          }         
-          if(planet.empire !== self.empire){
+          }
+          if(planet.empire !== ship.empire){
             list.push(planet);
           }
           return list;
         }, []);
 
-        // ship will thrust towards this planet
+        // ship will thrust towards ship planet
+
         if(potentials.length > 0){
-          this.target_planet = potentials[random0to(potentials.length)];
-          this.set({'intent':'colonize'});
-        } else if(this.system.ships.filter(function(x){
-          return (x != self && x.empire === self.empire && x.get('intent') === 'patrol');
+          ship.target_planet = potentials[random0to(potentials.length)];
+          ship.set({
+            'intent':'colonize'
+          });
+
+        } else if(ship.system.ships.filter(function(x){
+          return (x != ship && x.empire === ship.empire && x.get('intent') === 'patrol');
         }).length > 1){
+
           // try and jump. if no suitable target then stay on patrol
-          if(!self.prepJump()){
-            this.set({
+          if(!ship.prepJump()){
+            ship.set({
               intent: 'patrol'
             });
           }
+
         } else {
+
           // no potentials -- keep the system safe unless enough
           // friendlies patrolling? go out-system and colonize
-          this.set({
+          ship.set({
             intent: 'patrol'
           });
+
         }
+
       }
     }
-    
-    this.systemPhysics(opts);
-    
+
+    ship.systemPhysics();
+
   },
   prepJump: function(){
 
@@ -352,7 +378,7 @@ App.Models.Ship = Backbone.Model.extend({
 
 
       return 'mixed';
-      
+
     });
 
     if(targetGroups.contested){
@@ -374,9 +400,7 @@ App.Models.Ship = Backbone.Model.extend({
       // nowhere to go, stay in system. bad luck
       return false;
     }
-    //console.log(targetGroups);
     var target = targets[random0to(targets.length)];
-    //console.log(targets.length, this.system.get('name'), target.get('name'))
 
     this.target_system = target;
     this.origin_system = this.system;
@@ -406,7 +430,7 @@ App.Models.Ship = Backbone.Model.extend({
     // position on edge of system closest to origin system
 
     var theta = G.angle(this.target_system.get('x'), this.target_system.get('y'), this.origin_system.get('x'), this.origin_system.get('y'));
-    
+
     var r = this.target_system.get('radius');
     var x = this.target_system.get('w')/2 - (r * Math.cos(theta));
     var y = this.target_system.get('h')/2 - (r * Math.sin(theta));
@@ -444,12 +468,12 @@ App.Models.Ship = Backbone.Model.extend({
       this.unJump();
       return;
     }
-    
+
     var dist = range * (1 - (pct/100));
-    
+
     var space_x = ship.target_system.get('x') - (dist * Math.cos(theta));
     var space_y = ship.target_system.get('y') - (dist * Math.sin(theta));
-    
+
     ship.set({
       jump_pct: pct,
       space_x: space_x,
@@ -459,7 +483,7 @@ App.Models.Ship = Backbone.Model.extend({
 
   },
   boom: function(type, x, y){
-    
+
     if(this.get('boom')){
       return;
     }
@@ -515,14 +539,14 @@ App.Models.Ship = Backbone.Model.extend({
 
     // ship is destroyed!
     if (ship.damage > ship.energy_max) {
-      this.boom();
+      this.boom('ship');
       return;
     }
 
 
     this.set(ship);
     switch(state){
-      case 'planet':      
+      case 'planet':
       this.runPlanet();
       break;
 
@@ -554,22 +578,26 @@ App.Models.Ship = Backbone.Model.extend({
   enterPlanet: function(planet){
     this.planet = planet;
     this.set({state: 'planet'});
-    this.system.removeShip(this); 
+    this.system.removeShip(this);
     this.planet.ships.add(this);
   },
 
-  leavePlanet: function(){    
+  leavePlanet: function(){
     if(!this.planet){
       return;
     }
+    var system = this.planet.system;
     this.set({
       'x': this.planet.get('x'),
       'y': this.planet.get('y'),
       'state': 'system'
     });
+
     this.planet.ships.remove(this);
-    this.system.ships.add(this);
     this.planet = null;
+
+    this.system = system;
+    system.ships.add(this);
   },
 
   spacePhysics: function(){
@@ -588,43 +616,34 @@ App.Models.Ship = Backbone.Model.extend({
       return;
     }
 
-    var self = this;
+    var ship = this;
 
-    if(!opts){
-      opts = {};
-    }
+    var data = ship.toJSON();
 
-    var ship = this.toJSON();
-
-    var intent = ship.intent;
     var x, y, a, v, gx, gy, thrust, angle;
     var radius;
-    radius = this.system.get('radius');
+    radius = ship.system.get('radius');
 
-    ship.x = Number(ship.x);
-    ship.y = Number(ship.y);
+    data.x = Number(data.x);
+    data.y = Number(data.y);
 
-    ship.vx = 0; //Number(ship.vx);
-    ship.vy = 0; //Number(ship.vy);
-
-    ship.vx = Number(ship.vx);
-    ship.vy = Number(ship.vy);
-
-    thrust = Number(ship.thrust);
+    data.vx = Number(data.vx);
+    data.vy = Number(data.vy);
 
     // star gravity
-    this.system.stars.each(
+    ship.system.stars.each(
       function(star){
 
-        var g, px, py, angle;
+        var g, px, py, angle, vx, vy, tx, ty;
 
         px = star.get('x');
         py = star.get('y');
 
         // angle between ship and star
-        var theta = G.angle (px, py, ship.x, ship.y);
+        var theta = G.angle (px, py, data.x, data.y);
+
         // distance between ship and star
-        var r = G.distance (ship.x, ship.y, px, py);
+        var r = G.distance (data.x, data.y, px, py);
 
         // force of gravity from stars on ship
         g = 300 * ( 5 / ( r * r ) )
@@ -636,70 +655,255 @@ App.Models.Ship = Backbone.Model.extend({
         }
 
         // convert gravity to xy. apply
-	ship.vx = ship.vx + g * Math.cos(theta);
-	ship.vy = ship.vy + g * Math.sin(theta);
+        vx = g * Math.cos(theta);
+        vy = g * Math.sin(theta);
 
         // thrust vector across star's pull
-        angle = de_ra ( ra_de (theta) + (ship.rot * 90) ); 
-        var tx = (3 * ship.thrust * g) * Math.cos(angle)
-        var ty = (3 * ship.thrust * g) * Math.sin(angle)
-        ship.vx = ship.vx + tx;
-        ship.vy = ship.vy + ty;
-
+        angle = de_ra ( ra_de (theta) + (data.rot * 90) );
+        var tx = (0.1 * data.thrust * g) * Math.cos(angle);
+        var ty = (0.1 * data.thrust * g) * Math.sin(angle);
+        data.vx = data.vx + vx + tx;
+        data.vy = data.vy + vy + ty;
       });
 
 
-    // planet gravity
-    this.system.planets.each(
+    // // planet gravity
+    ship.system.planets.each(
       function(planet){
 
-        var g, px, py, angle;
+        var g, px, py, angle, vx, vy, tx, ty;
 
         px = planet.get('x');
         py = planet.get('y');
 
         // angle between ship and planet
-        var theta = G.angle (px, py, ship.x, ship.y);
-        // distance between ship and planet
-        var r = G.distance (ship.x, ship.y, px, py);
+        var theta = G.angle (px, py, data.x, data.y);
 
+        // distance between ship and planet
+        var r = G.distance (data.x, data.y, px, py);
+
+        if(r < 5){
+          return;
+        }
         // force of gravity from planets on ship
-        g = 150 * ( 5 / ( r * r ) )
-        //g = 1000 * ( 50 / ( r * r ) )
+        g = 200 * ( 5 / ( r * r ) )
 
         // max gravity
-        if ( g > 0.25 ) {
-          g = 0.25;
+        if ( g > 0.2 ) {
+          g = 0.2;
         }
 
         // convert gravity to xy. apply
-	ship.vx = ship.vx + g * Math.cos(theta);
-	ship.vy = ship.vy + g * Math.sin(theta);
-
-
+        vx = g * Math.cos(theta);
+        vy = g * Math.sin(theta);
         // thrust vector across planet's pull
-        if(this.target_planet !== planet){
-          angle = de_ra ( ra_de (theta) + (ship.rot * 90) ); 
-          var tx = (0.2 * ship.thrust * g) * Math.cos(angle)
-          var ty = (0.2 * ship.thrust * g) * Math.sin(angle)
-          ship.vx = ship.vx + tx;
-          ship.vy = ship.vy + ty;
+        if(ship.target_planet !== planet){
+          angle = de_ra ( ra_de (theta) + (data.rot * 90) );
+          tx = (0.05 * data.thrust * g) * Math.cos(angle);
+          ty = (0.05 * data.thrust * g) * Math.sin(angle);
+          data.vx = data.vx + vx + tx;
+          data.vy = data.vy + vy + ty;
         }
 
       });
 
+    // flocking with friends
+    var separation = function(){
+
+      ship.system.ships.each(function(model){
+
+        var vx, vy;
+
+        vx = 0;
+        vy = 0;
+
+        if(model.get('boom') === true){
+          return;
+        }
+
+        // must be in system space
+        if(model.get('state') !== 'system'){
+          return;
+        }
+
+        if(model === ship){
+          return;
+        }
+
+        // friendly
+        if(model.empire !== ship.empire){
+          return;
+        }
+
+        var other = model.toJSON();
+        var range = G.distance (other.x, other.y, data.x, data.y);
+
+        if(range > 0 && range < radius * 0.2){
+          var angle = G.angle (other.x, other.y, data.x, data.y);
+          vx -= 0.1 * data.thrust * Math.cos(angle) * (1/range);
+          vy -= 0.1 * data.thrust * Math.sin(angle) * (1/range);
+        }
+
+        data.vx = data.vx + vx;
+        data.vy = data.vy + vy;
+      });
+    }();
+
+    // find closest smaller enemy and move towards it
+    var chase = function(){
+      var enemy = false;
+      var closest = Infinity;
+      ship.system.ships.each(function(model){
+
+        var vx, vy;
+
+        vx = 0;
+        vy = 0;
+
+        if(model.get('boom') === true){
+          return;
+        }
+
+        // must be in system space
+        if(model.get('state') !== 'system'){
+          return;
+        }
+
+        if(model === ship){
+          return;
+        }
+
+        // friendly
+        if(model.empire === ship.empire){
+          return;
+        }
+
+        // don't chase bigger enemies
+        if(model.get('energy') > data.energy){
+          return;
+        }
+
+        var range = G.distance (data.x, data.y, model.get('x'), model.get('y'));
+
+
+        if(range < closest){
+          closest = range;
+          enemy = model;
+        }
+      });
+
+
+      if(enemy){
+        // vector aray at 45 degrees
+        var other = enemy.toJSON();
+        var angle = G.angle (other.x, other.y, data.x, data.y);
+        angle = de_ra ( ra_de (angle) + (data.rot * 45) );
+        if(closest > 0){
+          vx = data.thrust * Math.cos(angle) * (1/closest);
+          vy = data.thrust * Math.sin(angle) * (1/closest);
+          data.vx = data.vx + vx;
+          data.vy = data.vy + vy;
+        }
+      }
+
+    }();
+
+
+    // find closest smaller enemy and move towards it
+    var flee = function(){
+
+      var vx, vy;
+
+      vx = 0;
+      vy = 0;
+
+      ship.system.ships.each(function(model){
+
+        if(model.get('boom') === true){
+          return;
+        }
+
+        // must be in system space
+        if(model.get('state') !== 'system'){
+          return;
+        }
+
+        if(model === ship){
+          return;
+        }
+
+        // friendly
+        if(model.empire === ship.empire){
+          return;
+        }
+
+        // don't run from smaller enemies
+        if(model.get('energy') < data.energy){
+          return;
+        }
+
+        var range = G.distance (data.x, data.y, model.get('x'), model.get('y'));
+        if(isNaN(range)){
+          console.log(range, data.y, data.y, model.get('x'), model.get('y'));
+        }
+        // if too far away, don't worry
+        if(range === 0 || range > radius * 0.2){
+          return;
+        }
+
+        var other = model.toJSON();
+        var angle = G.angle (data.x, data.y, other.x, other.y);
+        vx += data.thrust * Math.cos(angle) * (1/range);
+        vy += data.thrust * Math.sin(angle) * (1/range);
+
+      });
+
+      data.vx = data.vx + vx;
+      data.vy = data.vy + vy;
+
+    }();
+
+    var force_center = function(){
+
+      // distance from center of system. turn back towards center
+      // proportional to distance. at system radius, should be facing
+      // system center
+
+      var range = G.distance (data.x, data.y, ship.system.get('w')/2, ship.system.get('h')/2);
+      var theta = G.angle (ship.system.get('w')/2, ship.system.get('h')/2, data.x, data.y);
+
+      // create force proportional to distance from cenetr
+      var f = (range / radius);
+
+      // max force
+      // convert force to xy vector and apply
+      data.vx = data.vx + (f * Math.cos(theta));
+      data.vy = data.vy + (f * Math.sin(theta));
+
+    }();
+
+
     //find enemy ships and attack
-    var fight = function(){
+    var attack = function(){
 
-      var c = 0;
-      var t = 0;
-      var a = 0;       
+      if(data.intent !== 'fight'){
+        return;
+      }
 
-      ship.laser = false;
-      ship.laser_x = null;
-      ship.laser_y = null;
+      if(!ship.system.get('enabled_fight')){
+        return;
+      }
 
-      self.system.ships.each(function(model){
+
+      data.laser = false;
+      data.laser_x = null;
+      data.laser_y = null;
+
+      ship.system.ships.each(function(model){
+
+        if(data.laser){
+          return;
+        }
 
         if(model.get('boom') === true){
           return;
@@ -711,74 +915,65 @@ App.Models.Ship = Backbone.Model.extend({
         }
 
         // friendly
-        if(model.empire === self.empire){
+        if(model.empire === ship.empire){
           return;
-        }       
-
-        var other = model.toJSON();
-        var theta = G.angle (other.x, other.y, ship.x, ship.y);
-        var range = G.distance (other.x, other.y, ship.x, ship.y);
-
-        // chase or tun
-        if(true || range < radius * 0.2){
-          c ++;
-          
-          // always attack
-          //a = a + de_ra (ra_de (theta));
-
-          // run away from bigger, chase smaller. if energy < 20%
-          // always run
-          if (other.power > ship.power || ship.energy < ship.energy_max * 0.2) {
-            a = a + de_ra ( ra_de (theta) + 180 );
-          } else { 
-            a = a + de_ra (ra_de (theta));
-          }
         }
 
+        var other = model.toJSON();
+        var theta = G.angle (data.x, data.y, other.x, other.y);
+        var range = G.distance (other.x, other.y, data.x, data.y);
+
         // enemy in range to shoot?
-        if(!ship.laser && range < (2 * radius * ship.laser_range) && ship.energy > ship.energy_max * 0.2 ) {
+        if(range < (1.3 * radius * data.laser_range) && data.energy > data.energy_max * 0.2 ) {
+
+          if(Math.random() > 0.5){
+            return
+          }
+
           // laser uses energy
-          ship.energy = ship.energy - 1;
-          ship.laser = true;
+          data.energy = data.energy - 1;
+          data.laser = true;
           var f = ( random1to(2) === 1 ) ? -1 : 1;
-          ship.laser_x = other.x + ( f * random1to( 20 - ship.laser_accuracy ) );
-          ship.laser_y = other.y + ( f * random1to( 20 - ship.laser_accuracy ) );
-          if (G.distance (ship.laser_x, ship.laser_y, other.x, other.y) < radius / 10 ) {
+          data.laser_x = other.x + ( f * random1to( 20 - data.laser_accuracy ) );
+          data.laser_y = other.y + ( f * random1to( 20 - data.laser_accuracy ) );
+          if (G.distance (data.laser_x, data.laser_y, other.x, other.y) < radius / 10 ) {
             model.set({
               hit: true,
-              energy: Math.max(0, other.energy - ship.laser_power),
-              damage: other.damage + ship.laser_power
+              energy: Math.max(0, other.energy - data.laser_power * 1.0),
+              damage: other.damage + data.laser_power * 0.5
             });
           }
         }
       });
 
-      if(c>0){
-        a = a / c;
-        a = a % 360;
-	ship.vx = ship.vx + (0.2 * ship.thrust) * Math.cos(a);
-	ship.vy = ship.vy + (0.2 * ship.thrust) * Math.sin(a);          
+    }();
+
+
+    var target_planet = function(){
+
+      if(data.intent === 'fight'){
+        return;
       }
 
-    };
-    
-    var target_planet = function(){
-      
-      var planet = self.target_planet;
+      if(!ship.target_planet){
+        return;
+      }
+
+      var planet = ship.target_planet;
 
       // already colonized?
-      if(planet.empire === self.empire){
-        self.target_planet = false;
+      if(planet.empire === ship.empire){
+        ship.target_planet = false;
         return;
       }
 
       // how many enemies in the system
       var enemies;
-      enemies = self.system.ships.reduce(function(total, x){
+      enemies = ship.system.ships.reduce(function(total, x){
         if(!x){
           return;
         }
-        if(x.empire !== self.empire){
+        if(x.empire !== ship.empire){
           total ++;
         }
         return total;
@@ -789,95 +984,92 @@ App.Models.Ship = Backbone.Model.extend({
         return;
       }
 
-      var theta = G.angle (planet.get('x'), planet.get('y'), ship.x, ship.y);
-      ship.vx += (0.2 * ship.thrust) * Math.cos(theta);
-      ship.vy += (0.2 * ship.thrust) * Math.sin(theta);
-      var range = G.distance (planet.get('x'), planet.get('y'), ship.x, ship.y);
+      var theta = G.angle (planet.get('x'), planet.get('y'), data.x, data.y);
+      data.vx += (0.05 * data.thrust) * Math.cos(theta);
+      data.vy += (0.05 * data.thrust) * Math.sin(theta);
+      var range = G.distance (planet.get('x'), planet.get('y'), data.x, data.y);
 
       // if in range, go in to orbit and try to take over planet
       if(range < (radius * 0.05)) {
-        self.enterPlanet(planet);
+        ship.enterPlanet(planet);
         return;
       }
-    };
+    }();
 
     var jumpzone = function(){
-      var theta = G.angle (self.system.get('w')/2, self.system.get('h')/2, ship.x, ship.y) + Math.PI;
-      ship.vx += (.5 * ship.thrust) * Math.cos(theta);
-      ship.vy += (.5 * ship.thrust) * Math.sin(theta);
-      var range = (self.system.get('w')/2, self.system.get('h')/2, ship.x, ship.y);
-      //if(range > self.system.get('radius') * 0.4){
-        self.doJump();
+      var theta = G.angle (ship.system.get('w')/2, ship.system.get('h')/2, data.x, data.y) + Math.PI;
+      data.vx += (.5 * data.thrust) * Math.cos(theta);
+      data.vy += (.5 * data.thrust) * Math.sin(theta);
+      var range = (ship.system.get('w')/2, ship.system.get('h')/2, data.x, data.y);
+      //if(range > ship.system.get('radius') * 0.4){
+      ship.doJump();
       //}
     };
 
-    if(opts.fight){
-      fight();
-    }
-
-    if(!opts.fight && this.target_planet){
-      target_planet();
-    }
 
 
-    if(opts.jump){
+    if(data.intent === 'jump'){
       // fly to jump safe area (outer system)
-        self.doJump();
+        ship.doJump();
       //jumpzone();
     }
 
     // // ship thrust based on intent
-    
+
     // // console.log(angle, thrust);
-    // if(intent === 'jump'){
+    // if(data.intent === 'jump'){
     //   // thrust away from planet to get to edge of system
-    //   angle = de_ra ( ra_de (theta) + 180 ); 
-    //   ship.vx = ship.vx + (0.5 * thrust) * Math.cos(angle);
-    //   ship.vy = ship.vy + (0.5 * thrust) * Math.sin(angle);
+    //   angle = de_ra ( ra_de (theta) + 180 );
+    //   ship.vx = ship.vx + (0.5 * data.thrust) * Math.cos(angle);
+    //   ship.vy = ship.vy + (0.5 * data.thrust) * Math.sin(angle);
     // }
 
-    // if(intent === 'jump'){
-    // thrust to edge of system in direction of target star (safe jump range)
-    // }
-    
     // damping
-    ship.vx = ship.vx * 0.92;
-    ship.vy = ship.vy * 0.92;
+    data.vx = data.vx * 0.92;
+    data.vy = data.vy * 0.92;
 
     // angle ship is facing from movement vector
-    ship.a = ra_de ( G.angle ( 0, 0, ship.vx, ship.vy ) ) - 90;
+    data.a = ra_de ( G.angle ( 0, 0, data.vx, data.vy ) ) - 90;
 
-    ship.x += Number(ship.vx);
-    ship.y += Number(ship.vy);
+    if(isNaN(data.vx)){
+      data.vx = 0;
+    }
+
+    if(isNaN(data.vy)){
+      data.vy = 0;
+    }
+
+    data.x = Number(data.x) + Number(data.vx);
+    data.y = Number(data.y) + Number(data.vy);
 
     // stay in system bounds
-    if(this.system){
-      if ( ship.x < 0 ) {
-        ship.x = 0;
+    if(ship.system){
+      if ( data.x < 0 ) {
+        data.x = 0;
       }
 
-      if ( ship.x > this.system.get('w') ) {
-        ship.x = this.system.get('w');
+      if ( data.x > ship.system.get('w') ) {
+        data.x = ship.system.get('w');
       }
 
-      if ( ship.y < 0 ) {
-        ship.y = 0;
+      if ( data.y < 0 ) {
+        data.y = 0;
       }
 
-      if ( ship.y > this.system.get('h') ) {
-        ship.y = this.system.get('h');
+      if ( data.y > ship.system.get('h') ) {
+        data.y = ship.system.get('h');
       }
     }
 
-    this.set({
-      x: ship.x,
-      y: ship.y,
-      vx: ship.vx,
-      vy: ship.vy,
-      a: ship.a,
-      laser: ship.laser,
-      laser_x: ship.laser_x,
-      laser_y: ship.laser_y
+    ship.set({
+      x: data.x,
+      y: data.y,
+      vx: data.vx,
+      vy: data.vy,
+      a: data.a,
+      laser: data.laser,
+      laser_x: data.laser_x,
+      laser_y: data.laser_y
     });
   },
 

@@ -3,7 +3,7 @@
 /*jshint browser:true */
 /*jshint strict:false */
 
-App.Views.make_war = Backbone.View.extend({
+App.Views.make_fight = Backbone.View.extend({
   template: _.template('<div class="canvas"></div><div class="fx"></div>'),
   initialize : function(opts) {
     _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick');
@@ -154,6 +154,7 @@ App.Views.make_war = Backbone.View.extend({
       ctx.stroke();
       ctx.closePath();
 
+
       data.x = Number(data.x);
       data.y = Number(data.y);
 
@@ -186,65 +187,6 @@ App.Views.make_war = Backbone.View.extend({
       ctx.rotate(theta);
       var yy = xh * 0.6;
 
-      // planet name
-      ctx.fillStyle = '#0cc';
-      ctx.font = 'bold 12pt arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText(data.name, 0, - yy * 0.75);
-
-      // pop
-      ctx.font = 'normal 12pt arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillText(data.pop.toFixed(0), 0, yy * 0.75);
-
-      // build %
-      if(planet.empire){
-        ctx.font = 'normal 12pt arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.fillText( ((data.cr/data.shipcost)*100).toFixed(0) + '%', 0, yy*1.6);
-      }
-      
-      // ships landed
-      // if(planet.ships.length>0){
-      // ctx.fillStyle = '#000';
-      // ctx.textAlign = 'center';
-      // ctx.textBaseline = 'middle';
-      // ctx.font = 'bold 12pt arial';
-      // ctx.fillText(planet.ships.length, 0, 0);
-      // }
-
-      planet.ships.each(function(ship, i){
-
-        var x = xw/6 * data.size + (xw/6 * i);
-        var y = 0;
-        var z = xw / 16;
-
-        var color = ship.empire.get('color');
-        ctx.fillStyle = color;
-        ctx.strokeStyle = color;
-
-        ctx.save();
-        ctx.translate(x, y);        
-        //ctx.rotate(de_ra(data.a));
-        
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(0, -1.5*z);
-        ctx.lineTo(z, z);
-        ctx.lineTo(0, 0);
-        ctx.lineTo(-z, z);
-        ctx.lineTo(0, -1.5*z);
-        ctx.closePath();     
-        ctx.stroke();
-        ctx.fill();
-        
-        ctx.restore();
-
-      });
-
       ctx.restore();
 
     });
@@ -274,7 +216,7 @@ App.Views.make_war = Backbone.View.extend({
 
       if(data.hit){
         ctx.beginPath(); 
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4);';
         ctx.arc(0, 0, z*4, 0, 2 * Math.PI, true);
         ctx.closePath();     
         ctx.fill();
@@ -302,7 +244,7 @@ App.Views.make_war = Backbone.View.extend({
  
       // shield
       ctx.beginPath(); 
-      ctx.lineWidth = z/4;
+      ctx.lineWidth = z/2;
       ctx.strokeStyle = color;
       ctx.arc(0, 0, xw/4 * Math.max(0, (data.energy / data.energy_max)), 0, 2 * Math.PI, true);
       ctx.closePath();     
@@ -312,14 +254,8 @@ App.Views.make_war = Backbone.View.extend({
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = 'bold 10pt arial';
-      //ctx.fillText(ship.get('intent'), 0, -xh/4);
-      ctx.fillText( ((ship.get('energy')/ship.get('energy_max'))*100).toFixed(0), 0, xh/2);
 
-      if(ship.target_planet){
-        ctx.fillText(ship.target_planet.get('name'), 0, -xh/4);
-      } else {
-        ctx.fillText(ship.get('intent'), 0, -xh/4);
-      }
+      ctx.fillText( ((ship.get('energy')/ship.get('energy_max'))*100).toFixed(0), 0, xh/2);
 
       ctx.restore();
       ctxfx.restore();
@@ -344,30 +280,6 @@ App.Views.make_war = Backbone.View.extend({
       }
 
     });
-
-    // scores
-
-    var yy = xh/2;
-
-    ctx.font = 'bold 18pt arial';
-    ctx.fillStyle = '#888';
-    ctx.textAlign = 'center';
-    ctx.fillText('ships', xw, yy);
-    ctx.fillText('planets', 2.5 * xw, yy);
-    //ctx.fillText('systems', 2 * xw, yy);
-
-    self.empires.each(function(empire){
-      yy += xh * 0.75;
-      ctx.fillStyle = empire.get('color');
-      ctx.textAlign = 'center';
-      ctx.fillText(empire.ships.length, xw, yy);
-      ctx.fillText(empire.planets.length, 2.5 * xw, yy);
-    });
-
-    // ctx.fillStyle = '#fff';
-    // ctx.font = 'bold 10pt arial';
-    // ctx.textAlign = 'right';
-    // ctx.fillText(this.system.ships.length, this.w - xw, xh);
 
     ctx.restore();
     ctxfx.restore();
@@ -396,10 +308,15 @@ App.Views.make_war = Backbone.View.extend({
     this.booms = [];
    
     this.system = new App.Models.System({
-      planetCount: 6,
+      planetCount: 5,
       w: this.w,
       h: this.h,
       radius: Math.min(this.w, this.h),
+      max_empire_ships: 2,
+      enabled_easy_spawn: true,
+      enabled_fight: true,
+      enabled_colonize: false
+      
     });
 
     var empire;
@@ -415,7 +332,7 @@ App.Views.make_war = Backbone.View.extend({
 
     empire = new App.Models.Empire({
       name: 'Criminal Element',
-      color: '#cc0'
+      color: '#0cc'
     });
     this.empires.add(empire);
     empire.addPlanet(this.system.planets.at(1));

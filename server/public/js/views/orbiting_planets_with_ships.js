@@ -84,11 +84,41 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
       }
     }();
 
+
+    var draw_ship_vectors = function(){
+      var rr = Math.max(self.w, self.h);
+      self.ships.forEach(function(ship){
+
+        var r = G.distance(ship.x, ship.y, self.w/2, self.h/2);
+        var f = 1 - (r/rr);
+        ctx.strokeStyle = 'rgba(255, 0, 255,' + f/2 + ');';
+        ctx.lineWidth = 2; 
+        ctx.beginPath();
+        ctx.moveTo(ship.x, ship.y);
+        ctx.lineTo(self.w/2, self.h/2);
+        ctx.stroke();   
+
+        self.planets.forEach(function(planet){
+          var r = G.distance(ship.x, ship.y, planet.x, planet.y);
+          var f = 1 - (r/rr);
+          ctx.strokeStyle = 'rgba(255, 0, 255,' + f/2 + ');';
+          ctx.lineWidth = 1; 
+          ctx.beginPath();
+          ctx.moveTo(ship.x, ship.y);
+          ctx.lineTo(planet.x, planet.y);
+          ctx.stroke();   
+        });
+      });
+
+    }();
+
     // planets
     var draw_planets = function(){
       var planet;
       for (var i in self.planets) {
         planet = self.planets[i];
+        var theta = G.angle (planet.x, planet.y, self.w/2, self.h/2);
+
         ctx.fillStyle = '#0cc';
         ctx.strokeStyle = '#0ff';
         ctx.lineWidth = 2;
@@ -97,16 +127,25 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
         ctx.fill();
         ctx.stroke();
 
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.beginPath();
+        ctx.arc(planet.x, planet.y, xw/32 * planet.size, theta - (0.5*Math.PI), theta + (0.5*Math.PI), false);
+        ctx.closePath();
+        ctx.fill();
+
         ctxfx.fillStyle = '#0cc';
         ctxfx.strokeStyle = '#0ff';
         ctxfx.lineWidth = 2;
         ctxfx.beginPath();
-        ctxfx.arc(planet.x, planet.y, planet.size * xw/96, 0, 2 * Math.PI, true);
+        ctxfx.arc(planet.x, planet.y, xw/64, 0, 2 * Math.PI, true);
+
+
         ctxfx.fill();
         ctxfx.stroke();
 
       }
     }();
+
 
 
     var draw_ships = function(){
@@ -126,7 +165,7 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
         ctxfx.strokeStyle = 'rgba(100%,100%,100%,1)';	
         ctxfx.lineWidth = 2;			
         ctxfx.beginPath();
-        ctxfx.arc(ship.x, ship.y, xw/32, 0, 2 * Math.PI, true);
+        ctxfx.arc(ship.x, ship.y, xw/64, 0, 2 * Math.PI, true);
         ctxfx.fill();
         ctxfx.stroke();   
 
@@ -312,7 +351,7 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
     }();
    
     var init_planets = function(){
-      for(var i=0, ii = random1to(3) + 1; i<ii; i++){
+      for(var i=0, ii = 2 + random1to(3); i < ii; i++){
         self.planets.push (self.makePlanet());
       }
     }();
@@ -326,16 +365,59 @@ App.Views.orbiting_planets_with_ships = Backbone.View.extend({
     return star;
   },
   makePlanet: function() {
+
+    var r, a, v, d;
+
+    var rr = Math.min(this.w,this.h);
+    var spacing = rr * 0.05;
+
+    var gen = function(){
+      var r = (rr * 0.1) + (random.from0to(rr) * 0.4);
+      //var r = ((0.05 * rr) + (0.41 * random.from0to(rr))).toFixed(2);
+      return r;
+    };
+
+    if(this.planets.length === 0){
+      r = gen();
+    }
+
+    var ok = false;
+    while (this.planets.length > 0 && !ok){
+      ok = true;
+      r = gen();
+      _.each(this.planets, function(p){
+        var dd = Math.abs(p.r - r);
+        if (dd < spacing){
+          ok = false;
+        }
+      });
+    }
+
+    d = random.from0to(360),
+    v = 0.0001 * (25 + random.from0to(75));
+    //v = 0.00001 * (random.from0to(2000));
+    
     var planet = {
-      size: random.from0to(Math.min(this.w,this.h) * 0.01),
-      r: Math.min(this.w,this.h) * 0.1 + random.from0to(Math.min(this.w,this.h) * 0.4),
-      d: random.from0to(360),
-      v: 0.0001 * (random.from0to(100)),
+      size: (rr * 0.01) + random.from0to(rr * 0.01),
+      r: r,
+      d: d,
+      v: v,
       x: 0,
       y: 0
     };
     return planet;
   },
+  // makePlanet: function() {
+  //   var planet = {
+  //     size: random.from0to(Math.min(this.w,this.h) * 0.01),
+  //     r: Math.min(this.w,this.h) * 0.1 + random.from0to(Math.min(this.w,this.h) * 0.4),
+  //     d: random.from0to(360),
+  //     v: 0.0001 * (random.from0to(100)),
+  //     x: 0,
+  //     y: 0
+  //   };
+  //   return planet;
+  // },
   start: function () {
     this.init();
     this.running = true;

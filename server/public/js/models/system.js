@@ -7,7 +7,12 @@ App.Models.System = Backbone.Model.extend({
     w: 1024,
     h: 1024,
     x: null,
-    y: null
+    y: null,
+    // for demo modes set to false
+    max_empire_ships: 2,
+    enabled_easy_spawn: false,
+    enabled_fight: true,
+    enabled_colonize: true
   },
   interval: 25,
   initialize: function(opts) {
@@ -48,13 +53,26 @@ App.Models.System = Backbone.Model.extend({
         return;
       }
       if(ship.get('boom')){
+        var ttl = 10;
+        var type = ship.get('boom');
+        if(type === 'ship'){
+          ttl = 20;
+          // additional boom for ship
+          self.booms.push({
+            x: ship.get('x'),
+            y: ship.get('y'),
+            color: '#fff',
+            ttl: 5
+          });
+        }
         self.booms.push({
           x: ship.get('x'),
           y: ship.get('y'),
           color: ship.get('color'),
-          ttl: 5,
-          type: ship.get('boom')
+          ttl: ttl,
+          type: type
         });
+
         self.ships.remove(ship);
       }
     });
@@ -123,6 +141,15 @@ App.Models.System = Backbone.Model.extend({
     while(this.planets.length < this.planetCount){
       this.addPlanet();
     }
+    this.planets.sort();
+    // rename planets in order
+    this.planets.each(function(x, i){
+    var name = NATO[i];
+      name = name.substr(0,1).toUpperCase() + name.substr(1);
+      x.set({
+        name: name
+      });
+    });
   },
 
   addPlanet: function(i){

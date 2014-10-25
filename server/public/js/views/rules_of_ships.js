@@ -210,7 +210,7 @@ App.Views.rules_of_ships = Backbone.View.extend({
       // energy
       ctx.fillStyle = '#444';
       ctx.fillRect(this.w/2 + 2 * tw, th - th/4, (6*tw/50) * 50, th*0.8);
-      ctx.fillStyle = '#cc0';
+      ctx.fillStyle = '#c0c';
       ctx.fillRect(this.w/2 + 2 * tw, th - th/4, (6*tw/this.ships[1].energy_max) * this.ships[1].energy, th*0.8);
       ctx.closePath();
       
@@ -238,7 +238,7 @@ App.Views.rules_of_ships = Backbone.View.extend({
     ctx.fillText(this.scores[0], xw/2, this.h * 0.8);
 
     ctx.font = '48pt arial';
-    ctx.fillStyle = '#cc0';
+    ctx.fillStyle = '#c0c';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText(this.scores[1], this.w - xw/2, this.h * 0.8);
@@ -510,9 +510,9 @@ App.Views.rules_of_ships = Backbone.View.extend({
     this.ships[1].x = this.w/2 + 2 * xw;
     this.ships[1].y = this.h/2 - xh;
     this.ships[1].a = 180;
-    this.ships[1].hue = '#ff0';
-    this.ships[1].color = '#ff0';
-    this.ships[1].tint =  'rgba(255,255,0,0.25)';
+    this.ships[1].hue = '#f0f';
+    this.ships[1].color = '#f0f';
+    this.ships[1].tint =  'rgba(255,0,255,0.25)';
 
     this.restarter = setTimeout(this.init.bind(this), 15000);
     setTimeout(this.tick.bind(this), this.period);
@@ -550,8 +550,8 @@ App.Views.rules_of_ships = Backbone.View.extend({
     }
     if ( hue === 1 ) {
       // red
-      var color = '#ff0000';
-      var tint = 'rgba(255,0,0,0.5)';
+      var color = '#ff00ff';
+      var tint = 'rgba(255,0,255,0.5)';
     }
     if ( hue === 2 ) {
       // yellow

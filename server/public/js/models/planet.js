@@ -1,15 +1,15 @@
 App.Models.Planet = Backbone.Model.extend({
   defaults: {
-    'name':'Unknown Planet',
-    'age': 0,
-    'interval': 100,
-    'x': 0,
-    'y': 0,
-    'r': 0, // orbit radius
-    'a': 0, // orbit angle
-    'v': 0.0001, //orbital velocity in degrees
+    name:'Unknown Planet',
+    age: 0,
+    interval: 100,
+    x: 0,
+    y: 0,
+    r: 0, // orbit radius
+    a: 0, // orbit angle
+    v: 0.0001, //orbital velocity in degrees
     size: 1, // size for drawing
-
+    
     land: 1000, // available area
     agr: 0,
     pop: 0,
@@ -62,7 +62,8 @@ App.Models.Planet = Backbone.Model.extend({
         r = gen();
       }
       a = random.from0to(360),
-      v = 0.001 + (random.from0to(100)/10000);
+      //v = 0.001 + (random.from0to(100)/10000);
+      v = 0.0001 * (25 + random.from0to(75));
 
       var ok = false;
       while (this.system.planets.length > 0 && !ok){
@@ -195,10 +196,11 @@ App.Models.Planet = Backbone.Model.extend({
 
       // wrap in check for system so planet can be simmed in isolation
 
-      // if(this.system.empire && this.system.ships.length === 0){
-      //   this.spawnShip();
-      // }
+      if(this.system.get('enabled_easy_spawn')){
+        this.spawnShip();
+      }
 
+      //this.spawnShip();
       if(this.get('cr') > this.get('shipcost')){
         this.spawnShip();
       }
@@ -274,7 +276,7 @@ App.Models.Planet = Backbone.Model.extend({
       return (x.empire === self.empire);
     });
     
-    if(friends.length > 2){
+    if(friends.length > self.system.get('max_empire_ships')){
       return;
     }
 
@@ -288,15 +290,14 @@ App.Models.Planet = Backbone.Model.extend({
       y: this.get('y')
     }, {
       empire: this.empire,
-      system: this.system,
       planet: this
     });
+
+    // add to planets empire
+    this.empire.addShip(ship);
 
     // add to planet's ships
     this.addShip(ship);
     
-    // add to planets empire
-    this.empire.addShip(ship);
-
   }
 });

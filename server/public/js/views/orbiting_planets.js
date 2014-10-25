@@ -28,7 +28,7 @@ App.Views.orbiting_planets = Backbone.View.extend({
     ctx.save();
     ctxfx.save();
 
-    ctxfx.fillStyle = 'rgba(1,1,1,.05)';
+    ctxfx.fillStyle = 'rgba(1,1,1,.02)';
     ctxfx.fillRect(0,0, this.cw,this.ch);
 
     ctx.clearRect(0,0,this.cw,this.ch);
@@ -63,13 +63,11 @@ App.Views.orbiting_planets = Backbone.View.extend({
         ctx.lineTo(planet.x, planet.y);
         ctx.stroke();   
 
-        ctxfx.fillStyle = '#0cc';
-        ctxfx.strokeStyle = '#0ff';
-        ctxfx.lineWidth = 2;
+        ctxfx.fillStyle = '#0ff';
         ctxfx.beginPath();
-        ctxfx.arc(planet.x, planet.y, planet.size * xw/128, 0, 2 * Math.PI, true);
+        ctxfx.arc(planet.x, planet.y, xw/64, 0, 2 * Math.PI, true);
         ctxfx.fill();
-        ctxfx.stroke();
+        ctxfx.closePath();
 
       }
     }();
@@ -79,15 +77,35 @@ App.Views.orbiting_planets = Backbone.View.extend({
       var planet;
       for (var i in self.planets) {
         planet = self.planets[i];
+        var theta = G.angle (planet.x, planet.y, self.w/2, self.h/2);
 
         ctx.fillStyle = '#0cc';
         ctx.strokeStyle = '#0ff';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(planet.x, planet.y, planet.size * xw/48, 0, 2 * Math.PI, true);
+        ctx.arc(planet.x, planet.y, xw/24 * planet.size, 0, 2 * Math.PI, true);
         ctx.fill();
         ctx.stroke();
 
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.beginPath();
+        ctx.arc(planet.x, planet.y, xw/24 * planet.size, theta - (0.5*Math.PI), theta + (0.5*Math.PI), false);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(planet.x, planet.y);
+        ctx.rotate(theta - 0.5 * Math.PI);
+        var xl = 0 + xw/10;
+        var xr = 0 - xw/10;
+        var yy = (planet.size * xw/8);
+
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12pt arial';
+        ctx.textAlign = 'center';
+        ctx.fillText((ra_de(planet.d)%360).toFixed(0) + '°', 0, 0 + (1.75*planet.size * xw/24));
+
+        ctx.restore();
       }
     }();
 
@@ -140,7 +158,6 @@ App.Views.orbiting_planets = Backbone.View.extend({
       }
     }();
 
-
     //
 
     if(this.tickTimer){
@@ -155,18 +172,49 @@ App.Views.orbiting_planets = Backbone.View.extend({
     this.planets = [];
     
     var init_planets = function(){
-      for(var i=0, ii = random1to(3) + 2; i<ii; i++){
+      for(var i=0, ii = 2 + random1to(2); i<ii; i++){
         self.planets.push (self.makePlanet());
       }
     }();
 
   },
   makePlanet: function() {
+
+    var r, a, v, d;
+
+    var rr = Math.min(this.w,this.h);
+    var spacing = rr * 0.05;
+
+    var gen = function(){
+      var r = (rr * 0.1) + (random.from0to(rr) * 0.4);
+      //var r = ((0.05 * rr) + (0.41 * random.from0to(rr))).toFixed(2);
+      return r;
+    };
+
+    if(this.planets.length === 0){
+      r = gen();
+    }
+
+    var ok = false;
+    while (this.planets.length > 0 && !ok){
+      ok = true;
+      r = gen();
+      _.each(this.planets, function(p){
+        var dd = Math.abs(p.r - r);
+        if (dd < spacing){
+          ok = false;
+        }
+      });
+    }
+
+    d = random.from0to(360),
+    v = 0.00001 * (250 + random.from0to(1000));
+
     var planet = {
-      size: (Math.min(this.w,this.h) * 0.01) + random.from0to(Math.min(this.w,this.h) * 0.01),
-      r: Math.min(this.w,this.h) * 0.1 + random.from0to(Math.min(this.w,this.h) * 0.4),
-      d: random.from0to(360),
-      v: 0.00001 * (random.from0to(2000)),
+      size: (rr * 0.01) + random.from0to(rr * 0.01),
+      r: r,
+      d: d,
+      v: v,
       x: 0,
       y: 0
     };

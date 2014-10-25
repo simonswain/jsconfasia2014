@@ -125,11 +125,10 @@ App.index = [
   // Ships have a motivation to comquer, colonize or trade
   // colonization
 
+  ['make_ships', 'Make Ships'],
+  ['make_fight', 'Make Fight'],
   ['make_colonies', 'Make Colonies'], // colonize! one empire
-
   ['make_war', 'Make War'], // colonize! two empires
-
-
   ['make_empires', 'Make Empires'], // take over the stars
 
   //['make_stars', 'Make Stars'], 

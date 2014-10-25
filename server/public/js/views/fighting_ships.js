@@ -87,7 +87,7 @@ App.Views.fighting_ships = Backbone.View.extend({
           ctx.fillStyle = '#fff';
           ctx.strokeStyle = ship.color;
         };
-        ctx.lineWidth = Math.min(3,ship.power);
+        ctx.lineWidth = Math.min(4,ship.power);
 
         ctx.beginPath();
         ctx.arc(ship.x, ship.y, ship.energyf * xw*0.4, 0, 2 * Math.PI, true);

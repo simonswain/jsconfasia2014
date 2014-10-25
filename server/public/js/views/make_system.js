@@ -57,7 +57,7 @@ App.Views.make_system = Backbone.View.extend({
       ctx.fillStyle = data.color;
       ctx.strokeStyle = data.color;
       var p = 12;
-      var r = data.size * xw/24;
+      var r = data.size * xw/16;
       var m = 0.7;
       ctx.save();
       ctx.beginPath();
@@ -71,11 +71,6 @@ App.Views.make_system = Backbone.View.extend({
       }
       ctx.fill();
       ctx.restore();
-      // ctx.lineWidth = 2;
-      // ctx.beginPath();
-      // ctx.arc(data.x, data.y, data.size * xw/24, 0, 2 * Math.PI, true);
-      // ctx.fill();
-      // ctx.stroke();
     });
 
     var vals = [
@@ -87,8 +82,13 @@ App.Views.make_system = Backbone.View.extend({
 
     self.system.planets.each(function(planet){
       var data = planet.toJSON();
+      var theta = G.angle (data.x, data.y, self.w/2, self.h/2);
+      if(theta < 0){
+        theta = theta + 2 * Math.PI;
+      };
       data.x = Number(data.x);
       data.y = Number(data.y);
+
       ctx.fillStyle = '#fff';
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 2;
@@ -97,10 +97,15 @@ App.Views.make_system = Backbone.View.extend({
       ctx.fill();
       ctx.stroke();
 
-      var theta = G.angle (self.w/2, self.h/2, data.x, data.y) + Math.PI/2;
+      ctx.fillStyle = '#aaa';
+      ctx.beginPath();
+      ctx.arc(data.x, data.y, xw/24 * data.size, theta - (0.5*Math.PI), theta + (0.5*Math.PI), false);
+      ctx.closePath();
+      ctx.fill();
+
       ctx.save();
       ctx.translate(data.x, data.y);
-      ctx.rotate(theta);
+      ctx.rotate(theta - 0.5 * Math.PI);
       var xl = 0 + xw/10;
       var xr = 0 - xw/10;
       var yy = (data.size * xw/8);

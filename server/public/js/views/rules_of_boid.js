@@ -80,92 +80,75 @@ App.Views.rules_of_boid = Backbone.View.extend({
       }
     }();
 
-    if(this.frame === 1){
-      // separation
 
-      ctx.lineWidth = xw/16;
-      ctx.strokeStyle = '#0cc';
+    var arrow = function(x, y, angle, color){
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle - Math.PI/2);
+      if(color){ 
+        ctx.strokeStyle = color;
+      }
+      var zz = xw/4
       ctx.beginPath();
-      ctx.moveTo(this.w/2 - xw, this.h/2);
-      ctx.lineTo(this.w/2 + xw, this.h/2);
+      ctx.moveTo(-zz, zz) 
+      ctx.lineTo(0, 0)
+      ctx.lineTo(zz, zz) 
       ctx.stroke();
-
-      ctxfx.lineWidth = xw/16;
-      ctxfx.strokeStyle = '#0cc';
-      ctxfx.beginPath();
-      ctxfx.moveTo(this.w/2 - xw, this.h/2);
-      ctxfx.lineTo(this.w/2 + xw, this.h/2);
-      ctxfx.stroke();
+      ctx.closePath();   
+      ctx.restore();
     }
 
-
-    if(this.frame === 3){
-      // alignment
-
-      ctx.lineWidth = xw/16;
-      ctx.strokeStyle = '#0cc';
-
-      ctx.beginPath();
-      ctx.moveTo(this.w/2 - 2*xw, this.h/2 - 2*xw);
-      ctx.lineTo(this.w/2 - 2*xw, this.h/2 - 4*xw);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(this.w/2 + 2*xw, this.h/2 - 2*xw);
-      ctx.lineTo(this.w/2 + 2*xw, this.h/2 - 4*xw);
-      ctx.stroke();
+    ctx.lineWidth = xw/8;
 
 
-      ctxfx.lineWidth = xw/16;
-      ctxfx.strokeStyle = '#0cc';
+    var yy;
+ 
 
-      ctxfx.beginPath();
-      ctxfx.moveTo(this.w/2 - 2*xw, this.h/2 - 2*xw);
-      ctxfx.lineTo(this.w/2 - 2*xw, this.h/2 - 4*xw);
-      ctxfx.stroke();
+    // alignment
+    yy = this.h * 0.5;
+    ctx.strokeStyle = '#c0c';
+    ctx.beginPath();
+    ctx.moveTo(this.w/2 - 2.1*xw, yy - 2*xw);
+    ctx.lineTo(this.w/2 - 1.9*xw, yy - 4*xw);
+    ctx.stroke();
 
-      ctxfx.beginPath();
-      ctxfx.moveTo(this.w/2 + 2*xw, this.h/2 - 2*xw);
-      ctxfx.lineTo(this.w/2 + 2*xw, this.h/2 - 4*xw);
-      ctxfx.stroke();
+    arrow(this.w/2 - 1.9*xw, yy - 4*xw, 0.53*Math.PI);
 
-    }
+    ctx.beginPath();
+    ctx.moveTo(this.w/2 + 2.1*xw, yy - 2*xw);
+    ctx.lineTo(this.w/2 + 1.9*xw, yy - 4*xw);
+    ctx.stroke();
 
+    arrow(this.w/2 + 1.9*xw, yy - 4*xw, 0.46*Math.PI);
 
+    // separation
+    yy = this.h * 0.48;
+    ctx.strokeStyle = '#0cc';
 
-    if(this.frame === 5){
-      // alignment
+    ctx.beginPath();
+    ctx.moveTo(this.w/2 - xw, yy);
+    ctx.lineTo(this.w/2 + xw, yy);
+    ctx.stroke();
 
-      ctx.lineWidth = xw/16;
-      ctx.strokeStyle = '#0cc';
+    arrow(this.w/2 - xw, yy, 0);
+    arrow(this.w/2 + xw, yy, Math.PI);
 
-      ctx.beginPath();
-      ctx.moveTo(this.w/2 - 2*xw, this.h/2);
-      ctx.lineTo(this.w/2 - 0.5*xw, this.h/2);
-      ctx.stroke();
+    // alignment
+    yy = this.h * 0.48;
+    ctx.strokeStyle = '#c00';
 
-      ctx.beginPath();
-      ctx.moveTo(this.w/2 + 2*xw, this.h/2);
-      ctx.lineTo(this.w/2 + 0.5*xw, this.h/2);
-      ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(this.w/2 - 5*xw, yy);
+    ctx.lineTo(this.w/2 - 3*xw, yy);
+    ctx.stroke();
+    arrow(this.w/2 - 3*xw, yy, Math.PI);
 
+    ctx.beginPath();
+    ctx.moveTo(this.w/2 + 3*xw, yy);
+    ctx.lineTo(this.w/2 + 5*xw, yy);
+    ctx.stroke();
+    arrow(this.w/2 + 3*xw, yy, 0);
 
-      ctxfx.lineWidth = xw/16;
-      ctxfx.strokeStyle = '#0cc';
-
-      ctxfx.beginPath();
-      ctxfx.moveTo(this.w/2 - 2*xw, this.h/2);
-      ctxfx.lineTo(this.w/2 - 0.5*xw, this.h/2);
-      ctxfx.stroke();
-
-      ctxfx.beginPath();
-      ctxfx.moveTo(this.w/2 + 2*xw, this.h/2);
-      ctxfx.lineTo(this.w/2 + 0.5*xw, this.h/2);
-      ctxfx.stroke();
-
-    }
-
-    //
 
     ctx.restore();
     ctxfx.restore();
