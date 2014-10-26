@@ -83,7 +83,7 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
       var h = self.h *0.4
       ctx.save();
       ctx.translate(0, self.h * 0.55);
-      ctx.fillStyle = '#222';
+      ctx.fillStyle = '#000';
       ctx.beginPath();
       ctx.fillRect(0, 0, w, h);
       ctx.fill();
@@ -103,10 +103,10 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
         ctx.closePath();
       });
 
-      ctx.beginPath();
-      ctx.strokeStyle = '#444';
-      ctx.rect(0, 0, w,h);
-      ctx.stroke();
+      // ctx.beginPath();
+      // ctx.strokeStyle = '#444';
+      // ctx.rect(0, 0, w,h);
+      // ctx.stroke();
 
       ctx.restore();
 

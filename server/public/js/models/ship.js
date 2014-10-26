@@ -290,8 +290,6 @@ App.Models.Ship = Backbone.Model.extend({
             });
           }
 
-          return;
-          
         } else {
           // no potentials -- keep the system safe unless enough
           // friendlies patrolling? go out-system and colonize
@@ -317,21 +315,50 @@ App.Models.Ship = Backbone.Model.extend({
       return;
     }
 
-    var self = this;
-
     // only if there are other stars present
     if(!this.system.universe){
       return;
     }
+    var targets = this.system.universe.systems.filter(function(system){
 
-    var targets = this.system.universe.systems.filter(function(x){
-      var range = G.distance(self.system.get('x'), self.system.get('y'), x.get('x'), x.get('y'));
+      var range = G.distance(self.system.get('x'), self.system.get('y'), system.get('x'), system.get('y'));
 
-      if (x === self.system){
+      if (system === self.system){
         return false;
       }
 
       if(range > self.system.universe.get('radius') * 0.8){
+        return false;
+      }
+
+      // how many enemies in the system
+      var enemies;
+      enemies = system.ships.reduce(function(total, ship){
+        if(!ship){
+          return;
+        }
+        if(self.system.empire !== ship.empire){
+          total ++;
+        }
+        return total;
+      }, 0);
+
+      friends = system.ships.reduce(function(total, ship){
+        if(!ship){
+          return;
+        }
+        if(self.system.empire === ship.empire){
+          total ++;
+        }
+        return total;
+      }, 0);
+      
+
+      if(enemies && friends && friends-1 > enemies){
+        return false;
+      }
+
+      if(friends && friends > 2){
         return false;
       }
 
@@ -387,7 +414,6 @@ App.Models.Ship = Backbone.Model.extend({
       if(enemy > 0){
         return 'borderlands';
       }
-
 
       return 'mixed';
 

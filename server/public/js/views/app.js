@@ -5,7 +5,7 @@
 
 App.Views.App = Backbone.View.extend({
   el: '#app',
-  template: _.template('<div class="nav"></div><div class="view"></div>'),
+  template: _.template('<div class="nav"></div><div class="view"></div><div class="footer"></div>'),
   initialize : function(opts) {
     _.bindAll(this, 'render','onClose','onKey');
     this.controller = opts.controller;
@@ -40,7 +40,7 @@ App.Views.App = Backbone.View.extend({
       //App.router.navigate(prev[0], {trigger: true});
     }
 
-    if(e.which === 39){
+    if(e.which === 39 || e.which == 32){
       if(!current){
         this.controller.set({view_id: index[0][0]});
         App.router.navigate(index[0][0], {trigger: true});
@@ -76,6 +76,7 @@ App.Views.App = Backbone.View.extend({
   },
   render : function() {
    
+    var self = this;
 
     _.each(this.views, function(x){
       x.close();
@@ -90,10 +91,23 @@ App.Views.App = Backbone.View.extend({
       controller: this.controller
     });
 
+    this.views.footer = new App.Views.Footer({
+      el: this.$('.footer')
+    });
+
     var view = this.controller.get('view');
     var view_id = this.controller.get('view_id');
 
     var el = this.$('.view');
+
+    // el.on('click', function(){
+    //   self.onKey({which: 32});
+    // });
+
+    // $('.nav').on('click', function(){
+    //   self.onKey({which: 37});
+    // });
+
     el.addClass('view-' + view);
 
     switch (view){

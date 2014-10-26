@@ -44,92 +44,143 @@ App.Views.rules_of_life = Backbone.View.extend({
 
     // draw here
 
-    var frame = this.frames[this.frame];
+    var frame; // = this.frames[this.frame];
     var grid = this.grid;
     var x, y;
 
     var cell;    
     var color;
 
-    for(y = 0; y<3; y ++){
+    for(fx = 0; fx<=3; fx ++){
+      frame = this.frames[fx];    
+      ctx.save();
+      ctxfx.save();
+      switch(fx){
+      case 0:
+        ctx.translate(0, 0);
+        ctxfx.translate(0, 0);
+        break;
+      case 1:
+        ctx.translate(this.w/2, 0);
+        ctxfx.translate(this.w/2, 0);
+        break;
+      case 2:
+        ctx.translate(0, this.h/2);
+        ctxfx.translate(0, this.h/2);
+        break;
+      case 3:
+        ctx.translate(this.w/2, this.h/2);
+        ctxfx.translate(this.w/2, this.h/2);
+        break;
+      }
 
-      for(x = 0; x<3; x ++){
+      ctx.translate(-xw/3, -xh*0.6);
+      ctxfx.translate(-xw/3, -xh*0.6);
 
-        if(this.phase === 0){
-          continue;
-        }
+      ctx.scale(0.66, 0.66);
+      ctxfx.scale(0.66, 0.66);
+      
+      for(y = 0; y<3; y ++){
+        for(x = 0; x<3; x ++){
 
-        cell = frame[(y*3) + x];
-        color = '#333';
-
-        if(cell === 0){
+          cell = frame[(y*3) + x];
           color = '#333';
-        }
 
-        if(cell === 1){
-          color = '#fff';
-        }
-
-        if(this.phase === 1){
-          switch(cell){
-          case 2:
+          if(cell === 0){
             color = '#333';
-            break;
-
-          case 3:
-            color = '#fff';
-            break;
-
-          case 4:
-            color = '#fff';
-            break;
           }
-        }
 
-        if(this.phase === 2){
-          switch(cell){
-          case 2:
-            color = '#090';
-            break;
-
-          case 3:
-            color = '#900';
-            break;
-
-          case 4:
-            color = '#090';
-            break;
+          if(cell === 1){
+            color = '#fff';
           }
-        }
 
-        ctx.lineStyle = '#222';
-        ctx.lineWidth = 8;
-        ctx.fillStyle = color;
+          if(cell === 5){
+            color = '#c00';
+          }
 
-        //console.log('frame', this.frame, 'phase', this.phase, 'x', x, 'y', y, 'cell:', cell, color);
+          if(cell === 6){
+            color = '#090';
+          }
 
-        ctx.beginPath();
-        ctx.rect((this.w/2 - 1.5*xw) + (x * xw), (this.h/2 - 1.5*xh) + (y * xh), xw, xh);
-        ctx.fill();
-        ctx.stroke();
-        ctx.closePath();     
+          if(this.phase === 1){
+            switch(cell){
+            case 2:
+              color = '#333';
+              break;
 
-        ctxfx.lineStyle = '#222';
-        ctxfx.lineWidth = 8;
-        ctxfx.fillStyle = color;
+            case 3:
+              color = '#fff';
+              break;
 
-        ctxfx.beginPath();
-        ctxfx.rect((this.w/2 - 1.5*xw) + (x * xw), (this.h/2 - 1.5*xh) + (y * xh), xw, xh);
-        ctxfx.fill();
-        ctxfx.stroke();
-        ctxfx.closePath();     
+            case 4:
+              color = '#fff';
+              break;
+            }
+          }
 
-        // ctx.fillStyle = '#aaa';
-        // ctx.font = '12pt arial';
-        // ctx.textAlign = 'left';
-        // ctx.fillText(x+ ' ' + y + ' ' + cell + ' ' + color, (this.w/2 - 1.5*xw) + (x * xw) + xw/4, (this.h/2 - 1.5*xh) + (y * xh) + xh/4 );
+          if(this.phase === 2){
+            switch(cell){
+            case 2:
+              color = '#090';
+              break;
 
-      } 
+            case 3:
+              color = '#900';
+              break;
+
+            case 4:
+              color = '#090';
+              break;
+            }
+          }
+
+          if(this.phase === 3){
+            switch(cell){
+            case 2:
+              color = '#fff';
+              break;
+
+            case 3:
+              color = '#333';
+              break;
+
+            case 4:
+              color = '#fff';
+              break;
+            }
+          }
+
+          ctx.lineStyle = '#222';
+          ctx.lineWidth = 8;
+          ctx.fillStyle = color;
+
+          //console.log('frame', this.frame, 'phase', this.phase, 'x', x, 'y', y, 'cell:', cell, color);
+
+          ctx.beginPath();
+          ctx.rect((this.w/2 - 1.5*xw) + (x * xw), (this.h/2 - 1.5*xh) + (y * xh), xw, xh);
+          ctx.fill();
+          ctx.stroke();
+          ctx.closePath();     
+
+          ctxfx.lineStyle = '#222';
+          ctxfx.lineWidth = 8;
+          ctxfx.fillStyle = color;
+
+          ctxfx.beginPath();
+          ctxfx.rect((this.w/2 - 1.5*xw) + (x * xw), (this.h/2 - 1.5*xh) + (y * xh), xw, xh);
+          ctxfx.fill();
+          ctxfx.stroke();
+          ctxfx.closePath();     
+
+          // ctx.fillStyle = '#aaa';
+          // ctx.font = '12pt arial';
+          // ctx.textAlign = 'left';
+          // ctx.fillText(x+ ' ' + y + ' ' + cell + ' ' + color, (this.w/2 - 1.5*xw) + (x * xw) + xw/4, (this.h/2 - 1.5*xh) + (y * xh) + xh/4 );
+
+        } 
+      }
+      ctx.restore();
+      ctxfx.restore();
     }
 
     //
@@ -156,7 +207,7 @@ App.Views.rules_of_life = Backbone.View.extend({
     }
 
     this.phase ++;
-    if(this.phase === 3){
+    if(this.phase === 4){
       this.phase = 0;
       this.frame ++;
       if(this.frame === this.frames.length){
@@ -182,16 +233,13 @@ App.Views.rules_of_life = Backbone.View.extend({
     // 2 = blank to green
     // 3 = white to red
     // 4 = white to green
+    // 5 = show red
+    // 6 = show green
 
     this.frame = 0;
     this.phase = 1;
 
     this.frames = [
-      [
-        0, 0, 0,
-        0, 0, 0,
-        0, 0, 0,
-      ],
       [
         0, 0, 0,
         0, 3, 0,
@@ -207,11 +255,6 @@ App.Views.rules_of_life = Backbone.View.extend({
         3, 4, 3,
         0, 2, 0,
       ],
-      // [
-      //   0, 0, 0,
-      //   3, 2, 3,
-      //   0, 4, 0,
-      // ],
       [
         0, 4, 0,
         4, 3, 4,
@@ -219,7 +262,7 @@ App.Views.rules_of_life = Backbone.View.extend({
       ]
     ];
 
-    this.period = 1500;
+    this.period = 450;
 
   },
   start: function () {

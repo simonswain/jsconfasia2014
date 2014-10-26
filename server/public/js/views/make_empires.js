@@ -39,34 +39,30 @@ App.Views.make_empires = Backbone.View.extend({
     ctxfx.translate(this.x, this.y);
     ctxfx.scale(this.scale, this.scale);
 
-    ctx.strokeStyle = '#c00';
-    ctx.rect(0,0,this.w,this.h);
-    ctx.stroke();
-
     var xw = this.w/8;
     var xh = this.h/8;
 
     // draw here
 
     // scale for drawing elements within a system
-    var scale = 0.5;
+    var scale = 0.3;
 
     this.universe.systems.each(function(system){
 
       var data = system.toJSON();
-
       ctx.save();
-      ctx.translate(data.x - (self.w * scale/2), data.y - (self.h * scale/2));
-      ctx.scale(scale, scale);
+      ctx.translate(data.x - self.w*1.1*scale, data.y - self.h*1.85*scale);
+      ctx.scale(scale*1.75, scale*1.75);
 
       ctxfx.save();
-      ctxfx.translate(data.x - (data.w * scale/2), data.y - (data.h * scale/2));
+      //ctxfx.translate(data.x - (data.w * scale/2), data.y - (data.h * scale/2));
+      ctxfx.translate(data.x - self.w*scale, data.y - self.w*scale);
       ctxfx.scale(scale, scale);
       
       // ctx.lineWidth = 2;
       // ctx.beginPath();
       // ctx.strokeStyle='#c0c';
-      // ctx.arc(data.w/2, data.h/2, Math.min(data.w, data.h)/2, 0, 2*Math.PI);
+      // ctx.arc(data.w/2, data.h/2, data.radius, 0, 2*Math.PI);
       // ctx.rect(0, 0, data.w, data.h);
       // ctx.stroke();
       // ctx.closePath();
@@ -82,15 +78,23 @@ App.Views.make_empires = Backbone.View.extend({
         });
 
         ctx.fillStyle = 'rgba(51,51,51,0.2)';
-        ctx.strokeStyle = '#888';
+        ctx.strokeStyle = '#ccc';
         if(_.uniq(colors).length === 1 && colors[0]){
           // if this empire owns the whole system, draw it in their color
           ctx.strokeStyle = colors[0];
         }
 
-        ctx.lineWidth = xw/32;
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = xw/64;
         ctx.beginPath();
-        ctx.arc(data.w/2, data.h/2, Math.min(data.w, data.h)/4, 0, 2*Math.PI);
+        ctx.rect(0, 0, data.r, data.r);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = xw/64;
+        ctx.beginPath();
+        ctx.arc(data.w/2, data.h/2, data.radius/2, 0, 2*Math.PI);
         ctx.fill();
         ctx.stroke();
         ctx.closePath();
@@ -167,18 +171,14 @@ App.Views.make_empires = Backbone.View.extend({
 
       }();
 
-      system.planets.each(function(planet){
+      system.planets.each(function(model){
 
-        var w = system.get('w');
-        var h = system.get('h') ;
-        
-        var data = planet.toJSON();
+        var planet = model.toJSON();
 
         ctx.strokeStyle = 'rgba(255,255,255,0.15);';
-
-        var distance = G.distance (data.x, data.y, self.w/2, self.h/2);
+        var distance = G.distance (planet.x, planet.y, data.w/2, data.h/2);
         ctx.beginPath();
-        ctx.arc(w/2, h/2, data.r, 0, 2 * Math.PI, true);
+        ctx.arc(data.w/2, data.h/2, planet.r, 0, 2 * Math.PI, true);
         ctx.stroke();
         ctx.closePath();
 
@@ -322,9 +322,6 @@ App.Views.make_empires = Backbone.View.extend({
         ctx.closePath();     
         ctx.stroke();
              
-        ctx.restore();
-        ctxfx.restore();
-
         // if shooting draw laser (not translated)
         if (data.laser) {
           ctx.lineWidth = xw/24;
@@ -342,8 +339,10 @@ App.Views.make_empires = Backbone.View.extend({
           ctxfx.lineTo(data.laser_x, data.laser_y);
           ctxfx.closePath();     
           ctxfx.stroke();
-
         }
+
+        ctx.restore();
+        ctxfx.restore();
 
       });
 
@@ -353,38 +352,11 @@ App.Views.make_empires = Backbone.View.extend({
     });
 
 
-    // empire stats
-
-    var yy = xh/2;
-
-    ctx.font = 'bold 18pt arial';
-    ctx.fillStyle = '#888';
-    ctx.textAlign = 'center';
-    ctx.fillText('ships', 0.5 * xw, yy);
-    ctx.fillText('planets', 1 * xw, yy);
-    ctx.fillText('systems', 1.5 * xw, yy);
-
-    self.universe.empires.each(function(empire){
-      yy += xh/4;
-      ctx.fillStyle = empire.get('color');
-      ctx.textAlign = 'center';
-      ctx.fillText(empire.ships.length, 0.5 * xw, yy);
-      ctx.fillText(empire.planets.length, 1 * xw, yy);
-      ctx.fillText(empire.systems.length, 1.5 * xw, yy);
-
-      // ctx.textAlign = 'left';
-      // ctx.fillText(empire.get('name'), 4 * xw, yy);
-    });
-
-    // ships in jumpspace
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 12pt arial';
-    ctx.textAlign = 'right';
-    ctx.fillText(this.universe.ships.length, this.w - xw, xh);
-
-
     // draw jumplines from source to target
+    ctx.save();
+    ctx.translate(-50, -150);
     this.universe.ships.each(function(ship){
+
 
       if(!ship.origin_system || ! ship.target_system){
         return;
@@ -394,7 +366,7 @@ App.Views.make_empires = Backbone.View.extend({
       ctx.lineWidth = 8;
       ctx.beginPath();
       ctx.moveTo(ship.origin_system.get('x'), ship.origin_system.get('y'));
-      ctx.lineTo(ship.target_system.get('x'), ship.target_system.get('y'));
+      ctx.lineTo(ship.get('space_x'), ship.get('space_y'));
       ctx.stroke();
       ctx.closePath();     
 
@@ -405,7 +377,31 @@ App.Views.make_empires = Backbone.View.extend({
       ctx.closePath();     
 
     });
+    ctx.restore();
 
+
+    // empire stats
+
+    // var yy = xh/2;
+
+    // ctx.font = 'bold 18pt arial';
+    // ctx.fillStyle = '#888';
+    // ctx.textAlign = 'center';
+    // ctx.fillText('ships', 0.5 * xw, yy);
+    // ctx.fillText('planets', 1 * xw, yy);
+    // ctx.fillText('systems', 1.5 * xw, yy);
+
+    // self.universe.empires.each(function(empire){
+    //   yy += xh/4;
+    //   ctx.fillStyle = empire.get('color');
+    //   ctx.textAlign = 'center';
+    //   ctx.fillText(empire.ships.length, 0.5 * xw, yy);
+    //   ctx.fillText(empire.planets.length, 1 * xw, yy);
+    //   ctx.fillText(empire.systems.length, 1.5 * xw, yy);
+
+    //   // ctx.textAlign = 'left';
+    //   // ctx.fillText(empire.get('name'), 4 * xw, yy);
+    // });
 
 
     //

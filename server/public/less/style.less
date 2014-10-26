@@ -1,5 +1,6 @@
 body {
     background: #000;
+    scroll-:y none;
 }
 
 #app {
@@ -10,7 +11,7 @@ body {
 
     .nav {
         position: relative;
-
+        display: none;
         h1 {
             text-align: center;
             padding: 20px 0 0 0;
@@ -29,7 +30,7 @@ body {
     }
 
     .view {
-        top: 64px;
+        top: 0;
 
         &.view-default {
             h1 {
@@ -56,8 +57,25 @@ body {
             }
 
         }
+    }
+
+    .footer {
+        z-index: 100;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right:0;
+        height: 96px;
+
+        p {
+            font-size: 24pt;
+            text-align: center;
+            padding: 16px;
+            color: #0cc;
+        }
 
     }
+
 
     background: #000;
     color: #fff;
@@ -68,6 +86,8 @@ body {
 
     .content {
         background: #111;
+        width: auto;
+        margin: 32px;
 
         .toc {
             color: #000;

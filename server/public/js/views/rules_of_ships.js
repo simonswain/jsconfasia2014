@@ -51,26 +51,72 @@ App.Views.rules_of_ships = Backbone.View.extend({
     var xw = this.w/4;
     var xh = this.h/4;
 
+    // var draw_booms = function(){
+    //   var boom;
+    //   for (var i in self.booms) {
+    //     boom = self.booms[i];
+    //     boom.ttl --;
+
+    //     if(boom.ttl < 0){
+    //       self.booms.splice(i, 1);
+    //       continue;
+    //     }
+
+    //     ctxfx.fillStyle = '#ffffff';
+    //     ctxfx.strokeStyle = boom.color;
+    //     ctxfx.lineWidth = 2;
+    //     ctxfx.beginPath();
+    //     ctxfx.arc(boom.x,boom.y, boom.r * xw/64, 0, 2 * Math.PI, true);
+    //     ctxfx.fill();
+    //     ctxfx.stroke();
+    //   }
+    // }();
+
     var draw_booms = function(){
       var boom;
       for (var i in self.booms) {
         boom = self.booms[i];
         boom.ttl --;
-
         if(boom.ttl < 0){
           self.booms.splice(i, 1);
           continue;
         }
 
-        ctxfx.fillStyle = '#ffffff';
+        boom.x = Number(boom.x);
+        boom.y = Number(boom.y);
+
+        ctxfx.fillStyle = boom.color;
         ctxfx.strokeStyle = boom.color;
-        ctxfx.lineWidth = 2;
-        ctxfx.beginPath();
-        ctxfx.arc(boom.x,boom.y, boom.r * xw/64, 0, 2 * Math.PI, true);
-        ctxfx.fill();
-        ctxfx.stroke();
+
+        if(boom.type && boom.type == 'nop'){
+        }
+
+        if(boom.type && boom.type === 'ship'){
+          ctxfx.lineWidth = xw/64;
+          ctxfx.beginPath();
+          ctxfx.arc(boom.x, boom.y, ((20 - boom.ttl) * xw/16), 0, 2 * Math.PI, true);
+          ctxfx.closePath();
+          ctxfx.stroke();
+        }       
+        if(!boom.type || boom.type == 'missile'){
+          ctxfx.fillStyle = '#ffffff';
+          ctxfx.strokeStyle = boom.color;
+          ctxfx.lineWidth = 2;
+          ctxfx.beginPath();
+          ctxfx.arc(boom.x,boom.y, boom.r * xw/64, 0, 2 * Math.PI, true);
+          ctxfx.fill();
+          ctxfx.stroke();
+        }
+        if(!boom.type || boom.type == 'boom'){
+          ctxfx.beginPath();
+          ctxfx.arc(boom.x, boom.y, boom.r * xw/64, 0, 2 * Math.PI, true);
+          ctxfx.fill();
+          ctxfx.closePath();
+          ctxfx.stroke();
+        }
       }
     }();
+
 
     var draw_ships = function(){
       // ships
@@ -306,6 +352,7 @@ App.Views.rules_of_ships = Backbone.View.extend({
             y: other.y,
             r: 20,
             color: other.color,
+            type: 'missile',
             ttl: 5
           });
         }
@@ -358,7 +405,17 @@ App.Views.rules_of_ships = Backbone.View.extend({
             y: ship.y,
             r: ship.energy_max,
             color: ship.color,
-            ttl: 10
+            type: 'ship',
+            ttl: 20
+          });
+
+          self.booms.push({
+            x: ship.x,
+            y: ship.y,
+            r: ship.energy_max,
+            color: ship.color,
+            type: 'missile',
+            ttl: 5
           });
 
           if(i === 0){

@@ -2,6 +2,7 @@ App.Models.Universe = Backbone.Model.extend({
   defaults: {
     id: null,
     systemLimit: 5,
+    systemGrid: 7,
     empireLimit: 2,
     name: 'The Universe',
     radius: 512,
@@ -9,7 +10,7 @@ App.Models.Universe = Backbone.Model.extend({
     h: 1024,
   },
   initialize: function(opts) {
-    _.bindAll(this, 'run', 'addSystem','addShip', 'initSystems','addEmpire');
+    _.bindAll(this, 'run', 'addShip', 'initSystems', 'addEmpire');
     this.systems = new App.Collections.Systems();
     this.empires = new App.Collections.Empires();
     // ships in jump space
@@ -35,9 +36,56 @@ App.Models.Universe = Backbone.Model.extend({
     this.ships.remove(ship);
   },
   initSystems: function(){
-    while(this.systems.length < this.get('systemLimit')){
-      this.addSystem();
+    var self = this;
+    var len = this.get('systemLimit');
+    var grid = this.get('systemGrid');
+
+    var w = this.get('w');
+    var h = this.get('h');
+
+    var q = [];
+    var n;
+    while (q.length < len){
+      n = random0to(grid);
+      if(q.indexOf(n)!== -1){
+        continue;
+      }
+      q.push(n);
     }
+    
+    q.forEach(function(pos){
+      var x, y;
+      if(pos < 2){
+        y = h * 0.3;
+        x = w * 0.42;
+        if(pos === 1){
+          x = w * 0.735;
+        }
+      } else if(pos < 5){ 
+        y = h * 0.5;
+        x = w/2 - w/4 + ((pos - 2) * w/3);
+      } else{
+        y = h * 0.315;
+        x = w/2 - w/4 + ((pos - 2) * w/3);
+      }
+
+      if(pos > 4){
+        y = h * 0.7;
+        x = w * 0.42;
+        if(pos === 6){
+          x = w * 0.735;
+        }
+      }
+
+      var system = new App.Models.System({
+        x: x,
+        y: y,
+        name: GREEK[random0to(GREEK.length-1)] + ' ' + DEMONS[random0to(DEMONS.length-1)],
+        universe: self
+      });
+      self.systems.add(system);
+    });
+
   },
   addEmpire: function(opts){
     var empire;
@@ -55,50 +103,6 @@ App.Models.Universe = Backbone.Model.extend({
       }
     }
     return empire;
-  },
-  addSystem: function(i){
-
-    var self = this;
-    
-    var x, y;
-    var d;
-    var spacing = this.get('radius') * 0.4;
-
-    var gen = function(max){
-      var n = (max * 0.1) + (random.from0upto(max * 0.8));
-      return n;
-    };
-
-
-    d = 0;
-
-    if(this.systems.length === 0){
-      x = gen(this.get('w'));
-      y = gen(this.get('h') * 0.75);
-    }
-    
-    var ok = false;
-    while (this.systems.length > 0 && !ok){
-      ok = true;
-      x = gen(this.get('w'));
-      y = gen(this.get('h') * 0.75);
-      self.systems.each(function(p){
-        var dx = Math.abs(p.get('x') - x);
-        var dy = Math.abs(p.get('y') - y);
-        var dd = Math.sqrt((dx*dx) + (dy*dy));
-        if (dd < spacing){
-          ok = false;
-        }
-      });
-    }
-
-    var system = new App.Models.System({
-      x: x,
-      y: y,
-      name: GREEK[random0to(GREEK.length-1)] + ' ' + DEMONS[random0to(DEMONS.length-1)],
-      universe: this
-    });
-    this.systems.add(system);
   }
 });
 
