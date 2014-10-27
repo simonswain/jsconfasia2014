@@ -35,7 +35,7 @@ App.Models.Ship = Backbone.Model.extend({
     jump_pct: null, // % of jump complete
     thrust: 1, // grav drive power
     laser_power: 1, // laser power
-    laser_range: 0.1 + random0to(10)/100, // laser range as fraction of system radius
+    laser_range: 0.2 + random0to(10)/100, // laser range as fraction of system radius
     laser_accuracy: 5,
     laser: false, // laser firing?
     laser_x: null,

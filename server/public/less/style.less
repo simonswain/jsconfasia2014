@@ -1,9 +1,12 @@
 body {
     background: #000;
     scroll-:y none;
+    overflow:hidden;
 }
 
 #app {
+
+    overflow:hidden;
 
     h1 {
         color: #fff;
@@ -85,17 +88,18 @@ body {
     }
 
     .content {
-        background: #111;
+        background: #000;
         width: auto;
-        margin: 32px;
+        max-width: 800px;
+        margin: 64px auto;
 
         .toc {
             color: #000;
-            font-size: 12pt;
+            font-size: 18pt;
             a {
                 text-decoration: none;
                 &:hover {
-                    text-decoration: underline;
+                    background: #111;
                 }
                 color: #369;
                 &.available{
@@ -106,6 +110,7 @@ body {
     }
 
     .canvas {
+        cursor: none;
         position: absolute;
         top: 16px;
         left: 16px;

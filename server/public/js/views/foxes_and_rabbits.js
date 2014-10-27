@@ -54,7 +54,7 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
         ctx.beginPath();
         ctx.lineStyle = '#000';
         // grazz
-        ctx.fillStyle = '#222';
+        ctx.fillStyle = '#000';
         // fox
         if(grid[x][y] === 2){
           ctx.fillStyle = '#f00';

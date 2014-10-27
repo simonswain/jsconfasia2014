@@ -7,7 +7,7 @@ App.Models.Universe = Backbone.Model.extend({
     name: 'The Universe',
     radius: 512,
     w: 1024,
-    h: 1024,
+    h: 768,
   },
   initialize: function(opts) {
     _.bindAll(this, 'run', 'addShip', 'initSystems', 'addEmpire');
@@ -54,27 +54,47 @@ App.Models.Universe = Backbone.Model.extend({
     }
     
     q.forEach(function(pos){
+
       var x, y;
-      if(pos < 2){
-        y = h * 0.3;
-        x = w * 0.42;
-        if(pos === 1){
-          x = w * 0.735;
-        }
-      } else if(pos < 5){ 
-        y = h * 0.5;
-        x = w/2 - w/4 + ((pos - 2) * w/3);
-      } else{
-        y = h * 0.315;
-        x = w/2 - w/4 + ((pos - 2) * w/3);
+      var ww = w / 6;
+      var hh = h / 4;
+      x = ww;
+      y = hh;
+
+      if(pos === 0 ){
+        y = hh * 1;
+        x = ww * 2;
       }
 
-      if(pos > 4){
-        y = h * 0.7;
-        x = w * 0.42;
-        if(pos === 6){
-          x = w * 0.735;
-        }
+
+      if(pos === 1){
+        y = hh * 1;
+        x = ww * 4;
+      }
+
+      if(pos === 2){
+        y = hh * 2;
+        x = ww * 1;
+      }
+
+      if(pos === 3){
+        y = hh * 2;
+        x = ww * 3;
+      }
+
+      if(pos === 4){
+        y = hh * 2;
+        x = ww * 5;
+      }
+
+      if(pos === 5 ){
+        y = hh * 3;
+        x = ww * 2;
+      }
+
+      if(pos === 6){
+        y = hh * 3;
+        x = ww * 4;
       }
 
       var system = new App.Models.System({

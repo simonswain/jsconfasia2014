@@ -91,10 +91,6 @@ App.Views.App = Backbone.View.extend({
       controller: this.controller
     });
 
-    this.views.footer = new App.Views.Footer({
-      el: this.$('.footer')
-    });
-
     var view = this.controller.get('view');
     var view_id = this.controller.get('view_id');
 
@@ -115,6 +111,10 @@ App.Views.App = Backbone.View.extend({
     case 'default':
       this.views.main = new App.Views.Default({
         el: el
+      });
+
+      this.views.footer = new App.Views.Footer({
+        el: this.$('.footer')
       });
       break;
 

@@ -3,9 +3,9 @@ App.Models.System = Backbone.Model.extend({
     id: null,
     name: 'Unknown System',
     color: '#fff',
-    radius: 512,
+    radius: 768,
     w: 1024,
-    h: 1024,
+    h: 768,
     x: null,
     y: null,
     // for demo modes set to false
