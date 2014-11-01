@@ -61,7 +61,7 @@ App.Models.System = Backbone.Model.extend({
           self.booms.push({
             x: ship.get('x'),
             y: ship.get('y'),
-            color: '#fff',
+            color: 'rgba(255, 255, 255, 0.7)',
             ttl: 5
           });
         }

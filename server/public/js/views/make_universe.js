@@ -28,7 +28,7 @@ App.Views.make_universe = Backbone.View.extend({
     ctx.save();
     ctxfx.save();
 
-    ctxfx.fillStyle = 'rgba(1,1,1,.18)';
+    ctxfx.fillStyle = 'rgba(1,1,1,.01)';
     ctxfx.fillRect(0,0, this.cw,this.ch);
 
     ctx.clearRect(0,0,this.cw,this.ch);
@@ -38,113 +38,69 @@ App.Views.make_universe = Backbone.View.extend({
 
     ctxfx.translate(this.x, this.y);
     ctxfx.scale(this.scale, this.scale);
-    
-    var xw = this.w/8;
-    var xh = this.h/8;
-    var xx = Math.min(this.w, this.h)/24;
+
+    var xw = this.w/16;
+    var xh = this.h/16;
+
     // draw here
 
-    // scale for drawing elements within a system
-    var scale = xx / Math.min(this.w, this.h)
-
-    this.universe.systems.each(function(system){
-
-      var data = system.toJSON();
-
-      // center of system
-      var cx = data.x;
-      var cy = data.y;
-
-      // top left of system
-      var lx = data.x - xx;
-      var ly = data.y - xx;
-
-      ctx.fillStyle = 'rgba(127,127,127,0.1)';
-      ctx.strokeStyle = '#888';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(data.x, data.y, xx, 0, 2 * Math.PI, true);
-      ctx.fill();
-      ctx.stroke();
-
-      // ctx.rect(data.x - xx, data.y - xx, xx * 2, xx * 2);
-      // ctx.stroke();
-
-      ctx.fillStyle = '#666';
-      ctx.font = '10pt arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(data.name, data.x,data.y + xx*1.5);
-
-      ctx.save();
-      ctx.translate(lx, ly);
-      ctx.scale(scale*1.5, scale*1.5);
-      
+    this.stars.forEach(function(star){
       ctx.strokeStyle = '#fff';
+      ctx.fillStyle = '#999';
+      ctx.lineWidth = xw/64;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, xw/64, 0, 2*Math.PI);
+      ctx.stroke();
+      ctx.fill();
+      ctx.closePath();
+    });
 
-
-      system.stars.each(function(star){
-        var data = star.toJSON();
-        ctx.fillStyle = data.color;
-        ctx.strokeStyle = data.color;
-        var p = 12;
-        var r = data.size * xw/24;
-        var m = 0.7;
-        ctx.save();
-        ctx.beginPath();
-        ctx.translate(data.x, data.y);
-        ctx.moveTo(0,0-r);
-        for (var i = 0; i < p; i++) {
-          ctx.rotate(Math.PI / p);
-          ctx.lineTo(0, 0 - (r*m));
-          ctx.rotate(Math.PI / p);
-          ctx.lineTo(0, 0 - r);
-        }
-        ctx.fill();
-        ctx.restore();
-      });
-
-      system.planets.each(function(planet){
-        var data = planet.toJSON();
-        data.x = Number(data.x);
-        data.y = Number(data.y);
+    this.ships.forEach(function(ship){
+      var origin = ship.origin_star;
+      if(origin){
         ctx.fillStyle = '#fff';
-        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = xw/64;
+        ctx.beginPath();
+        ctx.arc(origin.x, origin.y, xw/16, 0, 2*Math.PI);
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      var target = ship.target_star;
+      if(target){
+        ctx.fillStyle = ship.color;
+        ctx.lineWidth = xw/64;
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, xw/16, 0, 2*Math.PI);
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      if(origin && target){
+
+        var theta = G.angle(target.x, target.y, origin.x, origin.y);
+        var range = G.distance(target.x, target.y, origin.x, origin.y);
+
+        var dist = range * (1 - (ship.pct/100));
+
+        var space_x = target.x - (dist * Math.cos(theta));
+        var space_y = target.y - (dist * Math.sin(theta));
+
+        ctx.strokeStyle = '#0ff';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(data.x, data.y, xw/24 * data.size*2, 0, 2 * Math.PI, true);
-        ctx.fill();
-        ctx.stroke();
-      });
+        ctx.arc(space_x, space_y, 4, 0, Math.PI*2);
+        ctx.closePath();
 
-
-      system.ships.each(function(ship){
-        var data = ship.toJSON();
-        var z = xw/4;
-        ctx.fillStyle = '#c00';
-        ctx.strokeStyle = '#c00';
-
-        ctx.save();
-        ctx.translate(data.x, data.y);        
-        // rotate 45 degrees clockwise
-        ctx.rotate(de_ra(data.a));
-
-        ctx.lineWidth = z/2;
-        ctx.fillStyle = data.color;
-        ctx.strokeStyle = data.color;
-        ctx.beginPath();
-        ctx.moveTo(0, -1.5*z);
-        ctx.lineTo(z, z);
-        ctx.lineTo(0, 0);
-        ctx.lineTo(-z, z);
-        ctx.lineTo(0, -1.5*z);
-        ctx.closePath();     
-        ctx.stroke();
-        ctx.fill();
-        ctx.restore();
-      });
-
-
-      ctx.restore();
+        ctxfx.strokeStyle = ship.color;
+        ctxfx.lineWidth = 2;
+        ctxfx.beginPath();
+        ctxfx.moveTo(origin.x, origin.y);
+        ctxfx.lineTo(space_x, space_y);
+        ctxfx.stroke();
+        ctxfx.closePath();
+       
+      }
 
     });
 
@@ -160,32 +116,97 @@ App.Views.make_universe = Backbone.View.extend({
 
     var self = this;
 
-    if(!this.running){
-      return;
-    }
+    this.ships.forEach(function(ship){
 
-    // tick here
+      // origin and target
 
+      if(!ship.origin_star){
+        ship.origin_star = self.stars[random0to(self.stars.length-1)];
+      };
 
+      if(!ship.target_star){
+
+        var targets  = _.reduce(
+          self.stars, 
+          function(list, target){
+            var range = G.distance(ship.origin_star.x, ship.origin_star.y, target.x, target.y);
+            if(range < ship.range){
+              list.push(target);
+            }
+            return list;
+          }, []);
+
+        if(targets.length === 1) {
+          ship.target_star = targets[0];
+        } else if(targets.length > 1) {
+          ship.target_star = targets[random0to(targets.length-1)];
+        }
+
+      }
+
+      if(ship.origin_star && ship.target_star){
+        if(!ship.pct){
+          // starting jump
+          ship.pct = 0;
+        }
+
+        ship.pct += ship.speed;
+        if(ship.pct >= 100){
+          ship.origin_star = ship.target_star;
+          ship.target_star = null;
+          ship.pct = null;
+        }
+
+      };
+    });
 
     //
-
+    
     if(this.tickTimer){
       clearTimeout(this.tickTimer);
     }
     this.tickTimer = setTimeout(this.tick.bind(this), this.period);
   },
+  toggle: function(){
+    if(this.shiplimit !== 16){
+      this.speedfactor = 0.1;
+      this.shiplimit = 16;
+    } else {
+      this.speedfactor = 0.2;
+      this.shiplimit = 200;
+    }
+    this.init();
+  },
   init: function(){
     var self = this;
 
-    this.universe = new App.Models.Universe({
-      systemLimit: 6
-    });
 
-    this.period = 100;
+    this.stars = [];
+    while(this.stars.length < 500) {
+      self.stars.push({
+        x: random0to(self.w),
+        y: random0to(self.h)
+      });
+    }
+
+    var colors = ['#0f0','#f00','#00f'];
+
+    this.ships = [];
+    while(this.ships.length < this.shiplimit) {
+      self.ships.push({
+        color: colors[random0to(3)],
+        speed: (10 + random0to(20)) * self.speedfactor,
+        origin_star: null,
+        target_star: null,
+        range: 100,
+        pct: null
+      });
+    }
+
+    this.period = 25;
 
   },
-  start: function () {
+  start: function () {    
     this.init();
     this.running = true;
     this.draw();
@@ -212,6 +233,10 @@ App.Views.make_universe = Backbone.View.extend({
     this.y = (this.ch / 2) - ((this.h * this.scale)/2);
   },
   render : function(){
+
+    this.shiplimit = 16;
+    this.speedfactor = 0.1;
+
     this.stop();
     this.$el.html(this.template());
     this.$('.canvas').html('<canvas id="canvas"></canvas>');

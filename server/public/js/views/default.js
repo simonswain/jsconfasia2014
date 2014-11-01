@@ -4,7 +4,7 @@
 /*jshint strict:false */
 
 App.Views.Default = Backbone.View.extend({
-  template: _.template('<div class="content"><h1>Deep Space</h1>\
+  template: _.template('<div class="home"><h1>Deep Space</h1>\
 <ul class="toc">\
 <% _.each(pages, function(x) { %><li><a href="/<%= x[0] %>" class="<%= x[2] %>"><%= x[1] %></a><% }); %>\
 </ul>\

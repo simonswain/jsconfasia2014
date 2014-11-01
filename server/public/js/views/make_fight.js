@@ -270,13 +270,13 @@ App.Views.make_fight = Backbone.View.extend({
         ctx.closePath();     
         ctx.stroke();
 
-        ctxfx.lineWidth = xw/32;
-        ctxfx.strokeStyle = '#fff';
-        ctxfx.beginPath();
-        ctxfx.moveTo(data.x, data.y);
-        ctxfx.lineTo(data.laser_x, data.laser_y);
-        ctxfx.closePath();     
-        ctxfx.stroke();
+        // ctxfx.lineWidth = xw/32;
+        // ctxfx.strokeStyle = '#fff';
+        // ctxfx.beginPath();
+        // ctxfx.moveTo(data.x, data.y);
+        // ctxfx.lineTo(data.laser_x, data.laser_y);
+        // ctxfx.closePath();     
+        // ctxfx.stroke();
       }
 
     });
