@@ -68,6 +68,23 @@ App.Views.make_fight = Backbone.View.extend({
       ctx.closePath();
     }();
 
+    var draw_missiles = function(){
+      for (var i in self.system.missiles) {
+        var missile = self.system.missiles[i];
+        //console.log(missile);
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(missile.x, missile.y, xw/24, 0, 2 * Math.PI, true);
+        ctx.fill();
+
+        ctxfx.fillStyle = '#888';
+        ctxfx.beginPath();
+        ctxfx.arc(missile.x, missile.y, xw/24, 0, 2 * Math.PI, true);
+        ctxfx.fill();
+      }
+    }();
+
+
     var draw_booms = function(){
       var boom;
       for (var i in self.system.booms) {
@@ -85,6 +102,14 @@ App.Views.make_fight = Backbone.View.extend({
         ctxfx.strokeStyle = boom.color;
 
         if(boom.type && boom.type == 'nop'){
+        }
+
+        if(!boom.type || boom.type == 'missile'){
+          ctxfx.beginPath();
+          ctxfx.arc(boom.x, boom.y, xw/2, 0, 2 * Math.PI, true);
+          ctxfx.fill();
+          ctxfx.closePath();
+          ctxfx.stroke();
         }
 
         if(boom.type && boom.type === 'ship'){
@@ -254,6 +279,8 @@ App.Views.make_fight = Backbone.View.extend({
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = 'bold 10pt arial';
+
+      //ctx.fillText(ship.get('intent'), 0, -xh/2);
 
       ctx.fillText( ((ship.get('energy')/ship.get('energy_max'))*100).toFixed(0), 0, xh/2);
 

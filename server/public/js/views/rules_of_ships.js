@@ -51,27 +51,6 @@ App.Views.rules_of_ships = Backbone.View.extend({
     var xw = this.w/4;
     var xh = this.h/4;
 
-    // var draw_booms = function(){
-    //   var boom;
-    //   for (var i in self.booms) {
-    //     boom = self.booms[i];
-    //     boom.ttl --;
-
-    //     if(boom.ttl < 0){
-    //       self.booms.splice(i, 1);
-    //       continue;
-    //     }
-
-    //     ctxfx.fillStyle = '#ffffff';
-    //     ctxfx.strokeStyle = boom.color;
-    //     ctxfx.lineWidth = 2;
-    //     ctxfx.beginPath();
-    //     ctxfx.arc(boom.x,boom.y, boom.r * xw/64, 0, 2 * Math.PI, true);
-    //     ctxfx.fill();
-    //     ctxfx.stroke();
-    //   }
-    // }();
-
     var draw_booms = function(){
       var boom;
       for (var i in self.booms) {
@@ -122,7 +101,13 @@ App.Views.rules_of_ships = Backbone.View.extend({
       // ships
       var z = xw / 16;
       for ( var i in self.ships ) {
+
         var ship = self.ships[i]
+
+        if(!ship){
+          continue;
+        }
+
         // ship energy indicator/shield
 
         ctx.fillStyle = false;
@@ -418,14 +403,13 @@ App.Views.rules_of_ships = Backbone.View.extend({
             ttl: 5
           });
 
-          if(i === 0){
+          if(ix === 0){
             self.scores[1] ++;
+            self.ships[0] = false;
           } else {
             self.scores[0] ++;
+            self.ships[1] = false;
           }
-            
-          self.ships.splice(i, 1);
-          return;
         }
 
         var other;
@@ -434,7 +418,6 @@ App.Views.rules_of_ships = Backbone.View.extend({
         if(ix === 0){
           ship.x = ((self.w/2 ) - fx * Math.sin(theta)) - 2 * xw;
           ship.y = (self.h/2) - fx * Math.cos(theta);
-
           other = self.ships[1];
           if(other){
             ship.a = ra_de(G.angle ( ship.x, ship.y, other.x, other.y )) - 90;
@@ -483,8 +466,8 @@ App.Views.rules_of_ships = Backbone.View.extend({
         if ( ship.energy > 20 ) {
           for ( var ii in self.ships ) {
             var other = self.ships[ii];
-
-            if ( other.hue != ship.hue && random1to(50) == 1 ) {
+            
+            if (other && other.hue != ship.hue && random1to(50) == 1 ) {
               self.missiles.push(self.makeMissile({
                 x:ship.x, y:
                 ship.y,
@@ -493,7 +476,7 @@ App.Views.rules_of_ships = Backbone.View.extend({
               }));
             }
 
-            if ( other.hue != ship.hue && ship.energy > 20 ) {
+            if (other && other.hue != ship.hue && ship.energy > 20 ) {
               var rng = G.distance ( ship.x, ship.y, other.x, other.y );
               if ( rng < ( ship.range * ship.energyf * 4 ) ) {
                 ship.energy = ship.energy - 1;
@@ -524,17 +507,18 @@ App.Views.rules_of_ships = Backbone.View.extend({
 
     }();
 
-    if(this.ships.length < 2){
+    if(!this.ships[0] || !this.ships[1]){
       if(!this.restarting){
         clearTimeout(this.restarter);
         this.restarting = true;
         this.restarter = setTimeout(this.init.bind(this), 2500);
       }
     }
-
+    
     if(this.tickTimer){
       clearTimeout(this.tickTimer);
     }
+
     this.tickTimer = setTimeout(this.tick.bind(this), this.period);
 
   },

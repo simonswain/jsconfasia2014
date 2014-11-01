@@ -29,7 +29,9 @@ App.Models.Planet = Backbone.Model.extend({
     d_cr:0,
 
     out_agr: 0,
-    out_ind: 0
+    out_ind: 0,
+
+    fake_empire: false
   },
   initialize: function(opts) {
 
@@ -178,13 +180,14 @@ App.Models.Planet = Backbone.Model.extend({
 
     // planet wants to buy ag, raw, goods depending on stats ('need' factor)
 
-    if(this.empire){
+    //if(true || this.empire || this.get('fake_empire')){
       // Calculate earnings from planet
-      var earnings = ((data.ind / 1000) * (data.pop / 1000)) * ((50 + random0to(50))/100);
+      //var earnings = ((data.ind / 1000) * (data.pop / 1000)) * ((50 + random0to(50))/100);
+      var earnings = (data.ind/100 +data.pop/100) * ((50 + random0to(50))/100);
 
       data.d_cr = earnings;
       data.cr += earnings;
-    }
+  //}
 
     data.age ++;
 
@@ -271,6 +274,10 @@ App.Models.Planet = Backbone.Model.extend({
     this.set({
       cr: this.get('cr') - this.get('shipcost')
     });
+
+    if(this.get('pop') < 2000){
+      return;
+    }
 
     var friends = this.system.ships.filter(function(x){
       return (x.empire === self.empire);

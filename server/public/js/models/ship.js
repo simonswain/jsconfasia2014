@@ -24,7 +24,7 @@ App.Models.Ship = Backbone.Model.extend({
     space_y: null,
 
     pop: 0, //  how many population the ship is carrying
-    max_pop: 5000,
+    max_pop: 2000,
 
     // vector away from planet cw or ccw
     rot: ((Math.random() > 0.5) ? 1 : -1),
@@ -110,6 +110,7 @@ App.Models.Ship = Backbone.Model.extend({
 
       // for demo mode
       if(planet.system.get('enabled_easy_spawn')){
+        ship.set('intent', 'fight');
         ship.leavePlanet();
         return;
       }
@@ -343,6 +344,7 @@ App.Models.Ship = Backbone.Model.extend({
         return total;
       }, 0);
 
+      var friends;
       friends = system.ships.reduce(function(total, ship){
         if(!ship){
           return;
@@ -353,12 +355,22 @@ App.Models.Ship = Backbone.Model.extend({
         return total;
       }, 0);
       
-
-      if(enemies && friends && friends-1 > enemies){
+      var inbound;
+      inbound = self.system.universe.ships.reduce(function(total, ship){
+        if(!ship){
+          return;
+        }
+        if(self.system.empire === ship.empire && ship.target_system === system){
+          total ++;
+        }
+        return total;
+      }, 0);
+      
+      if(enemies && friends && (friends + inbound)-1 > enemies){
         return false;
       }
 
-      if(friends && friends > 2){
+      if(friends && (friends + inbound) > 2){
         return false;
       }
 
@@ -822,8 +834,7 @@ App.Models.Ship = Backbone.Model.extend({
         }
 
         var range = G.distance (data.x, data.y, model.get('x'), model.get('y'));
-
-
+        
         if(range < closest){
           closest = range;
           enemy = model;
@@ -932,12 +943,27 @@ App.Models.Ship = Backbone.Model.extend({
         return;
       }
 
+      if(data.energy < data.energy_max * 0.1){
+        return;
+      }
+
+      if(Math.random() > 0.25){
+        return
+      }
 
       data.laser = false;
       data.laser_x = null;
       data.laser_y = null;
 
+      var enemy = {
+        data: false,
+        range: Infinity
+      };
+
+
       ship.system.ships.each(function(model){
+
+        var other, theta, range;
 
         if(data.laser){
           return;
@@ -957,32 +983,78 @@ App.Models.Ship = Backbone.Model.extend({
           return;
         }
 
+        // attach closest enemy
+        
         var other = model.toJSON();
         var theta = G.angle (data.x, data.y, other.x, other.y);
         var range = G.distance (other.x, other.y, data.x, data.y);
-
-        // enemy in range to shoot?
-        if(range < (1.3 * radius * data.laser_range) && data.energy > data.energy_max * 0.2 ) {
-
-          if(Math.random() > 0.5){
-            return
-          }
-
-          // laser uses energy
-          data.energy = data.energy - 1;
-          data.laser = true;
-          var f = ( random1to(2) === 1 ) ? -1 : 1;
-          data.laser_x = other.x + ( f * random1to( 20 - data.laser_accuracy ) );
-          data.laser_y = other.y + ( f * random1to( 20 - data.laser_accuracy ) );
-          if (G.distance (data.laser_x, data.laser_y, other.x, other.y) < radius / 10 ) {
-            model.set({
-              hit: true,
-              energy: Math.max(0, other.energy - data.laser_power * 1.0),
-              damage: other.damage + data.laser_power * 0.5
-            });
+        if(range < enemy.range && range < (1.3 * radius * data.laser_range)){
+          enemy = {
+            range: range,
+            model: model,
+            data: other
           }
         }
       });
+
+      if(enemy) {
+        other = enemy.data;
+        // laser uses energy
+        data.energy = data.energy - 1;
+        data.laser = true;
+        var f = ( random1to(2) === 1 ) ? -1 : 1;
+        data.laser_x = other.x + ( f * random1to( 20 - data.laser_accuracy ) );
+        data.laser_y = other.y + ( f * random1to( 20 - data.laser_accuracy ) );
+        if (G.distance (data.laser_x, data.laser_y, other.x, other.y) < radius / 10 ) {
+          enemy.model.set({
+            hit: true,
+            energy: Math.max(0, other.energy - data.laser_power * 1.0),
+            damage: other.damage + data.laser_power
+          });
+        }
+      }
+
+    }();
+
+
+    var fire_missile = function(){
+
+      if(data.intent !== 'fight'){
+        return;
+      }
+
+      if(!ship.system.get('enabled_fight')){
+        return;
+      }
+
+      if(random1to(1500) > 10) {
+        return;
+      }
+
+      data.laser = false;
+      data.laser_x = null;
+      data.laser_y = null;
+
+      var enemies = ship.system.ships.filter(function(model){
+        // friendly?
+        return(model.empire !== ship.empire);
+      });
+
+      if(enemies.length === 0){
+        return;
+      }
+
+      var enemy = enemies[random0to(enemies.length-1)];
+
+      var missile = {
+        x: data.x,
+        y: data.y,
+        v: 20 + random1to(20)/100,
+        target: enemy,
+        ttl: 50 + random1to(50)
+      };
+
+      ship.system.addMissile(missile);
 
     }();
 

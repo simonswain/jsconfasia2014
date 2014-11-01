@@ -68,6 +68,22 @@ App.Views.make_war = Backbone.View.extend({
       ctx.closePath();
     }();
 
+    var draw_missiles = function(){
+      for (var i in self.system.missiles) {
+        var missile = self.system.missiles[i];
+        //console.log(missile);
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(missile.x, missile.y, xw/24, 0, 2 * Math.PI, true);
+        ctx.fill();
+
+        ctxfx.fillStyle = '#888';
+        ctxfx.beginPath();
+        ctxfx.arc(missile.x, missile.y, xw/24, 0, 2 * Math.PI, true);
+        ctxfx.fill();
+      }
+    }();
+
     var draw_booms = function(){
       var boom;
       for (var i in self.system.booms) {
@@ -85,6 +101,14 @@ App.Views.make_war = Backbone.View.extend({
         ctxfx.strokeStyle = boom.color;
 
         if(boom.type && boom.type == 'nop'){
+        }
+
+        if(!boom.type || boom.type == 'missile'){
+          ctxfx.beginPath();
+          ctxfx.arc(boom.x, boom.y, xw/2, 0, 2 * Math.PI, true);
+          ctxfx.fill();
+          ctxfx.closePath();
+          ctxfx.stroke();
         }
 
         if(boom.type && boom.type === 'ship'){

@@ -16,7 +16,7 @@ App.Models.System = Backbone.Model.extend({
   },
   interval: 25,
   initialize: function(opts) {
-    _.bindAll(this, 'run','addPlanet','initPlanets');
+    _.bindAll(this, 'run','addPlanet','initPlanets','addMissile');
 
     this.universe = opts.universe || false;
 
@@ -35,6 +35,7 @@ App.Models.System = Backbone.Model.extend({
     this.planets = new App.Collections.Planets();
     this.ships = new App.Collections.Ships([]);
     this.booms = [];
+    this.missiles = [];
 
     this.empire = null;
 
@@ -84,6 +85,53 @@ App.Models.System = Backbone.Model.extend({
       }
       ship.run();
     });
+
+    var tick_missiles = function(){
+      self.missiles.forEach(function(missile, i){
+
+        // missile out of gas?
+        missile.ttl = missile.ttl - 1;
+        if ( missile.ttl == 0 ) {
+          self.missiles.splice(i, 1);
+          return;
+        }
+
+        // target gone?
+        if(!missile.target){
+          self.missiles.splice(i, 1);
+          return;
+        }
+
+        // home in on target
+        var other = missile.target.toJSON();
+        var a = G.angle (other.x, other.y, missile.x, missile.y);
+        var t = missile.v/2;
+        missile.x = missile.x + t * Math.cos(a);
+        missile.y = missile.y + t * Math.sin(a);
+
+        // missile hit?
+        var r = G.distance ( other.x, other.y, missile.x, missile.y );
+        if ( r < 5 ) {
+          self.missiles.splice(i, 1);
+          self.booms.push({
+            type: 'missile',
+            x: other.x,
+            y: other.y,
+            r: 10,
+            ttl: 5,
+            color: '#fff'
+          });
+          missile.target.set({
+            hit: true,
+            energy: Math.max(0, other.energy - other.energy_max * 0.75),
+            damage: other.damage + other.energy_max * 0.75
+          });
+
+        }
+
+      });
+    }();
+
 
     var empires = _.uniq(this.planets.map(function(planet){
       return planet.empire;
@@ -188,7 +236,12 @@ App.Models.System = Backbone.Model.extend({
 
     this.ships.add(ship);
 
+  },
+
+  addMissile: function(missile){
+    this.missiles.push(missile);
   }
+
 
 });
 

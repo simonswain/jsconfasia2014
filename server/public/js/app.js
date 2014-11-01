@@ -78,9 +78,9 @@ App.index = [
 
   // http://en.wikipedia.org/wiki/World3
 
-  ['rules_of_economics', 'Economy'], // make the stats interplay (sliding charts from codepen) change over time, exonomic cycles
+  ['economics', 'Economics'], // make the stats interplay (sliding charts from codepen) change over time, exonomic cycles
 
-  ['make_planet', 'Make a planet'], // what makes up a planet? Show the stats.
+  //['make_planet', 'Make a planet'], // what makes up a planet? Show the stats.
   
   // // show three planets trading
   // ['surplus_and_deficit', 'Trade and Commerce'], // create some surplus and deficit for the same of the game
@@ -105,7 +105,7 @@ App.index = [
   ['orbiting_planets', 'Heliocentric Orbits'], // we fake gravity for the planets
   ['orbiting_planets_with_ships', 'Planets and Ships'], // but the ships respect gravity
 
-  ['rules_of_boid', 'Boid'],
+  //['rules_of_boid', 'Boid'],
   ['boids', 'Boids'],
   ['boids_and_predators', 'Boids and Predators'],
 

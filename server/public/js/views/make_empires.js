@@ -176,6 +176,22 @@ App.Views.make_empires = Backbone.View.extend({
       }(system);
 
 
+      var draw_missiles = function(){
+        for (var i in system.missiles) {
+          var missile = system.missiles[i];
+          //console.log(missile);
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(missile.x, missile.y, xw/24, 0, 2 * Math.PI, true);
+          ctx.fill();
+
+          ctxfx.fillStyle = '#888';
+          ctxfx.beginPath();
+          ctxfx.arc(missile.x, missile.y, xw/24, 0, 2 * Math.PI, true);
+          ctxfx.fill();
+        }
+      }();
+
 
       var draw_booms = function(system){
         var boom;
@@ -199,6 +215,14 @@ App.Views.make_empires = Backbone.View.extend({
           ctxfx.strokeStyle = boom.color;
 
           if(boom.type && boom.type == 'nop'){
+          }
+
+          if(!boom.type || boom.type == 'missile'){
+            ctxfx.beginPath();
+            ctxfx.arc(boom.x, boom.y, xw/2, 0, 2 * Math.PI, true);
+            ctxfx.fill();
+            ctxfx.closePath();
+            ctxfx.stroke();
           }
 
           if(boom.type && boom.type === 'ship'){

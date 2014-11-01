@@ -52,7 +52,7 @@ App.Views.life_hd = Backbone.View.extend({
           continue;
         }
         ctx.beginPath();
-        ctx.fillStyle = '#0ff';
+        ctx.fillStyle = '#0f0';
         ctx.lineStyle = '#000';
         ctx.rect(x * xw, y * xh, xw, xh);
         ctx.fill();
@@ -141,11 +141,23 @@ App.Views.life_hd = Backbone.View.extend({
     this.tickTimer = setTimeout(this.tick.bind(this), this.period);
   },
   
+  toggle: function(){
+    if(this.gridxy !== 256){
+      this.gridxy = 256;
+    } else {
+      this.gridxy = 128;
+    }
+    console.log(this.gridxy);
+    this.init();
+  },
+
   init: function(){
     var self = this;
 
-    this.gridxy = 192;
-    var density = 50;
+    if(!this.gridxy){
+      this.gridxy = 256;
+    }
+    var density = 15;
     // which grid we are coming from
     this.q = 0;
     this.grid = [];

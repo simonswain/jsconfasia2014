@@ -55,30 +55,50 @@ App.Views.rules_of_life = Backbone.View.extend({
       frame = this.frames[fx];    
       ctx.save();
       ctxfx.save();
+
+      ctx.translate(- this.w * 0.025, 0);
+
       switch(fx){
+
       case 0:
-        ctx.translate(0, 0);
-        ctxfx.translate(0, 0);
+        ctx.translate(this.w * 0.05, this.h * 0.05);
+        //ctxfx.translate(this.w * 0.05, this.h * 0.05);
         break;
       case 1:
-        ctx.translate(this.w/2, 0);
-        ctxfx.translate(this.w/2, 0);
+        ctx.translate(this.w/2 - this.w * 0.05, this.h * 0.05);
+        //ctxfx.translate(this.w/2, 0);
         break;
       case 2:
-        ctx.translate(0, this.h/2);
-        ctxfx.translate(0, this.h/2);
+        ctx.translate(this.w * 0.05, this.h/2 - this.h * 0.025);
+        //ctxfx.translate(0, this.h/2);
         break;
       case 3:
-        ctx.translate(this.w/2, this.h/2);
-        ctxfx.translate(this.w/2, this.h/2);
-        break;
+        ctx.translate(this.w/2 - this.w * 0.05, this.h/2 - this.h * 0.025);
+        //ctxfx.translate(this.w/2, this.h/2);
+
+      // case 0:
+      //   ctx.translate(0, 0);
+      //   //ctxfx.translate(this.w * 0.05, this.h * 0.05);
+      //   break;
+      // case 1:
+      //   ctx.translate(this.w/2, 0);
+      //   //ctxfx.translate(this.w/2, 0);
+      //   break;
+      // case 2:
+      //   ctx.translate(0, this.h/2);
+      //   //ctxfx.translate(0, this.h/2);
+      //   break;
+      // case 3:
+      //   ctx.translate(this.w/2, this.h/2);
+      //   //ctxfx.translate(this.w/2, this.h/2);
+      //   break;
       }
 
       ctx.translate(-xw/3, -xh*0.6);
-      ctxfx.translate(-xw/3, -xh*0.6);
+      //ctxfx.translate(-xw/3, -xh*0.6);
 
       ctx.scale(0.66, 0.66);
-      ctxfx.scale(0.66, 0.66);
+      //ctxfx.scale(0.66, 0.66);
       
       for(y = 0; y<3; y ++){
         for(x = 0; x<3; x ++){
@@ -155,22 +175,23 @@ App.Views.rules_of_life = Backbone.View.extend({
           ctx.fillStyle = color;
 
           //console.log('frame', this.frame, 'phase', this.phase, 'x', x, 'y', y, 'cell:', cell, color);
+          var f = 1.5;
 
           ctx.beginPath();
-          ctx.rect((this.w/2 - 1.5*xw) + (x * xw), (this.h/2 - 1.5*xh) + (y * xh), xw, xh);
+          ctx.rect((this.w/2 - f * xw) + (x * xw), (this.h/2 - f * xh) + (y * xh), xw, xh);
           ctx.fill();
           ctx.stroke();
           ctx.closePath();     
 
-          ctxfx.lineStyle = '#222';
-          ctxfx.lineWidth = 8;
-          ctxfx.fillStyle = color;
+          // ctxfx.lineStyle = '#222';
+          // ctxfx.lineWidth = 8;
+          // ctxfx.fillStyle = color;
 
-          ctxfx.beginPath();
-          ctxfx.rect((this.w/2 - 1.5*xw) + (x * xw), (this.h/2 - 1.5*xh) + (y * xh), xw, xh);
-          ctxfx.fill();
-          ctxfx.stroke();
-          ctxfx.closePath();     
+          // ctxfx.beginPath();
+          // ctxfx.rect((this.w/2 - f * xw) + (x * xw), (this.h/2 - f * xh) + (y * xh), xw, xh);
+          // ctxfx.fill();
+          // ctxfx.stroke();
+          // ctxfx.closePath();
 
           // ctx.fillStyle = '#aaa';
           // ctx.font = '12pt arial';

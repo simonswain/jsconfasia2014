@@ -253,8 +253,23 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
       }
     });
   },
+  toggle: function(){
+    if(this.gridw === 128){
+      this.gridw = 64;
+      this.gridh = 32;
+    } else {
+      this.gridw = 128;
+      this.gridh = 64;
+    }
+    this.init();
+  },
   init: function(){
     var self = this;
+
+    if(!this.gridw){
+      this.gridw = 64;
+      this.gridh = 32;
+    }
 
     this.period = 25;
     this.valMax = 100;
@@ -277,8 +292,6 @@ App.Views.foxes_and_rabbits = Backbone.View.extend({
     this.numFox = 0;
     this.numRabbit = 0;
     var x, y;
-    this.gridw = 64;
-    this.gridh = 32;
     this.grid = grid = [];
     for (x = 0; x < this.gridw; x++) {
       grid[x] = [];
