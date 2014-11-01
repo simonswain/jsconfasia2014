@@ -8,7 +8,7 @@ App.Views.economics = Backbone.View.extend({
   initialize : function(opts) {
     _.bindAll(this, 'onClose', 'render', 'start', 'stop', 'draw', 'tick');
     this.render();
-    $(window).on('resize', this.render);
+    //$(window).on('resize', this.render);
   },
   onClose: function(){
     $(window).off('resize', this.render);
@@ -41,6 +41,82 @@ App.Views.economics = Backbone.View.extend({
 
     var xw = this.w/16;
     var xh = this.h/16;
+
+
+
+    ctx.save();
+    ctx.translate(this.w/2, this.h - xh);
+    var pctx = ((this.planet.get('cr')/this.planet.get('shipcost'))*100).toFixed(0);
+
+    ctx.fillStyle = 'rgba(255,255,255, 0.2);';
+    ctx.fillRect(-50, 0, 100, 8);
+    //ctx.fillText(0, yy*1, 20, 20);
+
+      ctx.fillStyle = 'rgba(0,255,255, 0.5);';
+      ctx.fillRect(0 - pctx/2, 0, pctx, 8);
+    //ctx.fillText(0, yy*1, 20, 20);
+      ctx.restore();
+
+    // draw spawned ships
+
+    var draw_ships = function(){
+      var z = xw / 8;
+      //var z = 2 * xw;
+      self.planet.ships.each(function(ship, ix){
+        if(ix > 5){
+          return;
+        }
+        //draw ship body
+        ctx.save();
+        ctx.scale(1.8, 1.8);
+        ctx.translate(self.w * 0.1, self.h * 0.43);
+
+        ctxfx.save();
+        ctxfx.scale(1.8, 1.8);
+        ctxfx.translate((self.w * 0.1) + (z * ix) , self.h * 0.43);
+
+        ctx.lineWidth = z/2;
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = '#fff';
+        ctx.beginPath();
+
+        ctx.moveTo(0, -1.5*z);
+        ctx.lineTo(z, z);
+        ctx.lineTo(0, 0);
+        ctx.lineTo(-z, z);
+        ctx.lineTo(0, -1.5*z);
+
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fill();
+
+
+        ctxfx.lineWidth = z/2;
+        ctxfx.fillStyle = '#fff';
+        ctxfx.strokeStyle = '#fff';
+        ctxfx.beginPath();
+
+        ctxfx.moveTo(0, -1.5*z);
+        ctxfx.lineTo(z, z);
+        ctxfx.lineTo(0, 0);
+        ctxfx.lineTo(-z, z);
+        ctxfx.lineTo(0, -1.5*z);
+
+        ctxfx.closePath();
+        ctxfx.stroke();
+        ctxfx.fill();
+
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12pt Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(ship.get('pop'), 0, 3*z);
+
+        ctx.restore();
+        ctxfx.restore();
+      });
+    }();
+
 
     // draw here
 
@@ -202,6 +278,12 @@ App.Views.economics = Backbone.View.extend({
     // data.y = Number(3.3*xh);
     data.x = Number(this.w/2);
     data.y = Number(this.h/2);
+
+    ctx.beginPath();
+    ctx.fillStyle = '#000';
+    ctx.fillRect(data.x - xw, data.y - radius * 1.2, 2 * xw, 2.4 * radius);
+    ctx.closePath();
+
     ctx.fillStyle = '#222';
     ctx.beginPath();
     ctx.arc(data.x, data.y, radius, 0, 2 * Math.PI, true);
@@ -215,7 +297,7 @@ App.Views.economics = Backbone.View.extend({
       agr: '#090'
     };
 
-    var oldAngle = 0;
+    var oldAngle = Math.PI * 1.15;
     _.each(segments, function(color, k){
       var val = data[k] / data.land;
       if(k === 'pol'){
@@ -377,14 +459,18 @@ App.Views.economics = Backbone.View.extend({
     // chart
     var drawChart = function(){
       var chart = self.chart;
-      var w = xw*3;
-      var h = xh*4
+      var w = xw * 5;
+      var h = xh * 3.3
+      var max = Math.max(data.pop, data.pol, data.ind, data.agr);
+      var f;
+      //f = (h/max);
+      f = 250;
       ctx.save();
-      ctx.translate(self.w - 7*xh, xh);
+      ctx.translate(self.w - 5.5*xw, xh * 1.5);
       //ctx.translate(xh*1.5, self.h - h - xh*1.5);
-      ctx.fillStyle = '#222';
+      ctx.fillStyle = '#000';
       ctx.beginPath();
-      ctx.rect(0, 0, w,h);
+      ctx.rect(0, 0, w, h);
       ctx.fill();
 
       ctx.lineWidth = xw/16;
@@ -393,16 +479,18 @@ App.Views.economics = Backbone.View.extend({
         ctx.strokeStyle = segments[key];
         var xstep = w /  self.chartLimit;
         ctx.beginPath();
-        ctx.moveTo(0, h - (h * vals)[0]);
+        ctx.moveTo(0, h - (f * vals)[0]);
         vals.forEach(function(val, ix){
-          ctx.lineTo(1+ ix * xstep, h - (h * val));
+          //console.log((f * val));
+          ctx.lineTo(1 + ix * xstep, h - (f * val));
         });
         ctx.stroke();
         ctx.closePath();
       });
 
       ctx.beginPath();
-      ctx.strokeStyle = '#000';
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = xw/8;
       ctx.rect(0, 0, w,h);
       ctx.stroke();
 
@@ -415,10 +503,10 @@ App.Views.economics = Backbone.View.extend({
     var yy = this.h * 0.1;
     //var yy = this.h * 0.65;
     ctx.fillStyle = '#a3a';
-    ctx.font = 'bold 12pt courier';
+    ctx.font = 'bold 10pt courier';
     ctx.textAlign = 'left';
     _.each(this.rules, function(rule){
-      ctx.fillText(rule, 0, yy);
+      ctx.fillText(rule, xw/2, yy);
       yy += xh/2;
     });
 
@@ -438,6 +526,11 @@ App.Views.economics = Backbone.View.extend({
 
     // tick here
 
+    if(this.planet.spawned && this.planet.spawned.length > 0){
+      //console.log(this.planet.spawned);
+      //this.planet.spawned = [];
+    }
+
     var data = this.planet.toJSON();
     _.each(['pop','pol','agr','ind'], function(key){
       var val = data[key];
@@ -446,6 +539,7 @@ App.Views.economics = Backbone.View.extend({
       } else{
         // express as
         val = (val / data.land);
+        //val = (val);
       }
       self.chart[key].push(val);
       while(self.chart[key].length > self.chartLimit+1){
@@ -514,13 +608,12 @@ App.Views.economics = Backbone.View.extend({
     };
 
     this.rules = [
-      'POP + IND + AGR + POL <= SIZ',
-      'POP <+ birthrate',
-      'POP <- deathrate',
-      'POP <= AGR',
+      'POP IND AGR POL :: SIZ',
+      'POP IND AGR <|ups|',
+      'POP :: AGR',
       'IND.out ~ POP',
-      'IND +> POL',
-      'POL +~> deathrate',
+      'IND :> POL',
+      'POL :~> ups|pop agr|',
       'IND %+> AGR',
       'IND gen Ships',
       'Ship takes POP',
@@ -528,10 +621,20 @@ App.Views.economics = Backbone.View.extend({
 
     this.planet = new App.Models.Planet({
       name: 'Test Planet',
-      fake_empire: false
+      fake_empire: true
     });
-    this.period = 50;
 
+
+    this.empire = new App.Models.Empire({
+      name: 'Meat Eaters',
+      color: '#c0c'
+    });
+
+    this.empire.addPlanet(this.planet);
+    this.planet.empire = this.empire;
+
+
+    this.period = 50;
   },
   start: function () {
     this.init();

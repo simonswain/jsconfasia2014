@@ -12,9 +12,13 @@ App.Models.Planet = Backbone.Model.extend({
     
     land: 1000, // available area
     agr: 0,
+    agr_max: 0,
     pop: 0,
-    birthrate: random0to(200) * 0.0005,
+    birthrate: 0.002, //( 50 + random0to(50)) * 0.0005,
     deathrate: 0.001,
+    popup: 500 + random0to(200) * 0.0030,
+    indup: 500 + random0to(200) * 0.0030,
+    agrup: 250 + random0to(200) * 0.15,
     shipcost: 5000,
     //
     pol: 0,
@@ -81,7 +85,10 @@ App.Models.Planet = Backbone.Model.extend({
     }
 
 
-    var land = 10000 * random.from1to(10);
+    var land = 10000 * random.from1to(5);
+    var agr = (15 + random.from1to(25)) * land/100;
+    var agr_max = agr;
+   
 
     this.set({
       id: uuid.v4(),
@@ -89,7 +96,8 @@ App.Models.Planet = Backbone.Model.extend({
       a: a,
       v: v,
       pop: (15 + random.from1to(25)) * land/100,
-      agr: (15 + random.from1to(25)) * land/100,
+      agr: agr,
+      agr: agr_max,
       ind: (5 + random.from1to(5)) * land/100,
       pol: 0,
       size: 2 + random.from0to(3),
@@ -97,6 +105,21 @@ App.Models.Planet = Backbone.Model.extend({
       cr: 1000,
       shipcost: 2500 + random0to(2500)
     });
+
+    //console.log(this.toJSON());
+
+    this.rules = [
+      'POP IND AGR POL <= SIZ',
+      'POP <+ birthrate',
+      'POP <- deathrate',
+      'POP <= AGR',
+      'IND.out ~ POP',
+      'IND +> POL',
+      'POL +~> deathrate',
+      'IND %+> AGR',
+      'IND gen Ships',
+      'Ship takes POP',
+    ];
 
 
     this.timer = false;
@@ -118,67 +141,77 @@ App.Models.Planet = Backbone.Model.extend({
 
     this.physics();
 
-    // 'POP + IND + AGR cannot exceed Size of Planet',
-    // 'POP has birthrate and deathrate',
-    // 'IND increases POL',
-    // 'POL increases deathrate',
-    // 'IND output is ~ POP',
-    // 'IND increases AGR',
-    // 'POP is limited by AGR',
-    // 'IND creates credit to make Ships',
-    // 'Suplus POP will leave via ship',
-    // 'IND & AGR can be traded'
-
     var data = this.toJSON();
 
-    // pollution recovery
-    data.pol = data.pol * 0.98;
-
-    data.pol += ((data.ind + data.pop) / data.land)  * 0.2;
-    if (data.pol >= 100){
-      data.pol = 100;
+     var sum = data.pop + data.pol + data.agr + data.ind;
+    //console.log('shrink', data.land, sum);
+    if(sum > data.land){
+      data.pop *= 0.95;
+      data.ind *= 0.95;
+      data.agr *= 0.95;
     }
 
-    var births = data.pop * (data.birthrate/100 * (50 + random.from1to(50)));
-    var deaths = data.pop * (data.deathrate/100 * (50 + random.from1to(50)));
+    // pollution recovery
+    data.pol = data.pol * 0.90;
 
-    deaths += 0.5 * data.pop * (data.pol/100);
+    // // // births and deaths
+    // var births = data.pop * (data.birthrate/100 * (50 + random.from1to(50)));
+    // var deaths = data.pop * (data.deathrate/100 * (50 + random.from1to(50)));
 
-    // use tech to increase efficiency
+    // deaths += 0.5 * data.pop * (data.pol/100);
+    // //data.pop += Number(births) + Number(deaths);
 
-    // pollution reduces ag output
-    data.out_agr = data.agr * (1 - (data.pol/100));
+    data.pop += data.popup;
 
-    data.pop += births;
-    data.pop -= deaths;
+    // // pop consumes agr
+    data.agr -= data.pop * 0.0005;
 
-    if(data.pop > data.out_agr){
-      deaths -= data.pop - data.out_agr;
-      data.pop = data.out_agr;
+    // // pol kills agr
+    data.agr -= data.pol;
+
+    if(data.agr > data.pop){
+      data.agr = data.pop;
     }
 
-    data.d_pop = births + deaths;
+    // // agr up
+    data.agr += data.agrup;
+    
+    // // ind up
+    data.ind += data.indup;
+    data.ind += data.pop * 0.01;
 
-    // pop and ind creates pol, expressed as a percentage of total
-    // environmental destruction
+    // // ind improves agr
+    // data.agr += data.ind * 0.002;
 
-    // output is reduced by this percentage
+    // // pollution from % of planet covered in ind and pop
+    data.pol += ((data.ind + data.pop) / data.land)  * 1;
 
-    // pollution recovery
+    if(data.ind > data.pop * 0.95){
+      data.ind *= 0.90;
+    }
+
+    // if(data.agr > data.land * 0.5){
+    //   //data.agr = data.agr * 0.90;
+    // }
+
+    // if(data.pop > data.agr * 0.95){
+    //   data.pop = data.pop * 0.98;
+    // }
+
+    // // if(data.agr < data.land * 0.05){
+    // //   data.agr = data.land * 0.1;
+    // // }
+
+    // if (data.pol >= 100){
+    //   data.pol = 100;
+    // }
 
 
-    // pop consumes ag
+    // // use tech to increase efficiency
 
-    // ind consumes raw
+    // // pollution reduces ag output
+    // data.out_agr = data.agr/2 * (1 - (data.pol/100));
 
-    // ind produces goods
-
-    // ships take pop and colonizes
-
-    // ships take ag, raw, goods and sell. profit goes to this planet
-    // (ship home planet)
-
-    // planet wants to buy ag, raw, goods depending on stats ('need' factor)
 
     //if(true || this.empire || this.get('fake_empire')){
       // Calculate earnings from planet
@@ -194,12 +227,11 @@ App.Models.Planet = Backbone.Model.extend({
     // enough credit spawns ships to carray away pop
 
     this.set(data);
-
-    if(this.empire){
+    if(this.empire || data.fake_empire){
 
       // wrap in check for system so planet can be simmed in isolation
 
-      if(this.system.get('enabled_easy_spawn')){
+      if(this.system && this.system.get('enabled_easy_spawn')){
         this.spawnShip();
       }
 
@@ -214,7 +246,7 @@ App.Models.Planet = Backbone.Model.extend({
   },
   takePop: function(max){
     // up to 10% of pop, or max
-    var pop = Math.floor(this.get('pop') * 0.1);
+    var pop = Math.floor(this.get('pop') * 0.025);
     pop = Math.min(pop, max);
     this.set('pop', this.get('pop') - pop);
     return pop;
@@ -279,12 +311,19 @@ App.Models.Planet = Backbone.Model.extend({
       return;
     }
 
-    var friends = this.system.ships.filter(function(x){
-      return (x.empire === self.empire);
-    });
-    
-    if(friends.length > self.system.get('max_empire_ships')){
+    if(this.ships.length > 0){
+      console.log('nospawn');
       return;
+    }
+
+    if(this.system){
+      var friends = this.system.ships.filter(function(x){
+        return (x.empire === self.empire);
+      });
+      
+      if(friends.length > self.system.get('max_empire_ships')){
+        return;
+      }
     }
 
     // calculate desired ship
@@ -300,11 +339,15 @@ App.Models.Planet = Backbone.Model.extend({
       planet: this
     });
 
-    // add to planets empire
-    this.empire.addShip(ship);
-
     // add to planet's ships
     this.addShip(ship);
+
+    if(this.get('fake_empire')){
+      return;
+    }
+
+    // add to planets empire
+    this.empire.addShip(ship);
     
   }
 });

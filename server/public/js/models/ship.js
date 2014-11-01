@@ -24,7 +24,7 @@ App.Models.Ship = Backbone.Model.extend({
     space_y: null,
 
     pop: 0, //  how many population the ship is carrying
-    max_pop: 2000,
+    max_pop: 3000,
 
     // vector away from planet cw or ccw
     rot: ((Math.random() > 0.5) ? 1 : -1),
@@ -109,7 +109,7 @@ App.Models.Ship = Backbone.Model.extend({
       }
 
       // for demo mode
-      if(planet.system.get('enabled_easy_spawn')){
+      if(planet.system && planet.system.get('enabled_easy_spawn')){
         ship.set('intent', 'fight');
         ship.leavePlanet();
         return;
@@ -636,6 +636,12 @@ App.Models.Ship = Backbone.Model.extend({
     if(!this.planet){
       return;
     }
+    if(this.planet.get('fake_empire')){
+      this.planet.ships.remove(this);
+      this.planet = null;
+      return;
+    }
+
     var system = this.planet.system;
     this.set({
       'x': this.planet.get('x'),
@@ -1027,7 +1033,7 @@ App.Models.Ship = Backbone.Model.extend({
         return;
       }
 
-      if(random1to(1500) > 10) {
+      if(random1to(1500) > 20) {
         return;
       }
 

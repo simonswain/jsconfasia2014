@@ -9,7 +9,7 @@ App.Views.App = Backbone.View.extend({
   initialize : function(opts) {
     _.bindAll(this, 'render','onClose','onKey');
     this.controller = opts.controller;
-    this.listenTo(this.controller, 'change:view change:view_id', this.render);
+    this.listenTo(this.controller, 'change:view', this.render);
     $(window).on('keydown', this.onKey);
     this.render();
   },
