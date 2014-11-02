@@ -353,25 +353,25 @@ App.Views.economics = Backbone.View.extend({
 
       switch(k){
       case 'pop':
-        ctx.translate(360, 140);
+        ctx.translate(420, 160);
         ctx.textAlign = 'right';
         break;
 
       case 'agr':
-        ctx.translate(190, 370);
+        ctx.translate(190, 390);
         break;
 
       case 'ind':
-        ctx.translate(420, 600);
+        ctx.translate(420, 620);
         break;
 
       case 'pol':
-        ctx.translate(840, 370);
+        ctx.translate(840, 390);
         ctx.textAlign = 'left';
         break;
 
       case 'cr':
-        ctx.translate(820, 570);
+        ctx.translate(820, 620);
         break;
 
       default:
@@ -396,33 +396,39 @@ App.Views.economics = Backbone.View.extend({
       var s;
 
 
-      // actual value
-     if(data.hasOwnProperty('d_' + k)){
-       ctx.fillText(data[k].toFixed(0), 0, 0);
+
+      if(data.hasOwnProperty('d_' + k)){
+        if(k === 'cr'){
+          ctx.fillText(data[k].toFixed(0) + ' Cr', 0, 0);
+        } else {
+          ctx.fillText(data[k].toFixed(0), 0, 0);
+        }
       }
+      // actual value
+     
 
 
       // deltas
 
 
-      s = data['d_' + k]
-      if(!s){
-        s = 0;
-      } else {
-        s = s.toFixed(0);
-      }
+     //  s = data['d_' + k]
+     //  if(!s){
+     //    s = 0;
+     //  } else {
+     //    s = s.toFixed(0);
+     //  }
 
-      if(data['d_' + k] === 0){
-        s = '-';
-      } else if(data['d_' + k] < 0){
-        s = '-' + s;
-      } else {
-        s = '+' + s;
-      }
+     //  if(data['d_' + k] === 0){
+     //    s = '-';
+     //  } else if(data['d_' + k] < 0){
+     //    s = '-' + s;
+     //  } else {
+     //    s = '+' + s;
+     //  }
 
-     if(data.hasOwnProperty('d_' + k)){
-        ctx.fillText(s, 0, xh * 1);
-     }
+     // if(data.hasOwnProperty('d_' + k)){
+     //    ctx.fillText(s, 0, xh * 1);
+     // }
 
      //  // outputs
      //  s = data['out_' + k]
@@ -442,14 +448,6 @@ App.Views.economics = Backbone.View.extend({
      //  }
 
 
-
-
-      if(k === 'cr'){
-        ctx.fillText(data[k].toFixed(2), 0, xh*2);
-      } else {
-        // % is on bar chart
-        //ctx.fillText(pct.toFixed(2) + '%', 0, xh*3);
-      }
 
       ctx.restore();
 
@@ -503,7 +501,7 @@ App.Views.economics = Backbone.View.extend({
     var yy = this.h * 0.1;
     //var yy = this.h * 0.65;
     ctx.fillStyle = '#a3a';
-    ctx.font = 'bold 10pt courier';
+    ctx.font = 'bold 12pt courier';
     ctx.textAlign = 'left';
     _.each(this.rules, function(rule){
       ctx.fillText(rule, xw/2, yy);

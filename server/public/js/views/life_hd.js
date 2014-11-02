@@ -170,7 +170,7 @@ App.Views.life_hd = Backbone.View.extend({
         this.grid[x][y] = (random0to(100) < density);
       } 
     }
-    this.period = 50;
+    this.period = 25;
 
   },
   start: function () {

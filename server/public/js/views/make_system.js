@@ -124,6 +124,44 @@ App.Views.make_system = Backbone.View.extend({
         ctx.fillText(data[k].toFixed(0), xr, yy);
         yy += xw/4;
       });
+      
+      var theta = G.angle (self.w/2, self.h/2, data.x, data.y) + Math.PI/2;
+      ctx.save();
+      ctx.translate(data.x, data.y);
+      ctx.rotate(theta);
+      var yy = xh * 0.6;
+
+      planet.ships.each(function(ship, i){
+
+        var x = xw/6 * data.size + (xw/6 * i);
+        var y = 0;
+        var z = xw / 16;
+
+        var color = '#ff';
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+
+        ctx.save();
+        ctx.translate(x, y);        
+        ctx.rotate(Math.PI);
+        
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0, -1.5*z);
+        ctx.lineTo(z, z);
+        ctx.lineTo(0, 0);
+        ctx.lineTo(-z, z);
+        ctx.lineTo(0, -1.5*z);
+        ctx.closePath();     
+        ctx.stroke();
+        ctx.fill();
+        
+        ctx.restore();
+
+      });
+
+      ctx.restore();
+
       ctx.restore();
 
     });
