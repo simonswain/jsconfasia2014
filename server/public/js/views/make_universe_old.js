@@ -27,7 +27,7 @@ App.Views.make_universe_old = Backbone.View.extend({
 
     ctx.save();
     ctxfx.save();
-
+     
     ctxfx.fillStyle = 'rgba(1,1,1,.18)';
     ctxfx.fillRect(0,0, this.cw,this.ch);
 

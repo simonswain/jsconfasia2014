@@ -126,8 +126,8 @@ App.Views.make_empires = Backbone.View.extend({
           colors.push(planet.empire.get('color'));
         });
 
-        ctx.fillStyle = 'rgba(51,51,51,0.2)';
-        ctx.strokeStyle = '#ccc';
+        ctx.fillStyle = 'rgba(51,51,51,0.1)';
+        ctx.strokeStyle = '#666';
         if(_.uniq(colors).length === 1 && colors[0]){
           // if this empire owns the whole system, draw it in their color
           ctx.strokeStyle = colors[0];
@@ -140,8 +140,8 @@ App.Views.make_empires = Backbone.View.extend({
         // ctx.closePath();
         // ctx.stroke();
 
-        ctx.strokeStyle = '#888';
-        ctx.lineWidth = xw/64;
+        //ctx.strokeStyle = '#888';
+        ctx.lineWidth = xw/32;
         ctx.beginPath();
         ctx.arc(data.w/2, data.h/2, data.radius/2, 0, 2*Math.PI);
         ctx.stroke();

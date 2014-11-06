@@ -5,7 +5,7 @@
 
 App.Views.App = Backbone.View.extend({
   el: '#app',
-  template: _.template('<div class="nav"></div><div class="view"></div><div class="footer"></div>'),
+  template: _.template('<div class="nav"></div><div class="view"></div>'),
   initialize : function(opts) {
     _.bindAll(this, 'render','onClose','onKey');
     this.controller = opts.controller;
@@ -113,9 +113,6 @@ App.Views.App = Backbone.View.extend({
         el: el
       });
 
-      this.views.footer = new App.Views.Footer({
-        el: this.$('.footer')
-      });
       break;
 
     case 'view':

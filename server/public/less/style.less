@@ -89,6 +89,13 @@ body {
     }
 
     .home {
+        z-index: 100;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+
+        border-radius: 10%;
 
         h1 {
             text-align: center;
@@ -98,9 +105,17 @@ body {
             text-align: center;
         }
 
-        background: #000;
+        p {
+            font-family: monospace;
+            font-size: 40pt;
+            text-align: center;
+            padding: 16px;
+            color: #0ff;
+        }
+
+        background: rgba(0, 0, 0, 0.6);
         max-width: 800px;
-        margin: 64px auto;
+        margin: 0 auto;
 
         .toc {
             color: #000;
@@ -119,7 +134,7 @@ body {
     }
 
     .canvas {
-        cursor: none;
+        //cursor: none;
         position: absolute;
         top: 16px;
         left: 16px;
@@ -134,7 +149,7 @@ body {
         left: 16px;
         bottom: 16px;
         right: 16px;
-        z-index: 20;
+        z-index: 10;
     }
 
 }

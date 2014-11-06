@@ -329,6 +329,13 @@ App.Views.make_fight = Backbone.View.extend({
     }
     this.tickTimer = setTimeout(this.tick.bind(this), this.period);
   },
+  toggle: function(){
+    if(this.system.get('max_empire_ships') !== 1){
+      this.system.set({'max_empire_ships': 1});
+    } else {
+      this.system.set({'max_empire_ships': 10});
+    }
+  },
   init: function(){
     var self = this;
 
@@ -339,7 +346,7 @@ App.Views.make_fight = Backbone.View.extend({
       w: this.w,
       h: this.h,
       radius: Math.min(this.w, this.h),
-      max_empire_ships: 2,
+      max_empire_ships: 1,
       enabled_easy_spawn: true,
       enabled_fight: true,
       enabled_colonize: false
