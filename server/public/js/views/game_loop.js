@@ -179,7 +179,7 @@ App.Views.game_loop = Backbone.View.extend({
       ' if(y < 0){',
       '  v = -v;',
       ' }',
-      ' setTimeout(tick, 25)',
+      ' setTimeout(tick, 25);',
       '};',
       'tick();',
     ];

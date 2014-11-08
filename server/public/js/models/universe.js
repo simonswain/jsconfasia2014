@@ -111,7 +111,7 @@ App.Models.Universe = Backbone.Model.extend({
     var empire;
     empire = new App.Models.Empire(opts);
     this.empires.add(empire);
-    var system;;
+    var system;
     var planet;
     var ok = false;
     while(!ok){

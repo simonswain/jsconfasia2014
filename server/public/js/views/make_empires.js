@@ -560,7 +560,7 @@ App.Views.make_empires = Backbone.View.extend({
     });
     this.universe.addEmpire({
       name: 'Meat Eaters',
-      color: '#0c0'
+      color: '#a0a'
     });
 
     this.universe.addEmpire({
