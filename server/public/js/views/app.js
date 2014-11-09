@@ -25,7 +25,7 @@ App.Views.App = Backbone.View.extend({
     //console.log(e.which);
     if(e.which === 27){
       this.controller.set({view_id: 'default'});
-      App.router.navigate('', {trigger: true});
+      App.router.navigate(App.mount + '/', {trigger: true});
     }
 
     if(e.which === 37){
@@ -35,7 +35,7 @@ App.Views.App = Backbone.View.extend({
         prev = index[ix];
         ix ++;
       }
-      window.location.href='/' + prev[0];
+      window.location.href=App.mount + '/' + prev[0];
       //this.controller.set({view_id: prev[0]});
       //App.router.navigate(prev[0], {trigger: true});
     }
@@ -43,7 +43,7 @@ App.Views.App = Backbone.View.extend({
     if(e.which === 39 || e.which == 32){
       if(!current){
         this.controller.set({view_id: index[0][0]});
-        App.router.navigate(index[0][0], {trigger: true});
+        App.router.navigate(App.mount + '/' + index[0][0], {trigger: true});
         return;
       }
       // next
@@ -53,7 +53,7 @@ App.Views.App = Backbone.View.extend({
       }
       ix ++;
       next = index[ix];
-      window.location.href='/' + next[0];
+      window.location.href=App.mount + '/' + next[0];
       //this.controller.set({view_id: next[0]});
       //App.router.navigate(next[0], {trigger: true});
     }

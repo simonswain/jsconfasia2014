@@ -19,13 +19,8 @@ var App = {
   Collections: {},
   Views: {},
   start: function(){
-
+    this.mount = window.MOUNT;
     this.controller = new App.Models.Controller({
-    });
-
-    this.socket = new App.Socket({
-      controller: this.controller,
-      auth: this.auth
     });
 
     this.router = new App.Router();
@@ -146,6 +141,7 @@ App.Router = Backbone.Router.extend ({
   routes: {
     "": "default",
     ":view": "view",
+    ":foo/:view": "view2",
     "*default": "default"
   },
 
@@ -164,6 +160,10 @@ default: function() {
 },
 
   view: function(id) {
+    this.setView('view', id);
+  },
+
+  view2: function(foo, id) {
     this.setView('view', id);
   }
 
