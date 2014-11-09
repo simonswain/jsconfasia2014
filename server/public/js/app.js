@@ -23,11 +23,6 @@ var App = {
     this.controller = new App.Models.Controller({
     });
 
-    this.socket = new App.Socket({
-      controller: this.controller,
-      auth: this.auth
-    });
-
     this.router = new App.Router();
 
     this.views = {
@@ -146,6 +141,7 @@ App.Router = Backbone.Router.extend ({
   routes: {
     "": "default",
     ":view": "view",
+    "deepspace/:view": "view",
     "*default": "default"
   },
 
