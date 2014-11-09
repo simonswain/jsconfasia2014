@@ -178,7 +178,7 @@ App.Views.life_hd = Backbone.View.extend({
     this.running = true;
     this.draw();
     setTimeout(this.tick.bind(this), this.period);
-    setInterval(this.init.bind(this), 15000);
+    //setInterval(this.init.bind(this), 15000);
 
     // restart every 20s
   },
