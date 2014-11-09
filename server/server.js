@@ -96,34 +96,34 @@ module.exports = function(config){
   });
 
   var css = _.map(cssAssets, function(x){
-    return '<link rel="stylesheet" href="/css/' + x + '" />';
+    return '<link rel="stylesheet" href="css/' + x + '" />';
   }).join("\n");
 
 
   var jsAssets = [
     // vendor
-    '/vendor/jquery/dist/jquery.js',
-    '/vendor/underscore/underscore.js',
-    '/vendor/backbone/backbone.js',
-    '/vendor/node-uuid/uuid.js',
+    'vendor/jquery/dist/jquery.js',
+    'vendor/underscore/underscore.js',
+    'vendor/backbone/backbone.js',
+    'vendor/node-uuid/uuid.js',
 
 
     // app corre
-    '/js/app.js',
-    '/js/tools.js',
-    '/js/socket.js',
+    'js/app.js',
+    'js/tools.js',
+    'js/socket.js',
 
-    '/js/models/star.js',
-    '/js/models/system.js',
-    '/js/models/planet.js',
-    '/js/models/empire.js',
-    '/js/models/universe.js',
+    'js/models/star.js',
+    'js/models/system.js',
+    'js/models/planet.js',
+    'js/models/empire.js',
+    'js/models/universe.js',
 
-    '/js/collections/empires.js',
-    '/js/collections/stars.js',
-    '/js/collections/systems.js',
-    '/js/collections/planets.js',
-    '/js/collections/ships.js',
+    'js/collections/empires.js',
+    'js/collections/stars.js',
+    'js/collections/systems.js',
+    'js/collections/planets.js',
+    'js/collections/ships.js',
 
   ];
   
@@ -133,7 +133,7 @@ module.exports = function(config){
       if (_.contains(['.','#','~'],file.substr(0,1))) {
         return;
       }
-      jsAssets.push('/js/' + dir + '/' + file);
+      jsAssets.push('js/' + dir + '/' + file);
     });
   });
 
