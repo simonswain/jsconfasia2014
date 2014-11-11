@@ -133,8 +133,8 @@ App.Views.life_hd = Backbone.View.extend({
   },
   
   toggle: function(){
-    if(this.gridxy !== 256){
-      this.gridxy = 256;
+    if(this.gridxy !== 192){
+      this.gridxy = 192;
     } else {
       this.gridxy = 128;
     }
@@ -146,7 +146,7 @@ App.Views.life_hd = Backbone.View.extend({
     var self = this;
 
     if(!this.gridxy){
-      this.gridxy = 256;
+      this.gridxy = 128;
     }
     var density = 15;
     // which grid we are coming from
