@@ -81,11 +81,6 @@ App.index = [
   // ['surplus_and_deficit', 'Trade and Commerce'], // create some surplus and deficit for the same of the game
   // // now it has motivation to send ships out to do things
 
-  // Lets make some space
-  ['make_system', 'Make a System'],
-
- // star with random number of orbitin planets (sped up). 'next' key zooms in to a
-
   ////
 
   ['game_loop', 'Game Loop'],
@@ -119,7 +114,9 @@ App.index = [
   // planet, orbit and outer system ownership??
   // Ships have a motivation to comquer, colonize or trade
   // colonization
+  // Lets make some space
 
+  ['make_system', 'Make a System'],
   ['make_ships', 'Make Ships'],
   ['make_fight', 'Make Fight'],
   ['make_colonies', 'Make Colonies'], // colonize! one empire
