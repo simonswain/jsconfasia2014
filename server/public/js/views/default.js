@@ -115,9 +115,6 @@ App.Views.Default = Backbone.View.extend({
     this.running = true;
     this.draw();
     setTimeout(this.tick.bind(this), this.period);
-    setInterval(this.init.bind(this), 20000);
-
-    // restart every 20s
   },
   stop: function(){
     this.running = false;
