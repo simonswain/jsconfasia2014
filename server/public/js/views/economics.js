@@ -284,6 +284,11 @@ App.Views.economics = Backbone.View.extend({
     ctx.fillRect(data.x - xw, data.y - radius * 1.2, 2 * xw, 2.4 * radius);
     ctx.closePath();
 
+    ctx.beginPath();
+    ctx.fillStyle = '#000';
+    ctx.fillRect(data.x - radius * 1.2, data.y - xw, 2.4 * radius, 2 * xw);
+    ctx.closePath();
+
     ctx.fillStyle = '#222';
     ctx.beginPath();
     ctx.arc(data.x, data.y, radius, 0, 2 * Math.PI, true);
@@ -600,7 +605,7 @@ App.Views.economics = Backbone.View.extend({
         title: 'POL',
         chinese: '污染',
         color: '#c00',
-        to: ['pop']
+        to: ['pop','agr']
       }
       
     };
