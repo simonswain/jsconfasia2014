@@ -462,7 +462,7 @@ App.Views.fighting_ships = Backbone.View.extend({
     }();
 
     var init_ships = function(){
-      var limit = random1to(30) + 5;
+      var limit = 24;
       for (var i=0; i<limit; i++){
         self.ships.push(self.makeShip());
       }
